@@ -9,10 +9,9 @@ import datetime
 #   05:00       5:00 a.m
 #   12:00       12:00 p.m (noon)
 #   17:00       5:00 p.m
-#   24:00       24:00 p.m (midnight: end of day)
+#   24:00       12:00 p.m (midnight: end of day)
 #
 #   EXAMPLE:
-#
 #   t1 = datetime.timedelta(hours=17, minutes=30)   # t1 represents 5:30 p.m
 #   t2 = datetime.timedelta(hours=14, minutes=30)   # t2 represents 2:30 p.m
 #
@@ -20,29 +19,27 @@ import datetime
 #   print (t1 - t2)     output: 3:00:00
 
 class Course(object):
-    """Define a course.
-
-    Course Parameters:
-    -------------------------------------------------
-    PARAMETERS      TYPE        Potential Arguments
-    
-    subject         string      'csc', 'phy'
-    code            string      '365', '450'
-    section         string      '1', '2', '3'
-    title           string      'software engineering'
-    days            string      'mwf', 'tr', 'mtwrf'
-    startTime       datetime    datetime.timedelta(hours=10, minutes=30)
-    endTime         datetime    datetime.timedelta(hours=11, minutes=30)  
-    instructor      string      'Eric D Shade (P)'
-    location        string      'cheek'
-    room            string      '308'
-    """
+    """Define a course."""
     
     def __init__(self, subject, code,
                  section, title, days,
                  startTime, endTime, instructor,
                  room, location):
-        """Initialize a course."""
+        """Initialize a course.
+
+        PARAMETERS      TYPE        Potential Arguments
+        -----------------------------------------------
+        subject         string      'csc', 'phy'
+        code            string      '365', '450'
+        section         string      '1', '2', '3'
+        title           string      'software engineering'
+        days            string      'mwf', 'tr', 'mtwrf'
+        startTime       datetime    datetime.timedelta(hours=10, minutes=30)
+        endTime         datetime    datetime.timedelta(hours=11, minutes=30)  
+        instructor      string      'Eric D Shade (P)'
+        room            string      '308'
+        location        string      'cheek'
+        """
         # String arguments are set to lowercase.
         self.subject = subject.lower()
         self.code = code.lower()
@@ -67,35 +64,33 @@ class Course(object):
               "\nroom: " + self.room + \
               "\nlocation: " + self.location
         return msg
-    def update(self, other, time_constraint):
+    def conflict(self, other):
         """Return a dictionary of Key Value pairs.
         The Key, e.g ('time_conflict'), is a string
         describing a conflict. If a Value is set to True,
         then there is a conflict.
 
-        update is the main method to do conflict checking.
-        Parameters include: course object, and datetime object.
+        The only parameter, other, is a course object.
         """
-        return {"time_conflict" : self.time_conflict(other, time_constraint),
-                "days_conflict" : self.days_conflict(other),
-                "room_conflict" : self.room_conflict(other)}
-        
-    def time_conflict(self, other, time_constraint):
-        """Return true if there is a time conflict between
-        two courses. The parameter, other, is a course object.
-        The parameter, time_constraint, is of the data type datetime.
+        return {"time_conflict" : self.__time_conflict(other),
+                "days_conflict" : self.__days_conflict(other),
+                "room_conflict" : self.__room_conflict(other)}
+    def __time_conflict(self, other):
+        """Return true if there is a time conflict
+        between two courses.
         """
-        tmax = max(self.startTime, other.startTime)
-        tmin = min(self.endTime, other.endTime)
-        return ((tmax - tmin) < time_constraint)
-    def days_conflict(self, other):
+        fifteen_minutes = datetime.timedelta(minutes=15)
+        time_between_courses = max(self.startTime, other.startTime) - \
+                               min(self.endTime, other.endTime)
+        return (time_between_courses < fifteen_minutes)
+    def __days_conflict(self, other):
         """Return true if self and other
         have class on similar days."""
         for i in xrange(len(self.days)):
             if (self.days[i] in other.days):
                 return True
         return False
-    def room_conflict(self, other):
+    def __room_conflict(self, other):
         """Return true if self and other
         share the same room number."""
         return (self.room == other.room)
@@ -104,20 +99,18 @@ class Course(object):
 def main():
     # Create course 1
     c1 = Course("CSC", "450", "1", "software engineering",
-               "rtw", datetime.timedelta(hours=11, minutes=15),
+               "tr", datetime.timedelta(hours=11, minutes=15),
                 datetime.timedelta(hours=12, minutes=5),
                "Eric D Shade (P)", "308", "cheek")
     print c1, "\n\n"
 
     # Create course 2
     c2 = Course("CSC", "365", "1", "Internet Programming",
-        "mwf", datetime.timedelta(hours=9, minutes=5),
-        datetime.timedelta(hours=9, minutes=55),
+        "mwf", datetime.timedelta(hours=11, minutes=20),
+        datetime.timedelta(hours=12, minutes=25),
         "Jamil M Saquer (P)", "308", "TEMP")
     print c2 , "\n\n"
-
-    # Courses less than 2 hours apart = time conflict.
-    time_constraint = datetime.timedelta(hours=2)
-    print c1.update(c2, time_constraint)
+    
+    print c1.conflict(c2)
     
 main()  # test
