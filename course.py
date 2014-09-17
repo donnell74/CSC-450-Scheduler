@@ -39,6 +39,7 @@ class Course(object):
         instructor      string      'Eric D Shade (P)'
         room            string      '308'
         location        string      'cheek'
+
         """
         # String arguments are set to lowercase.
         self.subject = subject.lower()
