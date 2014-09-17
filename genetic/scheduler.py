@@ -8,6 +8,7 @@ class Scheduler:
     def __init__(self, courses, rooms):
         logging.debug("Scheduler init")
         if type(courses) is list:
+            print(type(courses[0]))
             if type(courses[0]) is not Course:
                 logging.error("Courses is not a list of Course objects")
                 print("Courses is not a list of Course objects")
