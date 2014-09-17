@@ -1,4 +1,6 @@
 from __future__ import print_function
+from week import *
+
 import logging
 
 class Scheduler:

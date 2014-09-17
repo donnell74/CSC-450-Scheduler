@@ -1,5 +1,6 @@
 from __future__ import print_function
 from scheduler import Scheduler
+from week import *
 
 import unittest
 import logging
@@ -12,7 +13,9 @@ def init_logging():
 
 def main():
     init_logging()
-    s = Scheduler()
+    courses = [Course('CSC325', 3)]
+    rooms = [Room("CHEK212")]
+    s = Scheduler(courses, rooms)
 
 
 if __name__ == "__main__":
