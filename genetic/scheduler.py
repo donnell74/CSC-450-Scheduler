@@ -1,6 +1,6 @@
 from __future__ import print_function
 from random import randint
-from week import *
+from structures import *
 
 import logging
 
@@ -9,8 +9,7 @@ class Scheduler:
     def __init__(self, courses, rooms):
         logging.debug("Scheduler init")
         if type(courses) is list:
-            print(type(courses[0]))
-            if type(courses[0]) is not Course:
+            if not isinstance(courses[0], Course):
                 logging.error("Courses is not a list of Course objects")
                 print("Courses is not a list of Course objects")
                 return
@@ -20,7 +19,7 @@ class Scheduler:
             return
 
         if type(rooms) is list:
-            if type(rooms[0]) is not Room:
+            if not isinstance(rooms[0], Room):
                 logging.error("Rooms is not a list of Room objects")
                 print("Rooms is not a list of Room objects")
                 return
@@ -28,14 +27,14 @@ class Scheduler:
             logging.error("Rooms is not a list")
             print("Rooms is not a list")
 
-        self.week = Week()
+        self.week = Week(rooms)
         
         #Number of courses
         self.num_courses = len(courses)
         #Courses grouped by credit hours
-        self.courses_by_credits = separate_by_credit(courses)
+#self.courses_by_credits = self.separate_by_credit(courses)
         #Number of groups of credits
-        self.num_credits = len(courses_by_credits.keys())
+        #self.num_credits = len(courses_by_credits.keys())
         #Number of courses grouped by credit hours
         #self.num_course_by_credits = dict(zip(self.courses_by_credits.keys(), #len of values
 
@@ -45,13 +44,13 @@ class Scheduler:
         IN: list of course objects
         OUT: dictionary with keys=credit hours and values=list of course objects"""
         courses_by_credits = {}
-        for each course in courses:
+        for each_course in courses:
             #Case 1: New key-value pair (make new list)
-            if course.credit not in courses_by_credits.keys():
-                courses_by_credits[course.credit] = [course]
+            if each_course.credit not in courses_by_credits.keys():
+                courses_by_credits[each_course.credit] = [each_course]
             #Case 2: Add to value's list for key
             else:
-                courses_by_credits[course.credit].append(course)
+                courses_by_credits[each_course.credit].append(each_course)
         return courses_by_credits
 
 
@@ -77,8 +76,8 @@ class Scheduler:
             #Random credit hours selected
             credit = self.courses_by_credits[randint(1, self.num_credits)]
             #todo: perform the counts earlier
-            course_a = self.courses_by_credits[credit][randint(1,
-                self.num_course_by_credits[credit])]
+#course_a = self.courses_by_credits[credit][randint(1,
+#                self.num_course_by_credits[credit])]
             #perform the actual swap
         #todo: 'assign' function, schedule class/week class hookup
     

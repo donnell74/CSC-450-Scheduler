@@ -1,6 +1,6 @@
 from __future__ import print_function
 from scheduler import Scheduler
-from week import *
+from structures import *
 
 import unittest
 import logging
@@ -16,6 +16,7 @@ def main():
     courses = [Course('CSC325', 3)]
     rooms = [Room("CHEK212")]
     s = Scheduler(courses, rooms)
+    print(s.week)
 
 
 if __name__ == "__main__":

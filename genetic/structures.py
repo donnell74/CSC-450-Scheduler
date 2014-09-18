@@ -14,7 +14,7 @@ class Day:
 
     def __str__(self):
         return "Day: " + self.day_code + '\n' + "Rooms:\n" + \
-               "".join([str(r) + '\n' for r in self.rooms])
+               "\n".join([str(r) for r in self.rooms])
 
 class Room:
     def __init__(self, number, time_slots = ['00:00-10:00', '11:00-15:00']):
@@ -30,7 +30,7 @@ class Room:
         return this_schedule
 
     def __str__(self):
-        return self.number + "\n" + "\n".join([str(t) for t in self.schedule])
+        return str(self.number) + "\n" + "\n".join([str(t) for t in self.schedule])
 
 
 class TimeSlot:
@@ -65,7 +65,7 @@ class Week:
         self.days = [Day(rooms, day_code) for day_code in 'mtwrf']
 
     def __str__(self):
-        return "".join([str(d) for d in self.days])
+        return "\n".join([str(d) for d in self.days])
 
 class Course:
     def __init__(self, code, credit):
