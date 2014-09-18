@@ -71,3 +71,8 @@ class Course:
     def __init__(self, code, credit):
         self.code = code
         self.credit = credit
+
+#Todo: decide on week/schedule
+class Schedule:
+    def __init__(self):
+        pass
