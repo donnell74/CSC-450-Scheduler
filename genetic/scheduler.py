@@ -74,8 +74,9 @@ class Scheduler:
             print("Rooms is not a list")
             return
 
-        self.week = Week(rooms)
+        self.weeks = [Week(rooms)]
         self.constraints = []
+        self.courses = courses
         
         #Number of courses
         self.num_courses = len(courses)
@@ -157,4 +158,49 @@ class Scheduler:
     def evolution_loop(self):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         pass
+
+
+    def time_slot_available(self, day, time_slots_by_day, first_time_slot):
+        pass
+
+
+    def schedule_course(self, day, start_time, course):
+        pass
+
+
+    def randomly_fill_schedules(self):
+        #get all available time slots grouped by day
+        time_slots_by_day = dict([(day, list()) for day in "mtwrf"])
+        for day in self.days:
+            for room in day.rooms:
+                time_slots_by_day[day.day_code].extend([t for t in room])
+
+        index = 0
+        times_on_index = 1
+        while True:
+            if index == len(self.courses):
+                break
+
+            each_course = self.courses[index]
+            day_schedule = ""
+            if each_course.credit == 3:
+                day_schedule = "tr" if random.randint(0,1) else "mwf"
+                should_index = True
+                rand_time_slot = times_slots_by_day[day_schedule[0]]
+                for day_code in day_schedule[1:]:
+                    should_index = should_index and time_slot_available(day_code, time_slots_by_day, rand_time_slot)
+
+            elif each_course.credit == 4:
+                pass
+            elif each_course.credit == 5:
+                pass
+            else:
+                print("Unable to handle course credit of: ", each_course.credit)
+
+            if should_index or times_on_index > 5:
+                schedule_course(day, start_time, course):
+                index += 1
+                times_on_index = 1
+
+            
 

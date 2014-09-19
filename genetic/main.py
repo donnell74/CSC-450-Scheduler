@@ -13,11 +13,11 @@ def init_logging():
 
 def main():
     init_logging()
-    courses = [Course('CSC325', 3)]
+    courses = [Course('CSC325', 3), Course('CSC130', 3), Course('CSC131', 3), Course('CSC450', 3), Course('CSC232', 3)]
     rooms = ["CHEK212"]
     s = Scheduler(courses, rooms)
-    s.week.random(courses)
     #print(s.week)
+    print(s.weeks[0])
 
 
 if __name__ == "__main__":
