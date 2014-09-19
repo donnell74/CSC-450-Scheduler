@@ -1,8 +1,59 @@
 from __future__ import print_function
 from random import randint
 from structures import *
+from datetime import time, timedelta
 
 import logging
+
+
+def morning_class(course, scheduler):
+    holds = scheduler.week.find_course(course).start_time < time(12, 0) 
+    return 1 if holds else 0
+
+
+known_funcs = {"morning_class", morning_class}
+
+class Constraint:
+    def __init__(self, name, weight, func, course = None):
+        if type(name) is not str:
+            logging.error("Name is not a string")
+            print("Name is not a string")
+            return
+        
+        if type(weight) is not int:
+            logging.error("Weight is not a string")
+            print("Weight is not a string")
+            return
+
+        if not hasattr(func, '__call__'):
+            if type(func) is str and not known_funcs.has_key(func):
+                logging.error("Func string passed is not known")
+                print("Func string passed is not known")
+                return
+            else:
+                logging.error("Func passed is not a function")
+                print("Func passed is not a function")
+                return
+
+        if not isinstance(course, Course):
+            logging.error("Course is not of object type course")
+            print("Course is not of object type course")
+            return
+
+        self.name = name
+        self.weight = weight
+        self.course = course
+        if type(func) is str:
+            self.func = func
+        else:
+            self.func = func
+
+    def get_fitness(self, scheduler):
+        if self.course == None:
+            return func(scheduler) * self.weight
+        else:
+            return func(self.course, scheduler) * self.weight
+
 
 class Scheduler:
     """Schedules all courses for a week"""
@@ -18,16 +69,13 @@ class Scheduler:
             print("Courses is not a list")
             return
 
-        if type(rooms) is list:
-            if not isinstance(rooms[0], Room):
-                logging.error("Rooms is not a list of Room objects")
-                print("Rooms is not a list of Room objects")
-                return
-        else:
+        if type(rooms) is not list:
             logging.error("Rooms is not a list")
             print("Rooms is not a list")
+            return
 
         self.week = Week(rooms)
+        self.constraints = []
         
         #Number of courses
         self.num_courses = len(courses)
@@ -54,9 +102,17 @@ class Scheduler:
         return courses_by_credits
 
 
+    def add_constraint(self, name, weight, func):
+        self.constraints.append(Constraint(self, name, weight, func)) 
+    
+
     def calc_fitness(self):
         """Calculates the fitness score of a schedule"""
-        pass
+        total_fitness = 0
+        for each_constraint in self.constraints:
+            total_fitness += each_constraint.get_fitness(self)
+
+        #do something with fitness score
 
 
     def mutate(self, func):
@@ -90,3 +146,4 @@ class Scheduler:
     def evolution_loop(self):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         pass
+

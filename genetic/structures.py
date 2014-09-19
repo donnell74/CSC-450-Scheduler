@@ -1,6 +1,7 @@
 from __future__ import print_function
 from datetime import time, timedelta
 import logging
+import random
 
 class Day:
     def __init__(self, rooms, day_code):
@@ -67,10 +68,44 @@ class Week:
     def __str__(self):
         return "\n".join([str(d) for d in self.days])
 
+    def find_course(self, course):
+        for each_day in self.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    if each_slot.course == course:
+                        return each_slot
+
+    def random(self, courses):
+        sum([each_course.credit for each_course in courses])
+        for each_course in courses:
+            if each_course.credit == 3:
+                mwf_or_tr = random.randint(0, 1)
+                while True:
+                    room = self.days[mwf_or_tr].rooms[random.randint(0, len(rooms)-1)]
+                    slot_counter = 0
+                    while True:
+                        if slot_counter == len(room.schedule):
+                            break
+                        time_slot = room.schedule[random.randint(0, len(room.schedule)-1)]
+                        if time_slot.course == None:
+                            time_slot.course = each_course
+                        else:
+                            slot_counter += 1
+
+                    if slot_counter != len(room.schedule):
+                        break
+            elif each_course.credit == 5:
+                pass
+
+
 class Course:
     def __init__(self, code, credit):
         self.code = code
         self.credit = credit
+
+    def __eq__(self, other):
+        return self.code == other.code and \
+               self.credit == other.credit
 
 #Todo: decide on week/schedule
 class Schedule:
