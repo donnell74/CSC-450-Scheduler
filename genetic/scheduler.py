@@ -80,26 +80,30 @@ class Scheduler:
         #Number of courses
         self.num_courses = len(courses)
         #Courses grouped by credit hours
-#self.courses_by_credits = self.separate_by_credit(courses)
+        self.separate_by_credit(courses)
         #Number of groups of credits
-        #self.num_credits = len(courses_by_credits.keys())
-        #Number of courses grouped by credit hours
-        #self.num_course_by_credits = dict(zip(self.courses_by_credits.keys(), #len of values
-
+        self.num_credits = len(self.courses_by_credits.keys())
+        print(self.week.find_time_slot('m', '11:00'))
 
     def separate_by_credit(self, courses):
         """Groups the courses based on number of credit hours.
         IN: list of course objects
-        OUT: dictionary with keys=credit hours and values=list of course objects"""
+        OUT: dictionary with keys=credit hours and values=list of course objects;
+             dictionary with keys=credit hours and values=number of course objects"""
         courses_by_credits = {}
+        num_courses_by_credits = {}
         for each_course in courses:
             #Case 1: New key-value pair (make new list)
             if each_course.credit not in courses_by_credits.keys():
                 courses_by_credits[each_course.credit] = [each_course]
+                num_courses_by_credits[each_course.credit] = 1
             #Case 2: Add to value's list for key
             else:
                 courses_by_credits[each_course.credit].append(each_course)
-        return courses_by_credits
+                num_courses_by_credits[each_course.credit] += 1
+        self.courses_by_credits = courses_by_credits
+        self.num_courses_by_credits = num_courses_by_credits
+        return
 
 
     def add_constraint(self, name, weight, func):
@@ -122,6 +126,12 @@ class Scheduler:
             print("Func passed is not a function")
         
 
+    def swap(self, course1, course2, P1, P2):
+        """Swaps two courses between two schedules"""
+        
+        pass
+
+
     def crossover(self, P1, P2):
         """Performs a series of swaps on two schedules to produce children
         IN: 2 parent schedules, P1 and P2
@@ -132,11 +142,12 @@ class Scheduler:
             #Random credit hours selected
             credit = self.courses_by_credits[randint(1, self.num_credits)]
             #todo: perform the counts earlier
-#course_a = self.courses_by_credits[credit][randint(1,
-#                self.num_course_by_credits[credit])]
+            course_a = self.courses_by_credits[credit][randint(1,
+                self.num_courses_by_credits[credit])]
+            course_b = self.courses_by_credits[credit][randint(1,
+                self.num_courses_by_credits[credit])]
             #perform the actual swap
-        #todo: 'assign' function, schedule class/week class hookup
-    
+
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""

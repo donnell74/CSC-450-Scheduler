@@ -17,7 +17,7 @@ def main():
     rooms = ["CHEK212"]
     s = Scheduler(courses, rooms)
     s.week.random(courses)
-#print(s.week)
+    #print(s.week)
 
 
 if __name__ == "__main__":
