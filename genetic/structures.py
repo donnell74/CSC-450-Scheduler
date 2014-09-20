@@ -27,16 +27,20 @@ class Room:
         this_schedule = []
         for each_slot in time_slots:
             start, end = each_slot.split('-')
-            this_schedule.append(TimeSlot(start.split(':'), end.split(':')))
+            this_schedule.append(TimeSlot(start.split(':'), end.split(':'), self))
 
         return this_schedule
 
     def __str__(self):
         return str(self.number) + "\n" + "\n".join([str(t) for t in self.schedule])
 
+    def __iter__(self):
+        for t_slot in self.schedule:
+            yield t_slot
+
 
 class TimeSlot:
-    def __init__(self, start_time, end_time, course = None):
+    def __init__(self, start_time, end_time, this_room, course = None):
         try:
             #make sure we are given 4 integers for times
             start_time = list(map(int, start_time))
@@ -50,6 +54,7 @@ class TimeSlot:
         self.end_time = time(end_time[0], end_time[1])
         self.course = course
         self.duration = self.find_duration(start_time, end_time)
+        self.room = this_room
 
     def find_duration(self, start_time, end_time):
         duration_hours = (end_time[0] - start_time[0]) * 60
@@ -64,6 +69,10 @@ class TimeSlot:
         return "Course:%s\nStart time:%s\nEnd time:%s\nDuration:%s" % \
                (self.course, str(self.start_time), str(self.end_time),
                 self.duration) +"\n"
+
+    def __eq__(self, other):
+        return self.start_time == other.start_time and \
+               self.end_time == other.end_time
 
 
 class Week:
@@ -101,27 +110,14 @@ class Week:
         logging.error("Course not found")
         return
 
-    def random(self, courses):
-        sum([each_course.credit for each_course in courses])
-        for each_course in courses:
-            if each_course.credit == 3:
-                mwf_or_tr = random.randint(0, 1)
-                while True:
-                    room = self.days[mwf_or_tr].rooms[random.randint(0, len(rooms)-1)]
-                    slot_counter = 0
-                    while True:
-                        if slot_counter == len(room.schedule):
-                            break
-                        time_slot = room.schedule[random.randint(0, len(room.schedule)-1)]
-                        if time_slot.course == None:
-                            time_slot.course = each_course
-                        else:
-                            slot_counter += 1
+    def __getitem__(self, k):
+        if k not in "mtwrf":
+            raise ValueError
+        
+        for day in self.days:
+            if day.day_code == k:
+                return day
 
-                    if slot_counter != len(room.schedule):
-                        break
-            elif each_course.credit == 5:
-                pass
 
 
 class Course:
@@ -130,8 +126,14 @@ class Course:
         self.credit = credit
 
     def __eq__(self, other):
+        if other == None:
+            return False
+
         return self.code == other.code and \
                self.credit == other.credit
+
+    def __str__(self):
+        return self.code
 
 #Todo: decide on week/schedule
 class Schedule:
