@@ -70,6 +70,10 @@ class TimeSlot:
                (self.course, str(self.start_time), str(self.end_time),
                 self.duration) +"\n"
 
+    def __eq__(self, other):
+        return self.start_time == other.start_time and \
+               self.end_time == other.end_time
+
 
 class Week:
     """A particular week of courses"""
@@ -106,6 +110,14 @@ class Week:
         logging.error("Course not found")
         return
 
+    def __getitem__(self, k):
+        if k not in "mtwrf":
+            raise ValueError
+        
+        for day in self.days:
+            if day.day_code == k:
+                return day
+
 
 
 class Course:
@@ -114,6 +126,9 @@ class Course:
         self.credit = credit
 
     def __eq__(self, other):
+        if other == None:
+            return False
+
         return self.code == other.code and \
                self.credit == other.credit
 

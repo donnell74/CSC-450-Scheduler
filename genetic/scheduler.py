@@ -84,7 +84,7 @@ class Scheduler:
         self.separate_by_credit(courses)
         #Number of groups of credits
         self.num_credits = len(self.courses_by_credits.keys())
-        print(self.week.find_time_slot('m', '11:00'))
+        print(self.weeks[0].find_time_slot('m', '11:00'))
 
     def separate_by_credit(self, courses):
         """Groups the courses based on number of credit hours.
@@ -160,47 +160,56 @@ class Scheduler:
         pass
 
 
-    def time_slot_available(self, day, time_slots_by_day, first_time_slot):
-        pass
-
-
-    def schedule_course(self, day, start_time, course):
-        pass
+    def time_slot_available(self, day, first_time_slot):
+        for room in day.rooms:
+            for t_slot in room:
+                if t_slot == first_time_slot and t_slot.course == None:
+                    return (t_slot, True)
+        
+        return (None, False)
 
 
     def randomly_fill_schedules(self):
         #get all available time slots grouped by day
-        time_slots_by_day = dict([(day, list()) for day in "mtwrf"])
-        for day in self.days:
-            for room in day.rooms:
-                time_slots_by_day[day.day_code].extend([t for t in room])
+        for each_week in self.weeks:
+            time_slots_by_day = dict([(day, list()) for day in "mtwrf"])
+            for day in each_week.days:
+                for room in day.rooms:
+                    time_slots_by_day[day.day_code].extend([t for t in room])
 
-        index = 0
-        times_on_index = 1
-        while True:
-            if index == len(self.courses):
-                break
+            for courses_in_curr_credit in self.courses_by_credits.values()[::-1]:
+                index = 0
+                times_on_index = 0 
+                while True:
+                    if index == len(courses_in_curr_credit):
+                        break
 
-            each_course = self.courses[index]
-            day_schedule = ""
-            if each_course.credit == 3:
-                day_schedule = "tr" if random.randint(0,1) else "mwf"
-                should_index = True
-                rand_time_slot = times_slots_by_day[day_schedule[0]]
-                for day_code in day_schedule[1:]:
-                    should_index = should_index and time_slot_available(day_code, time_slots_by_day, rand_time_slot)
+                    times_on_index += 1
+                    each_course = courses_in_curr_credit[index]
+                    day_schedule = ""
+                    #if each_course.credit == 3
+                    day_schedule = "tr" if random.randint(0,1) else "mwf"
+                    if each_course.credit == 4:
+                        day_schedule = "mtwf" if random.randint(0,1) else "mwrf"
+                    elif each_course.credit == 5:
+                        day_schedule = "mtwrf"
 
-            elif each_course.credit == 4:
-                pass
-            elif each_course.credit == 5:
-                pass
-            else:
-                print("Unable to handle course credit of: ", each_course.credit)
+                    should_index = True
+                    rand_time_slot = time_slots_by_day[day_schedule[0]][random.randint(0, len(time_slots_by_day[day_schedule[0]])-1)]
+                    to_schedule_lyst = [rand_time_slot]
+                    for day_code in day_schedule[1:]:
+                        time_slot_to_schedule, time_found = self.time_slot_available(each_week[day_code], rand_time_slot)
+                        to_schedule_lyst.append(time_slot_to_schedule) 
+                        should_index = should_index and time_found 
 
-            if should_index or times_on_index > 5:
-                schedule_course(day, start_time, course):
-                index += 1
-                times_on_index = 1
+                    if should_index or times_on_index > 10:
+                        if times_on_index > 10:
+                            print("Unable to schedule ", str(each_course))
+                        else:
+                            for t_slot in to_schedule_lyst:
+                                t_slot.course = each_course
+                        index += 1
+                        times_on_index = 1
 
-            
+                    
 

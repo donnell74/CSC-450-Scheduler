@@ -13,9 +13,10 @@ def init_logging():
 
 def main():
     init_logging()
-    courses = [Course('CSC325', 3), Course('CSC130', 3), Course('CSC131', 3), Course('CSC450', 3), Course('CSC232', 3)]
+    courses = [Course('CSC333', 4), Course('MTH260', 5), Course('CSC325', 3)]
     rooms = ["CHEK212"]
     s = Scheduler(courses, rooms)
+    s.randomly_fill_schedules()
     #print(s.week)
     print(s.weeks[0])
 
