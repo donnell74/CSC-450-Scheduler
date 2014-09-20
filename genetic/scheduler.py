@@ -7,9 +7,6 @@ import logging
 
 
 def morning_class(course, this_week):
-    print("=" * 20, "\n")
-    print(course)
-    print("=" * 20, "\n")
     holds = this_week.find_course(course).start_time < time(12, 0) 
     return 1 if holds else 0
 
@@ -77,9 +74,11 @@ class Scheduler:
             print("Rooms is not a list")
             return
 
-        self.weeks = [Week(rooms)]
+        self.weeks = [Week(rooms), Week(rooms), Week(rooms), Week(rooms), Week(rooms)]
         self.constraints = []
+        self.max_fitness = 0
         self.courses = courses
+        self.rooms = rooms
         
         #Number of courses
         self.num_courses = len(courses)
@@ -112,14 +111,12 @@ class Scheduler:
 
     def add_constraint(self, name, weight, func, course = None):
         self.constraints.append(Constraint(name, weight, func, course)) 
+        self.max_fitness += weight
     
 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
         total_fitness = 0
-        print("=" * 20, "\n")
-        print(self.constraints)
-        print("=" * 20, "\n")
         for each_constraint in self.constraints:
             total_fitness += each_constraint.get_fitness(this_week)
 
@@ -158,12 +155,43 @@ class Scheduler:
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
-        pass
+        for x in range(15):
+            self.weeks.append(Week(self.rooms))
 
+        self.randomly_fill_schedules()
 
     def evolution_loop(self):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
-        pass
+        fitness_baseline = 30
+        total_iterations = 0
+        counter = 0
+        MAX_TRIES = 50
+
+        def week_slice_helper():
+            self.weeks.sort(key=lambda x: x.fitness, reverse=True)
+            self.weeks = self.weeks[:5]
+
+        while True:
+            for each_week in self.weeks:
+                self.calc_fitness(each_week)
+
+            week_slice_helper()
+            if counter > MAX_TRIES:
+                break
+
+            if len(filter(lambda x: x.fitness <=fitness_baseline, self.weeks)) == 0:
+                if fitness_baseline >= self.max_fitness:
+                    break
+
+                print(fitness_baseline, " : ", counter)
+                fitness_baseline += 30
+                counter = 0
+
+            self.breed() #makes self.weeks a list of 20 new 
+            total_iterations += 1 
+            counter += 1
+
+        print("Breeding iterations: ", total_iterations)
 
 
     def time_slot_available(self, day, first_time_slot):
@@ -213,7 +241,9 @@ class Scheduler:
 
                     if should_index or times_on_index > 10:
                         if times_on_index > 10:
-                            print("Unable to schedule ", str(each_course))
+                            #uncomment for output of bad courses
+                            #print("Unable to schedule ", str(each_course))
+                            pass
                         else:
                             for t_slot in to_schedule_lyst:
                                 t_slot.course = each_course

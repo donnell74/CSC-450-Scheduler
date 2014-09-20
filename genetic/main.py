@@ -20,10 +20,12 @@ def main():
     s.add_constraint("morning_classes", 30, morning_class, s.courses[0]) 
     s.add_constraint("morning_classes", 30, morning_class, s.courses[1]) 
     s.add_constraint("morning_classes", 30, morning_class, s.courses[2]) 
-    s.calc_fitness(s.weeks[0])
     #print(s.week)
-    print(s.weeks[0], "\n")
-    print(s.weeks[0].fitness)
+    s.evolution_loop()
+    for w in s.weeks:
+      s.calc_fitness(w)
+      print(w, "\n")
+      print(w.fitness)
 
 
 if __name__ == "__main__":
