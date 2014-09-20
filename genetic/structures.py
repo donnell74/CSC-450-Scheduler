@@ -19,7 +19,7 @@ class Day:
                 "\n".join([str(r) for r in self.rooms])
 
 class Room:
-    def __init__(self, number, time_slots = ['00:00-10:00', '11:00-15:00']):
+    def __init__(self, number, time_slots = ['9:00-10:00', '11:00-13:00', '15:00-17:00']):
         self.number = number
         self.schedule = self.generate_time_slots(time_slots)
 
@@ -79,6 +79,7 @@ class Week:
     """A particular week of courses"""
     def __init__(self, rooms):
         self.days = [Day(rooms, day_code) for day_code in 'mtwrf']
+        self.fitness = 0
 
     def find_time_slot(self, day, time):
         """Returns a time slot for the given time

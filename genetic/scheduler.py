@@ -6,8 +6,11 @@ from datetime import time, timedelta
 import logging
 
 
-def morning_class(course, scheduler):
-    holds = scheduler.week.find_course(course).start_time < time(12, 0) 
+def morning_class(course, this_week):
+    print("=" * 20, "\n")
+    print(course)
+    print("=" * 20, "\n")
+    holds = this_week.find_course(course).start_time < time(12, 0) 
     return 1 if holds else 0
 
 
@@ -48,11 +51,11 @@ class Constraint:
         else:
             self.func = func
 
-    def get_fitness(self, scheduler):
+    def get_fitness(self, this_week):
         if self.course == None:
-            return func(scheduler) * self.weight
+            return self.func(this_week) * self.weight
         else:
-            return func(self.course, scheduler) * self.weight
+            return self.func(self.course, this_week) * self.weight
 
 
 class Scheduler:
@@ -84,7 +87,7 @@ class Scheduler:
         self.separate_by_credit(courses)
         #Number of groups of credits
         self.num_credits = len(self.courses_by_credits.keys())
-        print(self.weeks[0].find_time_slot('m', '11:00'))
+#print(self.weeks[0].find_time_slot('m', '11:00'))
 
     def separate_by_credit(self, courses):
         """Groups the courses based on number of credit hours.
@@ -107,17 +110,20 @@ class Scheduler:
         return
 
 
-    def add_constraint(self, name, weight, func):
-        self.constraints.append(Constraint(self, name, weight, func)) 
+    def add_constraint(self, name, weight, func, course = None):
+        self.constraints.append(Constraint(name, weight, func, course)) 
     
 
-    def calc_fitness(self):
+    def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
         total_fitness = 0
+        print("=" * 20, "\n")
+        print(self.constraints)
+        print("=" * 20, "\n")
         for each_constraint in self.constraints:
-            total_fitness += each_constraint.get_fitness(self)
+            total_fitness += each_constraint.get_fitness(this_week)
 
-        #do something with fitness score
+        this_week.fitness = total_fitness
 
 
     def mutate(self, func):
@@ -162,7 +168,6 @@ class Scheduler:
 
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
-            print(first_time_slot.room.number, " == ", room.number, ": ", first_time_slot.room.number == room.number)
             if room.number != first_time_slot.room.number:
                 continue
 
@@ -181,9 +186,6 @@ class Scheduler:
                 for room in day.rooms:
                     time_slots_by_day[day.day_code].extend([t for t in room])
             
-            for t_slot in time_slots_by_day['m']:
-                print(t_slot)
-
             for courses_in_curr_credit in self.courses_by_credits.values()[::-1]:
                 index = 0
                 times_on_index = 0 

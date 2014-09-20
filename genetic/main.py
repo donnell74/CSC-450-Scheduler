@@ -1,5 +1,5 @@
 from __future__ import print_function
-from scheduler import Scheduler
+from scheduler import *
 from structures import *
 
 import unittest
@@ -17,8 +17,13 @@ def main():
     rooms = ["CHEK212", "CHEK105"]
     s = Scheduler(courses, rooms)
     s.randomly_fill_schedules()
+    s.add_constraint("morning_classes", 30, morning_class, s.courses[0]) 
+    s.add_constraint("morning_classes", 30, morning_class, s.courses[1]) 
+    s.add_constraint("morning_classes", 30, morning_class, s.courses[2]) 
+    s.calc_fitness(s.weeks[0])
     #print(s.week)
-    print(s.weeks[0])
+    print(s.weeks[0], "\n")
+    print(s.weeks[0].fitness)
 
 
 if __name__ == "__main__":
