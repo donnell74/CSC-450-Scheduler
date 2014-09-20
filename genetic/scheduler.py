@@ -162,6 +162,10 @@ class Scheduler:
 
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
+            print(first_time_slot.room.number, " == ", room.number, ": ", first_time_slot.room.number == room.number)
+            if room.number != first_time_slot.room.number:
+                continue
+
             for t_slot in room:
                 if t_slot == first_time_slot and t_slot.course == None:
                     return (t_slot, True)
@@ -176,6 +180,9 @@ class Scheduler:
             for day in each_week.days:
                 for room in day.rooms:
                     time_slots_by_day[day.day_code].extend([t for t in room])
+            
+            for t_slot in time_slots_by_day['m']:
+                print(t_slot)
 
             for courses_in_curr_credit in self.courses_by_credits.values()[::-1]:
                 index = 0
