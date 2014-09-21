@@ -1,5 +1,8 @@
 from __future__ import print_function
+from copy import deepcopy
+from copy import copy
 from random import randint
+from random import choice
 from structures import *
 from datetime import time, timedelta
 
@@ -58,7 +61,8 @@ class Constraint:
 
 class Scheduler:
     """Schedules all courses for a week"""
-    def __init__(self, courses, rooms):
+    def __init__(self, courses, rooms, time_slots, time_slot_divide):
+        #eventually will include mwf and tr slots instead of general slots
         logging.debug("Scheduler init")
         if type(courses) is list:
             if not isinstance(courses[0], Course):
@@ -75,28 +79,32 @@ class Scheduler:
             print("Rooms is not a list")
             return
 
-        self.weeks = [Week(rooms), Week(rooms), Week(rooms), Week(rooms), Week(rooms)]
-        self.constraints = []
-        self.max_fitness = 0
+        #self.time_slots_mwf = time_slots_mwf
+        #self.time_slots_tr = time_slots_tr
+        self.time_slots = time_slots
+        self.slot_divide = time_slot_divide
         self.courses = courses
         self.rooms = rooms
+        self.weeks = [Week(rooms, self), Week(rooms, self), Week(rooms, self),
+                      Week(rooms, self), Week(rooms, self)]
+        self.constraints = []
+        self.max_fitness = 0
         
         #Number of courses
         self.num_courses = len(courses)
         #Courses grouped by credit hours
-        self.separate_by_credit(courses)
+        self.separate_by_credit()
         #Number of groups of credits
         self.num_credits = len(self.courses_by_credits.keys())
-        #print(self.weeks[0].find_time_slot('m', '11:00'))
 
-    def separate_by_credit(self, courses):
+    def separate_by_credit(self):
         """Groups the courses based on number of credit hours.
         IN: list of course objects
         OUT: dictionary with keys=credit hours and values=list of course objects;
              dictionary with keys=credit hours and values=number of course objects"""
         courses_by_credits = {}
         num_courses_by_credits = {}
-        for each_course in courses:
+        for each_course in self.courses:
             #Case 1: New key-value pair (make new list)
             if each_course.credit not in courses_by_credits.keys():
                 courses_by_credits[each_course.credit] = [each_course]
@@ -142,40 +150,28 @@ class Scheduler:
         """Performs swaps around 2 courses in a schedule
         IN: 2 Course objects, schedule object
         OUT: schedule object with swap performed"""
-        #Time slot for course in P1
-        time_slot_in_P1 = P1.find_course(course)
-        #Corresponding time slot in P2:
-        time_slot_respective_P2 = find_respective_time_slot(time_slot_in_P1, P2)
-        #Time slot for course in P2
-        time_slot_in_P2 = P2.find_course(course)
-        #Corresponding time slot in P1:
-        time_slot_respective_P1 = find_respective_time_slot(time_slot_in_P2, P1)
-        #todo: check input types; log errors
+        pass
 
 
     def crossover(self, P1, P2):
-        """Performs a series of swaps on two schedules to produce children
+        """Mixes schedules P1 and P2 to create 2 children schedules, then corrects
+        the children schedules as necessary
         IN: 2 parent schedules, P1 and P2
         OUT: 2 children schedules, C1 and C2"""
-        #Random number of swaps
-        num_swaps = randint(1, self.num_courses)
+        #deep copies
         C1 = P1.deep_copy()
         C2 = P2.deep_copy()
-        for swap in range(num_swaps):
-            #Random credit hours selected
-            credit = self.courses_by_credits[randint(1, self.num_credits)]
-            #todo: perform the counts earlier
-            course_a = self.courses_by_credits[credit][randint(1,
-                self.num_courses_by_credits[credit])]
-            course_b = self.courses_by_credits[credit][randint(1,
-                self.num_courses_by_credits[credit])]
-            swap(course_a, course_b, C1, C2)
+        #the time slot(s) which will be moved from C1 to C2
+        top_slots = self.time_slots[:self.slot_divide]
+        #the time slot(s) which will be shifted from C2 to C1
+        bottom_slots = self.time_slots[-self.slot_divide:]
+        pass
 
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
         for x in range(15):
-            self.weeks.append(Week(self.rooms))
+            self.weeks.append(Week(self.rooms, self))
 
         self.randomly_fill_schedules()
 
@@ -224,8 +220,218 @@ class Scheduler:
         
         return (None, False)
 
+    #helper function
+    def list_time_slots_for_week(self, week):
+        """Gives list of all time slot objects in week while indexing them"""
+        list_of_slots = []
+        #index counters
+        day = 0
+        room = 0
+        slot = 0
+        
+        for each_day in week.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    list_of_slots.append(each_slot)
+                    each_slot.set_indices(day, room, slot)
+                    slot += 1
+                room += 1
+                slot = 0
+            day += 1
+            room = 0
+        return list_of_slots
+
 
     def randomly_fill_schedules(self):
+        """Fills in random starting schedules"""
+
+        #helper function
+        def week_helper(time_slot, time_slot_list):
+            """Gives the 5 timeslot objects and occupied status for each day in the same room,
+            at the same time, with the same schedule/week as the given time slot object
+            IN: list of time slot objects *for a schedule/week*, time slot object
+            OUT: dictionary with occupied counter and unoccupied keys, with values being time slots
+                 for the week; also gives the objects in order by day and their occupation status
+                 in order by day"""
+            helper = {'occupied': 0, 'unoccupied': [], 'in_order':[None, None, None, None, None],
+                      'occupation':[0,0,0,0,0]}
+            #Only need start time, not end time, because time slots on the same day don't overlap
+            marker = False #marker for whether open or not for current
+            this_time = time_slot.start_time
+            this_room = time_slot.room.number
+            for each_slot in time_slot_list:
+                if each_slot.start_time == this_time and each_slot.room.number == this_room:
+                    #occupation status
+                    if each_slot.course is None:
+                        marker = True
+                        helper['unoccupied'].append(each_slot)
+                    else:
+                        #occupied counter
+                        helper['occupied'] += 1
+
+                    #day
+                    temp_day = each_slot.room.day.day_code
+                    if temp_day == 'm':
+                        helper['in_order'][0] = each_slot
+                        helper['occupation'][0] = 1 if marker else 0
+                    elif temp_day == 't':
+                        helper['in_order'][1] = each_slot
+                        helper['occupation'][1] = 1 if marker else 0
+                    elif temp_day == 'w':
+                        helper['in_order'][2] = each_slot
+                        helper['occupation'][2] = 1 if marker else 0
+                    elif temp_day == 'r':
+                        helper['in_order'][3] = each_slot
+                        helper['occupation'][3] = 1 if marker else 0
+                    else:
+                        helper['in_order'][4] = each_slot
+                        helper['occupation'][4] = 1 if marker else 0
+                    marker = False #reset it
+            #cleanup...take care of cases where time slot has been removed
+            for entry in helper['in_order']:
+                if entry is None:
+                    #occupied counter
+                    helper['occupied'] += 1
+            return helper
+
+        #helper function
+        def find_index(time_slot, time_slot_list):
+            """Finds index of time slot object in list of time slots for week"""
+            counter = 0
+            for each_slot in time_slot_list:
+                if each_slot.room.number == time_slot.room.number and \
+                   each_slot.start_time == time_slot.start_time and \
+                   each_slot.room.day.day_code == time_slot.room.day.day_code:
+                   return counter
+                counter += 1
+            logging.error("Index not found")
+            print("Index not found")
+            return
+
+        def assign_and_remove(course, time_slot, slots_list, week):
+            """Assigns course to time slot and removes time slot from list of time slots"""
+            temp_room_index = time_slot.room_index
+            temp_day_index = time_slot.day_index
+            temp_slot_index = time_slot.slot_index
+
+            i = find_index(time_slot, slots_list)
+            week.days[temp_day_index].rooms[temp_room_index].schedule[temp_slot_index].set_course(course)
+            del(slots_list[i])
+
+        #main loop
+        for each_week in self.weeks:
+            #Make list of all time slots for week
+            list_of_time_slots = self.list_time_slots_for_week(each_week)
+            #5 hour case is easy because we handle it first...removes possibility of
+            #selecting a week with courses
+            for each_5 in self.courses_by_credits[5]:
+                #Choose a random timeslot from the list of all time slots for week
+                random_slot = choice(list_of_time_slots)
+                #assign and remove from pool of timeslots on mtwrf slots
+                assignees = week_helper(random_slot, list_of_time_slots)['in_order']
+                for each_assignee in assignees:
+                    assign_and_remove(each_5, each_assignee, list_of_time_slots, each_week)
+            #other cases must consider how the week is taken up
+            for each_4 in self.courses_by_credits[4]:
+                #Choose a random timeslot from the list of all time slots for week
+                random_slot = choice(list_of_time_slots)
+                temp_pool = deepcopy(list_of_time_slots)
+                done = False
+                while len(temp_pool) > 0 and not done:
+                    #check rest of week's courses at same time and place (differ by day)
+                    possibilities = week_helper(random_slot, temp_pool)
+                    #case that whole week is open
+                    if len(possibilities['unoccupied']) == 5:
+                        for d in (0, 2, 4):
+                            #MWF
+                            assign_and_remove(each_4, possibilities['in_order'][d], list_of_time_slots, each_week)
+                        #T or R
+                        j = randint(0,1)
+                        if j:
+                            assign_and_remove(each_4, possibilities['in_order'][1], list_of_time_slots, each_week) #T
+                        else:
+                            assign_and_remove(each_4, possibilities['in_order'][3], list_of_time_slots, each_week) #R
+                        done = True
+                    #case that mwf and either t or r are open
+                    elif possibilities['occupation'][0] and possibilities['occupation'][2] and \
+                         possibilities['occupation'][4] and \
+                         (possibilities['occupation'][1] or possibilities['occupation'][3]):
+                        for d in (0, 2, 4):
+                            #MWF
+                            assign_and_remove(each_4, possibilities['in_order'][d], list_of_time_slots, each_week)
+                        if possibilities['occupation'][1]:
+                            assign_and_remove(each_4, possibilities['in_order'][1], list_of_time_slots, each_week)
+                        else:
+                            assign_and_remove(each_4, possibilities['in_order'][3], list_of_time_slots, each_week)
+                        done = True
+                    #case that cannot schedule for this time and room
+                    else:
+                        #remove this timeslot and the other unoccupied in its week from temp pool
+                        for to_remove in possibilities['unoccupied']:
+                            i = find_index(to_remove, temp_pool)
+                            del(temp_pool[i])
+                        #get a new random time slot
+                        random_slot = choice(temp_pool)
+                #2 ways out of while...test for which
+                if len(temp_pool) == 0 and not done:
+                    #impossible to schedule
+                    logging.error("Could not schedule")
+                    print("Could not schedule")
+                    return
+            for each_3 in self.courses_by_credits[3]:
+                #Choose a random timeslot from the list of all time slots for week
+                random_slot = choice(list_of_time_slots)
+                temp_pool = deepcopy(list_of_time_slots)
+                done = False
+                while len(temp_pool) > 0 and not done:
+                    #check rest of week's courses at same time and place (differ by day)
+                    possibilities = week_helper(random_slot, temp_pool)
+                    #case that whole week is open...MWF or TR
+                    if len(possibilities['unoccupied']) == 5:
+                        j = randint(0,1)
+                        #MWF
+                        if j:
+                            for d in (0, 2, 4):
+                                assign_and_remove(each_3, possibilities['in_order'][d], list_of_time_slots, each_week)
+                        #TR
+                        else:
+                            for d in (1, 3):
+                                assign_and_remove(each_3, possibilities['in_order'][d], list_of_time_slots, each_week)
+                        done = True
+                    #case that mwf is open, but not tr
+                    elif possibilities['occupation'][0] and possibilities['occupation'][2] and \
+                         possibilities['occupation'][4]:
+                        for d in (0, 2, 4):
+                            assign_and_remove(each_3, possibilities['in_order'][d], list_of_time_slots, each_week)
+                        done = True
+                    #case that tr is open, but not mwf
+                    elif possibilities['occupation'][1] and possibilities['occupation'][3]:
+                        for d in (1, 3):
+                            assign_and_remove(each_3, possibilities['in_order'][d], list_of_time_slots, each_week)
+                        done = True
+                    #case that cannot schedule for this time and room
+                    else:
+                        #remove this timeslot and the other unoccupied in its week from temp pool
+                        for to_remove in possibilities['unoccupied']:
+                            i = find_index(to_remove, temp_pool)
+                            del(temp_pool[i])
+                        #get a new random time slot
+                        random_slot = choice(temp_pool)
+                #2 ways out of while...test for which
+                if len(temp_pool) == 0 and not done:
+                    #impossible to schedule
+                    logging.error("Could not schedule")
+                    print("Could not schedule")
+                    return
+            #Case of 1 hour is very easy because we saved it for last--just take whatever you find
+            try:
+                for each_1 in self.courses_by_credits[1]:
+                    assign_and_remove(each_1, random_slot, list_of_time_slots, each_week)
+            #case of no 1 hour courses
+            except KeyError:
+                continue
+
+    '''def randomly_fill_schedules(self):
         #get all available time slots grouped by day
         for each_week in self.weeks:
             time_slots_by_day = dict([(day, list()) for day in "mtwrf"])
@@ -267,7 +473,7 @@ class Scheduler:
                             for t_slot in to_schedule_lyst:
                                 t_slot.course = each_course
                         index += 1
-                        times_on_index = 1
+                        times_on_index = 1'''
 
                     
 
