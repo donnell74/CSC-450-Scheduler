@@ -39,7 +39,6 @@ class Day:
 class Room:
     """A particular room, consisting of a room number and a list of time slot objects"""
     def __init__(self, number, this_day):
-        #old default time_slots = ['9:00-10:00', '11:00-13:00', '15:00-17:00']
         self.day = copy(this_day)
         self.number = number
 

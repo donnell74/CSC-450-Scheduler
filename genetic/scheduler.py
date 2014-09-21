@@ -153,18 +153,68 @@ class Scheduler:
         pass
 
 
+    def list_time_slots_for_week(self, week):
+        """Gives list of all time slot objects in week while indexing them"""
+        list_of_slots = []
+        #index counters
+        day = 0
+        room = 0
+        slot = 0
+        
+        for each_day in week.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    list_of_slots.append(each_slot)
+                    each_slot.set_indices(day, room, slot)
+                    slot += 1
+                room += 1
+                slot = 0
+            day += 1
+            room = 0
+        return list_of_slots
+
+
+    def find_time_slots_from_cuts(self, this_week, slots_list):
+        """For a given week, returns all time slots matching the slots list"""
+        matching_slots = []
+
+        #form times from slots_list
+        times = []
+        for each_slot in slots_list:
+            start, end = each_slot.split('-')
+            temp_schedule.append(TimeSlot(start.split(':'), end.split(':'), self))
+        
+        full_list = self.list_time_slots_for_week(this_week)
+        for each_slot in full_list:
+            if each_slot.start_time in times:
+                matching_slots.append(each_slot)
+
+
+    def replace_time_slots(self, destination_slots, input_slots)
+        """Documentation"""
+        for i in destination_slots:
+            for j in input_slots:
+                if i.start_time == j.start_time and i.room.number == j.room.number and \
+                   i.room.day.day_code == j.room.day.day_code:
+                    i.set_course(j.course)
+
+
     def crossover(self, P1, P2):
-        """Mixes schedules P1 and P2 to create 2 children schedules, then corrects
-        the children schedules as necessary
+        """Mixes weeks (schedules) P1 and P2 to create 2 children weeks, then corrects
+        the children weeks as necessary
         IN: 2 parent schedules, P1 and P2
         OUT: 2 children schedules, C1 and C2"""
-        #deep copies
         C1 = P1.deep_copy()
+        #the time slot(s) which will be moved between C1 and C2
+        slots_A = self.time_slots[:self.slot_divide]
+
+        #Top-left slots...to be traded with following
+        cutA = find_time_slots_from_cuts(P1, top_slots)
         C2 = P2.deep_copy()
-        #the time slot(s) which will be moved from C1 to C2
-        top_slots = self.time_slots[:self.slot_divide]
-        #the time slot(s) which will be shifted from C2 to C1
-        bottom_slots = self.time_slots[-self.slot_divide:]
+        
+        
+        #Bottom-right slots...to be traded with above
+        cutB = find_time_slots_from_cuts(C2, bottom_slots)
         pass
 
 
@@ -219,27 +269,6 @@ class Scheduler:
                     return (t_slot, True)
         
         return (None, False)
-
-    #helper function
-    def list_time_slots_for_week(self, week):
-        """Gives list of all time slot objects in week while indexing them"""
-        list_of_slots = []
-        #index counters
-        day = 0
-        room = 0
-        slot = 0
-        
-        for each_day in week.days:
-            for each_room in each_day.rooms:
-                for each_slot in each_room.schedule:
-                    list_of_slots.append(each_slot)
-                    each_slot.set_indices(day, room, slot)
-                    slot += 1
-                room += 1
-                slot = 0
-            day += 1
-            room = 0
-        return list_of_slots
 
 
     def randomly_fill_schedules(self):
