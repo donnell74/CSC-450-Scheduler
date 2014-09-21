@@ -7,7 +7,8 @@ import logging
 
 
 def morning_class(course, this_week):
-    holds = this_week.find_course(course).start_time < time(12, 0) 
+    #Find course returns a list of time slots, but they should all be at the same time
+    holds = this_week.find_course(course)[0].start_time < time(12, 0)
     return 1 if holds else 0
 
 
@@ -86,7 +87,7 @@ class Scheduler:
         self.separate_by_credit(courses)
         #Number of groups of credits
         self.num_credits = len(self.courses_by_credits.keys())
-#print(self.weeks[0].find_time_slot('m', '11:00'))
+        #print(self.weeks[0].find_time_slot('m', '11:00'))
 
     def separate_by_credit(self, courses):
         """Groups the courses based on number of credit hours.
@@ -124,16 +125,32 @@ class Scheduler:
 
 
     def mutate(self, func):
-        """Mutates a schedule given an approiate function"""
+        """Mutates a schedule given an appropriate function"""
         if not hasattr(func, '__call__'):
             logging.error("Func passed is not a function")
             print("Func passed is not a function")
         
 
-    def swap(self, course1, course2, P1, P2):
-        """Swaps two courses between two schedules"""
-        
-        pass
+    def find_respective_time_slot(self, time_slot, week):
+        """Finds the given time slot object in given week and returns it"""
+        day = time_slot.info("Day")
+        room = time_slot.info("Room")
+        return week.find_time_slot(day, room, time_slot)
+
+
+    def swap(self, course1, course2, schedule):
+        """Performs swaps around 2 courses in a schedule
+        IN: 2 Course objects, schedule object
+        OUT: schedule object with swap performed"""
+        #Time slot for course in P1
+        time_slot_in_P1 = P1.find_course(course)
+        #Corresponding time slot in P2:
+        time_slot_respective_P2 = find_respective_time_slot(time_slot_in_P1, P2)
+        #Time slot for course in P2
+        time_slot_in_P2 = P2.find_course(course)
+        #Corresponding time slot in P1:
+        time_slot_respective_P1 = find_respective_time_slot(time_slot_in_P2, P1)
+        #todo: check input types; log errors
 
 
     def crossover(self, P1, P2):
@@ -142,6 +159,8 @@ class Scheduler:
         OUT: 2 children schedules, C1 and C2"""
         #Random number of swaps
         num_swaps = randint(1, self.num_courses)
+        C1 = P1.deep_copy()
+        C2 = P2.deep_copy()
         for swap in range(num_swaps):
             #Random credit hours selected
             credit = self.courses_by_credits[randint(1, self.num_credits)]
@@ -150,7 +169,7 @@ class Scheduler:
                 self.num_courses_by_credits[credit])]
             course_b = self.courses_by_credits[credit][randint(1,
                 self.num_courses_by_credits[credit])]
-            #perform the actual swap
+            swap(course_a, course_b, C1, C2)
 
 
     def breed(self):
