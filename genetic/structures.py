@@ -150,6 +150,7 @@ class Week:
         self.schedule = copy(this_scheduler)
         self.days = [Day(rooms, day_code, self) for day_code in 'mtwrf']
         self.fitness = 0
+        self.valid = True
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given week
