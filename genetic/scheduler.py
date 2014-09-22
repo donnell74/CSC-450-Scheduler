@@ -389,13 +389,14 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 50
+        MAX_TRIES = 20
 
         def week_slice_helper():
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
 
         while True:
+            print('Counter:', counter)
             for each_week in self.weeks:
                 self.calc_fitness(each_week)
 
@@ -404,15 +405,15 @@ class Scheduler:
                 print('Max tries reached; final output found')
                 break
 
-            if len(filter(lambda x: x.fitness <=fitness_baseline, self.weeks)) == 0:
+            if len(filter(lambda x: x.fitness <= fitness_baseline, self.weeks)) == 0:
                 if fitness_baseline >= self.max_fitness:
                     break
 
-                print(fitness_baseline, " : ", counter)
+                print('baseline:', fitness_baseline, "; Counter:", counter)
                 fitness_baseline += 30
                 counter = 0
 
-            self.breed() #makes self.weeks a list of 20 new 
+            self.breed()
             total_iterations += 1 
             counter += 1
 
@@ -470,10 +471,27 @@ class Scheduler:
             for each_5 in courses_by_credits[5]:
                 #Choose a random timeslot from the list of all time slots for week
                 random_slot = choice(list_of_time_slots)
-                #assign and remove from pool of timeslots on mtwrf slots
-                assignees = self.week_helper(random_slot, list_of_time_slots)['in_order']
-                for each_assignee in assignees:
-                    assign_and_remove(each_5, each_assignee, list_of_time_slots, each_week)
+                temp_pool = deepcopy(list_of_time_slots)
+                done = False
+                while len(temp_pool) > 0 and not done:
+                    possibilities = self.week_helper(random_slot, temp_pool)
+                    #each day open for that time and room
+                    if len(possibilities['unoccupied']) == 5:
+                        for each_assignee in possibilities['in_order']:
+                            assign_and_remove(each_5, each_assignee, list_of_time_slots, each_week)
+                        done = True
+                    #case that cannot schedule for this time and room
+                    else:
+                        #remove this timeslot and the other unoccupied in its week from temp pool
+                        for to_remove in possibilities['unoccupied']:
+                            i = find_index(to_remove, temp_pool)
+                            del(temp_pool[i])
+                        #get a new random time slot
+                        random_slot = choice(temp_pool)
+                #2 ways out of while...test for which
+                if len(temp_pool) == 0 and not done:
+                    #impossible to schedule
+                    week_to_fill.valid = False
         except KeyError:
             pass
         #other cases must consider how the week is taken up
