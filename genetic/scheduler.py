@@ -459,7 +459,7 @@ class Scheduler:
             del(slots_list[i])
 
         courses_by_credits = self.separate_by_credit(courses_list)
-        print(courses_by_credits)
+        #print(courses_by_credits)
         #main loop
         each_week = week_to_fill #todo...change var names to input rather than this
         #Make list of all time slots for week

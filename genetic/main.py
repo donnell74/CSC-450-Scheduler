@@ -22,8 +22,8 @@ def main():
 
     s = Scheduler(courses, rooms, time_slots, time_slot_divide)
     s.generate_starting_population()
-    #for week in s.weeks:
-    #    print(week)
+    for week in s.weeks:
+        print(week)
     s.add_constraint("morning_classes", 30, morning_class, s.courses[0]) 
     s.add_constraint("morning_classes", 30, morning_class, s.courses[1]) 
     s.add_constraint("morning_classes", 30, morning_class, s.courses[2]) 
