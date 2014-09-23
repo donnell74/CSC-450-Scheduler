@@ -389,7 +389,7 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 20
+        MAX_TRIES = 2
 
         def week_slice_helper():
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)

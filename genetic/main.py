@@ -33,6 +33,7 @@ def main():
       s.calc_fitness(w)
       print(w, "\n**************************************\n")
       print(w.fitness)
+    end = raw_input("Press enter to exit")
 
 
 if __name__ == "__main__":
