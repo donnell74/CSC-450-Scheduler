@@ -112,5 +112,6 @@ def main():
     print c2 , "\n\n"
     
     print c1.conflict(c2)
-    
-main()  # test
+
+if __name__ == "__main__":
+    main()  # test
