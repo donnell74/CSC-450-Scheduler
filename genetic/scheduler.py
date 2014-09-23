@@ -376,12 +376,14 @@ class Scheduler:
             logging.error("Not enough weeks to breed")
             print("Not enough weeks to breed")
             return
+
         #combinations...(ex) 5 choose 2
-        for each_week in range(len(self.weeks) - 1):
-            for each_other_week in range(each_week + 1, len(self.weeks)):
+        for each_week in range(0, len(self.weeks) - 1, 2):
+            for each_other_week in range(each_week + 1, len(self.weeks), 2):
                 children = self.crossover(self.weeks[each_week], self.weeks[each_other_week])
                 #add to list of weeks
                 self.weeks.extend(children)
+#                print(len(self.weeks))
 
 
     def evolution_loop(self):
