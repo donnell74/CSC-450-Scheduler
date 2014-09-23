@@ -389,7 +389,7 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 2
+        MAX_TRIES = 5 
 
         def week_slice_helper():
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
@@ -399,19 +399,16 @@ class Scheduler:
             print('Counter:', counter)
             for each_week in self.weeks:
                 self.calc_fitness(each_week)
+            print([i.fitness for i in self.weeks])
 
             week_slice_helper()
-            if counter > MAX_TRIES:
+            if counter >= MAX_TRIES:
                 print('Max tries reached; final output found')
                 break
 
-            if len(filter(lambda x: x.fitness <= fitness_baseline, self.weeks)) == 0:
-                if fitness_baseline >= self.max_fitness:
-                    break
-
-                print('baseline:', fitness_baseline, "; Counter:", counter)
-                fitness_baseline += 30
-                counter = 0
+            print(min(i.fitness for i in self.weeks))
+            if min(i.fitness for i in self.weeks) == self.max_fitness:
+                break
 
             self.breed()
             total_iterations += 1 
