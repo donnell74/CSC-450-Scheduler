@@ -398,17 +398,17 @@ class Scheduler:
             self.weeks = self.weeks[:5]
 
         while True:
-            print('Counter:', counter)
+            print('Generation counter:', counter + 1)
             for each_week in self.weeks:
                 self.calc_fitness(each_week)
-            print([i.fitness for i in self.weeks])
+            #print([i.fitness for i in self.weeks])
 
             week_slice_helper()
             if counter >= MAX_TRIES:
                 print('Max tries reached; final output found')
                 break
 
-            print(min(i.fitness for i in self.weeks))
+            print("Minimum fitness of the generation:", min(i.fitness for i in self.weeks))
             if min(i.fitness for i in self.weeks) == self.max_fitness:
                 break
 
@@ -416,7 +416,7 @@ class Scheduler:
             total_iterations += 1 
             counter += 1
 
-        print("Breeding iterations: ", total_iterations)
+        print("Final number of generations: ", total_iterations + 1)
 
 
     def time_slot_available(self, day, first_time_slot):
