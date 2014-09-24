@@ -39,6 +39,7 @@ def main():
     s.evolution_loop()
     for w in s.weeks:
       s.calc_fitness(w)
+      week_print = raw_input("Press enter to print the next schedule")
       print(w, "\n**************************************\n")
       print("Fitness level:", w.fitness)
     end = raw_input("Press enter to exit")
