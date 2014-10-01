@@ -79,7 +79,7 @@ add_course_con.grid(row = 1, column = 1)
 add_instructor_con =Button(main_window, text = "add instructor constraint", width =15, height =5, command = add_instructor_con )
 add_instructor_con.grid(row = 1, column = 27)
 
-
+#canvas.get_tk_widget().delete("all")
 
 main_window.mainloop()   # NEED FOR MAC OSX AND WINDOWS
 
