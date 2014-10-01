@@ -1,3 +1,4 @@
 # test
 *.pyc
 *.log
+schedule_*.csv
