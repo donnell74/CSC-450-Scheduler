@@ -1,5 +1,7 @@
 import sys
 from Tkinter import *
+from guiClasses import *
+
 
 # Define click functions
 def clickHome():
@@ -23,6 +25,7 @@ def clickRun():
     topLabelText.set("Scheduler should be running...")
     return
 
+
 mainWindow = Tk()
 
 windowWidth = 850
@@ -33,6 +36,12 @@ screenYpos = (mainWindow.winfo_screenheight() / 2) - (windowHeight / 2)
 mainWindow.geometry(str(windowWidth) + 'x' + str(windowHeight) +\
                     '+' + str(screenXpos) + '+' + str(screenYpos))
 
+# Next two lines are using guiClasses.py and TopLevel for sub-windows
+main = MainWindow(mainWindow)
+main.pack()
+
+# Following section places everything on one window
+'''
 mainWindow.title('CSC Scheduler')
 
 topLabelText = StringVar()
@@ -54,8 +63,5 @@ miscButton.grid(row = 3, column = 0)
 
 runButton = Button(mainWindow, text = "RUN", width = 15, height = 10, bg = "green", command = clickRun)
 runButton.grid(row = 4, column = 0)
-
+'''
 mainWindow.mainloop()   # NEED FOR MAC OSX AND WINDOWS
-
-
-
