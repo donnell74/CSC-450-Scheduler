@@ -6,7 +6,7 @@ class MainWindow(Frame):
     def __init__(self, *args, **kwargs):
         Frame.__init__(self, *args, **kwargs)
         self.button = Button(self, text = 'Make window', command = self.create_window)
-        self.button.pack()
+        self.button.pack(side=LEFT, padx = 1, pady = 5)
 
     def create_window(self):
         self.counter += 1
