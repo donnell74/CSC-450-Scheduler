@@ -38,7 +38,7 @@ def main():
     s.add_constraint("morning_classes", 30, morning_class, s.courses[2]) 
 
     s.evolution_loop()
-
+    export_schedules(s.weeks)
     end = raw_input("Press enter to exit")
 
 

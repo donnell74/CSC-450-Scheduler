@@ -16,6 +16,7 @@ class TimeSlot:
             return
 
         self.room = copy(this_room)
+        self.day = self.room.day.day_code
         self.start_time = time(start_time[0], start_time[1])
         self.end_time = time(end_time[0], end_time[1])
         self.course = course

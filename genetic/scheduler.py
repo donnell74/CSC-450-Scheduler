@@ -143,27 +143,6 @@ class Scheduler:
         pass
 
 
-    def list_time_slots_for_week(self, week):
-        """Gives list of all time slot objects in week while indexing them"""
-        list_of_slots = []
-        #index counters
-        day = 0
-        room = 0
-        slot = 0
-        
-        for each_day in week.days:
-            for each_room in each_day.rooms:
-                for each_slot in each_room.schedule:
-                    list_of_slots.append(each_slot)
-                    each_slot.set_indices(day, room, slot)
-                    slot += 1
-                room += 1
-                slot = 0
-            day += 1
-            room = 0
-        return list_of_slots
-
-
     def find_time_slots_from_cuts(self, this_week, slots_list):
         """For a given week, returns all time slots matching the slots list"""
         matching_slots = []
@@ -178,7 +157,7 @@ class Scheduler:
             start = time(start[0], start[1])
             times.append(start) #only care about start times right now
         
-        full_list = self.list_time_slots_for_week(this_week)
+        full_list = this_week.list_time_slots()
         for each_slot in full_list:
             if each_slot.start_time in times:
                 matching_slots.append(each_slot)
@@ -210,7 +189,7 @@ class Scheduler:
         days = ['m', 't', 'w', 'r', 'f']
         seen = [0] * len(self.courses)
         inconsistencies = {'surplus': [], 'lacking': []}
-        full_list = self.list_time_slots_for_week(this_week)
+        full_list = this_week.list_time_slots()
 
         for course in self.courses:
             markers = [0] * 5 #day markers
@@ -322,7 +301,7 @@ class Scheduler:
         IN: (crossed) week object, inconsistencies dict with surplus and lacking
              surplus is list of time slots; lacking is list of courses
         OUT: (crossed) week object that represents all courses once"""
-        full_list = self.list_time_slots_for_week(this_week)
+        full_list = this_week.list_time_slots()
         open_list = []
 
         #free excess slots
@@ -600,7 +579,7 @@ class Scheduler:
             self.weeks.append(Week(self.rooms, self))
 
         for each_week in self.weeks:
-            list_slots = self.list_time_slots_for_week(each_week)
+            list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             if not each_week.valid: #if impossible to generate (incomplete week)
                 del self.weeks[self.weeks.index(each_week)]

@@ -1,5 +1,6 @@
 import csv
 from structures import *
+import os
 
 def csv_dict_reader(file_obj):
     """
@@ -10,11 +11,13 @@ def csv_dict_reader(file_obj):
         print(line["Courses"], line["Credit"])
         
         
-def export_schedules(weeks, debug = False):
+def export_schedules(weeks, export_dir = "./", debug = False):
+    counter = 0
     for each_week in weeks:
-        str(each_week)
-        if debug:
-            print(each_week.fitness)
+        counter += 1
+        filename = "schedule_" + str(counter) + ".csv"
+        with open(os.path.join(export_dir, filename), 'w') as out:
+            out.write(each_week.print_concise())
         
 if __name__ == "__main__":
     with open("Scheduler.csv") as f_obj:

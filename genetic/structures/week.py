@@ -75,9 +75,42 @@ class Week:
             if day.day_code == k:
                 return day
 
+    def list_time_slots(self):
+        """Gives list of all time slot objects in week while indexing them"""
+        list_of_slots = []
+        #index counters
+        day = 0
+        room = 0
+        slot = 0
+        
+        for each_day in self.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    list_of_slots.append(each_slot)
+                    each_slot.set_indices(day, room, slot)
+                    slot += 1
+                room += 1
+                slot = 0
+            day += 1
+            room = 0
+        return list_of_slots
+
+
+    def print_concise(self):
+        courses_dyct = {} # structure of {course_code : (day_code, room_number, start_time, end_time)}
+        for each_slot in self.list_time_slots():
+            if each_slot.course != None:
+                if courses_dyct.has_key(each_slot.course.code):
+                    courses_dyct[each_slot.course.code][0] += each_slot.day
+                else:
+                    courses_dyct[each_slot.course.code] = [each_slot.day, each_slot.room.number, \
+                                                           each_slot.start_time, each_slot.end_time]
+        concise_schedule_str = ""
+        for key, value in courses_dyct.items():
+            concise_schedule_str += str(key) + ' ' + value[0] + ' ' + str(value[1]) + ' ' + str(value[2]) + '-' + str(value[3]) + '\n' 
+
+        return concise_schedule_str
 
     def __str__(self):
         """Returns string representation of given week"""
         return "\n".join([str(d) for d in self.days])
-
-
