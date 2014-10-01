@@ -37,8 +37,8 @@ main_window.geometry(str(window_width) + 'x' + str(window_height) +\
                     '+' + str(screen_x_pos) + '+' + str(screen_y_pos))
 
 # Next two lines are using guiClasses.py and TopLevel for sub-windows
-#main = MainWindow(main_window)
-#main.pack()
+##main = MainWindow(main_window)
+##main.pack()
 
 # Following section places everything on one window
 
