@@ -1,6 +1,7 @@
 from __future__ import print_function
 from scheduler import *
 from structures import *
+from interface import *
 
 import unittest
 import logging
@@ -37,11 +38,7 @@ def main():
     s.add_constraint("morning_classes", 30, morning_class, s.courses[2]) 
 
     s.evolution_loop()
-    for w in s.weeks:
-      s.calc_fitness(w)
-      week_print = raw_input("Press enter to print the next schedule")
-      print(w, "\n**************************************\n")
-      print("Fitness level:", w.fitness)
+
     end = raw_input("Press enter to exit")
 
 

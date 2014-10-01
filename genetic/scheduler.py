@@ -15,8 +15,6 @@ def morning_class(course, this_week):
     return 1 if holds else 0
 
 
-known_funcs = {"morning_class", morning_class}
-
 class Constraint:
     def __init__(self, name, weight, func, course = None):
         if type(name) is not str:
