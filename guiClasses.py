@@ -1,5 +1,10 @@
 from Tkinter import *
 
+font_style = "Helvetica"
+size_h1 = 20
+size_h2 = 18
+size_p = 14
+
 class Page(Frame):
     def __init__(self, root):
         Frame.__init__(self, root)
@@ -10,10 +15,10 @@ class Page(Frame):
 class HomePage(Page):
 
     def __init__(self, root):
-        Frame.__init__(self, root, bg="blue")  # color to show where the frame is
-        self.head_label = Label(self, text = "Home Page")
-        #self.head_label.grid(row = 0, column = 0)  # don't use grid and pack together
-        self.head_label.pack()
+        Frame.__init__(self, root, bg="grey")  # color to show where the frame is
+        self.head_label = Label(self, text = "Welcome", bg="grey", font = (font_style, size_h1))
+        self.head_label.pack(pady=10)
+        
 
 
 class ConstraintPage(Page):
@@ -45,11 +50,9 @@ class MainWindow(Frame):
         
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width = "500", height = "600", bg="red")
-        #self.menu.grid(row = 0, column = 0) 
         self.menu.pack(side = LEFT, fill = "both")
 
         self.content_container = Frame(self, width = "800", height = "600")
-        #self.content_container.grid(row = 0, column = 1)
         self.content_container.pack(side = LEFT, fill = "both")
 
         # MENU BUTTONS
