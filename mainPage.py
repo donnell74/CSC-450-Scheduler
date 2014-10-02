@@ -2,38 +2,88 @@ import sys
 from Tkinter import *
 from guiClasses import *
 
+# Functions for placing content
+def load_base_content():
+    content_frame = Frame(main_window)
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+
+    top_label = Label(content_frame, textvariable = top_label_text)
+    top_label.pack(side = TOP)
+    return content_frame
+
+def clear_content():
+    content_frame.destroy()
+    new_frame = Frame(main_window)
+    new_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    #content_frame.pack_forget()
+    #content_frame.grid_forget()
+    return
+
+def place_home_screen():
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    top_label_text.set("Home Screen")
+    top_label.pack()
+    return
+
+def place_constraint_screen():
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    top_label_text.set("Constraint Screen")
+    top_label.pack()
+    add_course_con_btn.pack(side = LEFT, padx = 2, pady = 2)
+    add_instructor_con_btn.pack(side = LEFT, padx = 5, pady = 2)
+    return
+
+def place_view_screen():
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    top_label_text.set("View Screen")
+    top_label.pack()
+    return
+
+def place_misc_screen():
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    top_label_text.set("Misc Screen")
+    top_label.pack()
+    return
+
+def run_scheduler():
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    top_label_text.set("Scheduler should be running...")
+    top_label.pack()
+    return
+
 
 # Define click functions
 def click_home():
-    top_label_text.set("Home Screen")
-    content_frame.delete(ALL)
+    temp_frame = clear_content()
+    content_frame = load_base_content()
+    place_home_screen()
     return
 
 def click_constraint():
-    top_label_text.set("Constraint Screen")
+    clear_content()
+    place_constraint_screen()
     return
 
 def click_view():
-    top_label_text.set("View Screen")
+    clear_content()
+    place_view_screen()
     return
 
 def click_misc():
-    top_label_text.set("Misc Screen")
+    clear_content()
+    place_misc_screen()
     return
 
 def click_run():
     # run the scheduler
-    top_label_text.set("Scheduler should be running...")
+    run_scheduler()
     return
 
 def add_course_con():
-    top_label_text.set("course constraint")
     return
 
 def add_instructor_con():
-    top_label_text.set("Instructor constraint")
     return
-
 
 
 main_window = Tk()
@@ -61,35 +111,34 @@ top_label_text.set("You have just begun!")
 menu_frame = Frame(main_window, bg = 'red')
 menu_frame.grid(row = 0, column = 0, rowspan = 6, columnspan = 2)
 
-# MENU BUTTONS
-home_button = Button(menu_frame, text = "Home", width = 15, height = 5, command = click_home)
-home_button.pack()
+# MENU btnS
+home_btn = Button(menu_frame, text = "Home", width = 15, height = 5, command = click_home)
+home_btn.pack()
 
-constraint_button = Button(menu_frame, text = "Constraint", width = 15, height = 5, command = click_constraint)
-constraint_button.pack()
+constraint_btn = Button(menu_frame, text = "Constraint", width = 15, height = 5, command = click_constraint)
+constraint_btn.pack()
 
-view_button = Button(menu_frame, text = "View", width = 15, height = 5, command = click_view)
-view_button.pack()
+view_btn = Button(menu_frame, text = "View", width = 15, height = 5, command = click_view)
+view_btn.pack()
 
-misc_button = Button(menu_frame, text = "...", width = 15, height = 5, command = click_misc)
-misc_button.pack()
+misc_btn = Button(menu_frame, text = "...", width = 15, height = 5, command = click_misc)
+misc_btn.pack()
 
-run_button = Button(menu_frame, text = "RUN", width = 15, height = 10, bg = "green", command = click_run)
-run_button.pack()
+run_btn = Button(menu_frame, text = "RUN", width = 15, height = 10, bg = "green", command = click_run)
+run_btn.pack()
 
 
 # CONTENT SECTION
-content_frame = Canvas(main_window)
-content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+##content_frame = Frame(main_window)
+##content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+##
+##top_label = Label(content_frame, textvariable = top_label_text)
+##top_label.pack(side = TOP)
+content_frame = load_base_content()
 
-top_label = Label(content_frame, textvariable = top_label_text)
-top_label.pack(side = TOP)
-
-add_course_con = Button(content_frame, text = "add course constraint", width =15, height =5, command = add_course_con)
-add_course_con.pack(side = LEFT, padx = 2, pady = 2)
-
-add_instructor_con = Button(content_frame, text = "add instructor constraint", width =15, height =5, command = add_instructor_con )
-add_instructor_con.pack(side = LEFT, padx = 5, pady = 2)
+# CONSTRAINT SCREEN STUFF
+add_course_con_btn = Button(content_frame, text = "add course constraint", width =15, height =5, command = add_course_con)
+add_instructor_con_btn = Button(content_frame, text = "add instructor constraint", width =15, height =5, command = add_instructor_con )
 
 
 
