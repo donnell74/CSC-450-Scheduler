@@ -3,12 +3,20 @@ from Tkinter import *
 from guiClasses import *
 
 # Functions for placing content
+def load_base_content():
+    content_frame = Frame(main_window)
+    content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+
+    top_label = Label(content_frame, textvariable = top_label_text)
+    top_label.pack(side = TOP)
+    return content_frame
+
 def clear_content():
-    #old_frame.destroy()
-    #new_frame = Frame(main_window)
-    #new_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
-    content_frame.pack_forget()
-    content_frame.grid_forget()
+    content_frame.destroy()
+    new_frame = Frame(main_window)
+    new_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+    #content_frame.pack_forget()
+    #content_frame.grid_forget()
     return
 
 def place_home_screen():
@@ -46,7 +54,8 @@ def run_scheduler():
 
 # Define click functions
 def click_home():
-    clear_content()
+    temp_frame = clear_content()
+    content_frame = load_base_content()
     place_home_screen()
     return
 
@@ -120,12 +129,12 @@ run_btn.pack()
 
 
 # CONTENT SECTION
-content_frame = Frame(main_window)
-content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
-
-top_label = Label(content_frame, textvariable = top_label_text)
-top_label.pack(side = TOP)
-
+##content_frame = Frame(main_window)
+##content_frame.grid(row = 0, column = 2, rowspan = 6, columnspan = 5)
+##
+##top_label = Label(content_frame, textvariable = top_label_text)
+##top_label.pack(side = TOP)
+content_frame = load_base_content()
 
 # CONSTRAINT SCREEN STUFF
 add_course_con_btn = Button(content_frame, text = "add course constraint", width =15, height =5, command = add_course_con)
