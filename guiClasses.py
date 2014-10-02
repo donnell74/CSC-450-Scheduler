@@ -10,9 +10,10 @@ class Page(Frame):
 class HomePage(Page):
 
     def __init__(self, root):
-        Frame.__init__(self, root)
+        Frame.__init__(self, root, bg="blue")  # color to show where the frame is
         self.head_label = Label(self, text = "Home Page")
-        self.head_label.pack(side = "bottom")
+        #self.head_label.grid(row = 0, column = 0)  # don't use grid and pack together
+        self.head_label.pack()
 
 
 class ConstraintPage(Page):
@@ -40,31 +41,33 @@ class MainWindow(Frame):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-
+        self.pack(side = TOP, fill = "both")
+        
         # MENU AND CONTENT SECTIONS
-        self.menu = Frame(self)
-        self.menu.grid(row = 0, column = 0)
-        #self.menu.pack(side = 'left', fill = 'y')
+        self.menu = Frame(self, width = "500", height = "600", bg="red")
+        #self.menu.grid(row = 0, column = 0) 
+        self.menu.pack(side = LEFT, fill = "both")
 
-        self.content_container = Frame(self)
-        self.content_container.grid(row = 1, column = 0)
-        #self.content_container.pack(fill = 'both')
+        self.content_container = Frame(self, width = "800", height = "600")
+        #self.content_container.grid(row = 0, column = 1)
+        self.content_container.pack(side = LEFT, fill = "both")
 
         # MENU BUTTONS
-        self.home_btn = Button(self.menu, text = 'Home', command = self.show_home)
-        self.home_btn.pack(side = "left")
+        self.home_btn = Button(self.menu, text = 'Home', command = self.show_home, \
+                               width = "20", height = "4") # specified in characters?
+        self.home_btn.pack(fill = X, side = "top")
         
         self.constraint_btn = Button(self.menu, text = 'Constraint', command = self.show_constraint)
-        self.constraint_btn.pack(side = "left")
+        self.constraint_btn.pack(fill = X, side = "top")
         
         self.view_btn = Button(self.menu, text = 'View', command = self.show_view)
-        self.view_btn.pack(side = "left")
+        self.view_btn.pack(fill = X, side = "top")
         
         self.misc_btn = Button(self.menu, text = 'Misc', command = self.show_misc)
-        self.misc_btn.pack(side = "left")
+        self.misc_btn.pack(fill = X, side = "top")
         
         self.run_btn = Button(self.menu, text = 'RUN', bg = 'green', command = self.run_scheduler)
-        self.run_btn.pack(side = "left")
+        self.run_btn.pack(fill = X, side = "top")
 
         # PAGES
         self.home_page = HomePage(self.content_container)
