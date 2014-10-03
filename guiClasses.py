@@ -57,7 +57,7 @@ class MainWindow(Frame):
         self.pack(side = TOP, fill = "both")
         
         # MENU AND CONTENT SECTIONS
-        self.menu = Frame(self, width="500", height="600", bg="red")
+        self.menu = Frame(self, width="500", height="600")
         self.menu.pack(side=LEFT, fill="both")
 
         self.content_container = Frame(self, width="800", height="600")
