@@ -1,4 +1,5 @@
 from Tkinter import *
+from toolTips import *
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -55,6 +56,8 @@ class MainWindow(Frame):
     def __init__(self, root):
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
+
+        ToolTips(root)
         
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width="500", height="600")
