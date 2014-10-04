@@ -2,6 +2,7 @@ from Tkinter import *
 from guiClasses import *
 
 root = Tk()
+root.title = "CSC Scheduler"
 main = MainWindow(root)
 
 window_width = 850
