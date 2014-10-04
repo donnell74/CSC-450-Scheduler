@@ -65,23 +65,23 @@ class MainWindow(Frame):
 
         # MENU BUTTONS
         self.home_btn = Button(self.menu, text='Home', command=self.show_home, \
-                               width="10", height="3", font=(font_style, size_h2)) # specified in characters?
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2') # specified in characters?
         self.home_btn.pack(fill=X, side="top", pady=2)
         
         self.constraint_btn = Button(self.menu, text='Constraint', command=self.show_constraint, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.constraint_btn.pack(fill=X, side="top", pady=2)
         
         self.view_btn = Button(self.menu, text='View', command=self.show_view, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.view_btn.pack(fill=X, side="top", pady=2)
         
         self.misc_btn = Button(self.menu, text='Misc', command=self.show_misc, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.misc_btn.pack(fill=X, side="top", pady=2)
         
         self.run_btn = Button(self.menu, text='RUN', bg='green', command=self.run_scheduler, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.run_btn.pack(fill = X, side = "top", pady=2)
 
         # PAGES
