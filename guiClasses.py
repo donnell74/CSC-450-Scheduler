@@ -17,12 +17,14 @@ class HomePage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Welcome", font=(font_style, size_h1))
+        self.head_label = Label(self, text="CSC-450-Scheduler", font=(font_style, size_h1))
         self.head_label.pack(pady=10)
 
-        paragraph_text = "To use this scheduler:\n" +\
-                         "\t\t - Do this thing if you want this to happen.\n" +\
-                         "\t\t - Do that thing if you want that to happen.\n"
+        paragraph_text = "User Guide: step-by-step\n\n" +\
+                         "1.) Click RUN to begin generating CSC schedules.\n\n" +\
+                         "a.) OPTIONAL: Click the Constraint button to \ngenerate custom schedules.\n\n" +\
+                         "2.) After the scheduling is finished click on the View \nbutton" +\
+                         " to view the schedules.\n"
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
