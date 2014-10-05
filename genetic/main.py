@@ -36,9 +36,12 @@ def main():
     #s.add_constraint("morning_classes", 30, morning_class, s.courses[0]) 
     #s.add_constraint("morning_classes", 30, morning_class, s.courses[1]) 
     #s.add_constraint("morning_classes", 30, morning_class, s.courses[2])
+    #s.add_constraint("morning_classes", 30, morning_class, s.courses[3])
     
-    #s.add_constraint("all_before_noon", 30, all_before_time, ["all", time(12,0)])
-    s.add_constraint("232_after_9", 30, course_after_time, [s.courses[1], time(9,0)])
+    #s.add_constraint("all_before_noon", 30, all_before_time, s.courses, time(12,0))
+    s.add_constraint("all_after_nine", 30, all_after_time, s.courses, time(9,0))
+    #s.add_constraint("232_after_10", 30, course_after_time, s.courses[1], time(10,0))
+    #s.add_constraint("325_before_10", 30, course_before_time, s.courses[0], time(10,0))
 
     s.evolution_loop()
     export_schedules(s.weeks)
