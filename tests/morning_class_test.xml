@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<data>
+    <schedule name="test">
+        <courseList>
+          <item code="CSC130" credit="3"></item>
+          <item code="CSC131" credit="3"></item>
+          <item code="CSC232" credit="3"></item>
+        </courseList>
+        <roomList>
+          <item>CHEK209</item>
+          <item>CHEK210</item>
+        </roomList>
+        <timeList>
+          <item>10:00-11:00</item>
+          <item>11:00-12:00</item>
+        </timeList>
+        <timeSlotDivide>1</timeSlotDivide>
+    </schedule>
+    <course 
+        code="CSC130"
+        credit="3"
+        startTime="11:00"
+        endTime="12:00"
+        days="MWF"
+        room="CHEK209">
+    </course>
+    <course 
+        code="CSC131"
+        credit="3"
+        startTime="10:00"
+        endTime="11:00"
+        days="MWF"
+        room="CHEK209">
+    </course>
+    <course
+        code="CSC232"
+        credit="3"
+        startTime="10:00"
+        endTime="11:00"
+        days="TR"
+        room="CHEK210">
+    </course>
+</data>

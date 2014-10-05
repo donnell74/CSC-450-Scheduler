@@ -2,6 +2,13 @@ from __future__ import print_function
 import unittest
 import random
 from genetic import *
+import genetic.structures
+
+genetic.scheduler.create_scheduler_from_file("./tests/morning_class_test.xml")
+#test_scheduler = Scheduler(self, courses, rooms, time_slots, time_slot_divide):
+#test_morning_week = genetic.structures.week.Week()
+#test_morning_week.schedule_from_file("./tests/morning_class_test.xml")
+
 
 class TestSequenceFunctions(unittest.TestCase):
 

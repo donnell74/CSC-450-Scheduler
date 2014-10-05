@@ -3,62 +3,27 @@ from copy import deepcopy
 from copy import copy
 from random import randint
 from random import choice
-from structures import *
 from datetime import time, timedelta
-
+from structures import *
+from constraint import * 
+import xml.etree.ElementTree as ET
 import logging
 
 
-def morning_class(course, this_week):
-    #Find course returns a list of time slots, but they should all be at the same time
-    holds = this_week.find_course(course)[0].start_time < time(12, 0)
-    return 1 if holds else 0
+def create_scheduler_from_file(path_to_xml):
+    """Reads in an xml file and schedules all courses found in it"""
+    tree = ET.parse(path_to_xml)
+    root = tree.getroot()
+    courses = [Course(c.attrib["code"], c.attrib["credit"]) for c in root.find("schedule").find("courseList").getchildren()]
+    rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
+    time_slots = [t.text for t in root.find("schedule").find("timeList").getchildren()]
+    time_slot_divide = root.find("schedule").find("timeSlotDivide").text
+    setCourses = [i.attrib for i in root.findall("course")]
+    return_schedule = Scheduler(courses, rooms, time_slots, time_slot_divide) 
+    return_schedule.weeks[0].fill_week(setCourses)
+    print(return_schedule.weeks[0])
 
-
-known_funcs = {"morning_class", morning_class}
-
-class Constraint:
-    def __init__(self, name, weight, func, course = None):
-        if type(name) is not str:
-            logging.error("Name is not a string")
-            print("Name is not a string")
-            return
         
-        if type(weight) is not int:
-            logging.error("Weight is not a string")
-            print("Weight is not a string")
-            return
-
-        if not hasattr(func, '__call__'):
-            if type(func) is str and not known_funcs.has_key(func):
-                logging.error("Func string passed is not known")
-                print("Func string passed is not known")
-                return
-            else:
-                logging.error("Func passed is not a function")
-                print("Func passed is not a function")
-                return
-
-        if not isinstance(course, Course):
-            logging.error("Course is not of object type course")
-            print("Course is not of object type course")
-            return
-
-        self.name = name
-        self.weight = weight
-        self.course = course
-        if type(func) is str:
-            self.func = func
-        else:
-            self.func = func
-
-    def get_fitness(self, this_week):
-        if self.course == None:
-            return self.func(this_week) * self.weight
-        else:
-            return self.func(self.course, this_week) * self.weight
-
-
 class Scheduler:
     """Schedules all courses for a week"""
     def __init__(self, courses, rooms, time_slots, time_slot_divide):
@@ -145,27 +110,6 @@ class Scheduler:
         pass
 
 
-    def list_time_slots_for_week(self, week):
-        """Gives list of all time slot objects in week while indexing them"""
-        list_of_slots = []
-        #index counters
-        day = 0
-        room = 0
-        slot = 0
-        
-        for each_day in week.days:
-            for each_room in each_day.rooms:
-                for each_slot in each_room.schedule:
-                    list_of_slots.append(each_slot)
-                    each_slot.set_indices(day, room, slot)
-                    slot += 1
-                room += 1
-                slot = 0
-            day += 1
-            room = 0
-        return list_of_slots
-
-
     def find_time_slots_from_cuts(self, this_week, slots_list):
         """For a given week, returns all time slots matching the slots list"""
         matching_slots = []
@@ -180,7 +124,7 @@ class Scheduler:
             start = time(start[0], start[1])
             times.append(start) #only care about start times right now
         
-        full_list = self.list_time_slots_for_week(this_week)
+        full_list = this_week.list_time_slots()
         for each_slot in full_list:
             if each_slot.start_time in times:
                 matching_slots.append(each_slot)
@@ -212,7 +156,7 @@ class Scheduler:
         days = ['m', 't', 'w', 'r', 'f']
         seen = [0] * len(self.courses)
         inconsistencies = {'surplus': [], 'lacking': []}
-        full_list = self.list_time_slots_for_week(this_week)
+        full_list = this_week.list_time_slots()
 
         for course in self.courses:
             markers = [0] * 5 #day markers
@@ -324,7 +268,7 @@ class Scheduler:
         IN: (crossed) week object, inconsistencies dict with surplus and lacking
              surplus is list of time slots; lacking is list of courses
         OUT: (crossed) week object that represents all courses once"""
-        full_list = self.list_time_slots_for_week(this_week)
+        full_list = this_week.list_time_slots()
         open_list = []
 
         #free excess slots
@@ -602,7 +546,7 @@ class Scheduler:
             self.weeks.append(Week(self.rooms, self))
 
         for each_week in self.weeks:
-            list_slots = self.list_time_slots_for_week(each_week)
+            list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             if not each_week.valid: #if impossible to generate (incomplete week)
                 del self.weeks[self.weeks.index(each_week)]
