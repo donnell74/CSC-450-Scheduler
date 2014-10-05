@@ -2,6 +2,7 @@ from __future__ import print_function
 import structures
 from copy import copy
 from copy import deepcopy
+from datetime import time
 
 
 class Week:
@@ -96,7 +97,43 @@ class Week:
         return list_of_slots
 
 
+    def fill_week(self, courses):
+        """Fills the week based on the criteria listed in courses"""
+        #check that courses has the correct structure
+        #[{code:"CSC130", credit:"3", startTime:"11:00", endTime:"12:00", days:"MWF", room:"CHEK209"}, ...]
+
+        try:
+            #not using find_time_slot because this way should be faster 
+            print(courses)
+            print('=' * 30)
+            print(self.days)
+            for each_course in courses:
+                start_hour, start_min = map(int, each_course["startTime"].strip().split(':'))
+                end_hour, end_min = map(int, each_course["endTime"].strip().split(':'))
+                startTime = time(start_hour, start_min)
+                endTime = time(end_hour, end_min)
+                #loop through days and find timeslot associated with starttime, room, day
+                for each_day in self.days:
+                    if each_day.day_code in each_course["days"].lower():
+                        print("day")
+                        for each_slot in each_day.get_room(each_course["room"]):
+                            if each_slot.start_time == startTime and \
+                               each_slot.end_time == endTime:
+                                print("time")
+                                for each_s_course in self.schedule.courses:
+                                    if each_s_course.code == each_course["code"]: 
+                                        print("course")
+                                        each_slot.course = each_s_course 
+
+
+        except KeyError, AttributeError:
+            #error stuff
+            print("Unable to fill week because bad input")
+
+
     def print_concise(self):
+        """Returns a concise list of courses for week in the structure:
+            course_code day_code room_number start_time-end_time"""
         courses_dyct = {} # structure of {course_code : (day_code, room_number, start_time, end_time)}
         for each_slot in self.list_time_slots():
             if each_slot.course != None:

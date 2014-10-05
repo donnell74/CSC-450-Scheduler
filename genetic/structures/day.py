@@ -28,6 +28,15 @@ class Day:
         elif query == "Schedule":
             return self.week.schedule
 
+
+    def get_room(self, query_number):
+        for each_room in self.rooms:
+            if each_room.number == query_number:
+                return each_room
+        
+        return None
+
+
     def __str__(self):
         return "-----------------------\n" + \
                 "Day: " + self.day_code + '\n' + "Rooms:\n" + \
