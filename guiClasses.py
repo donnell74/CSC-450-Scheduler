@@ -1,4 +1,5 @@
 from Tkinter import *
+from toolTips import *
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -16,12 +17,14 @@ class HomePage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Welcome", font=(font_style, size_h1))
+        self.head_label = Label(self, text="CSC-450-Scheduler", font=(font_style, size_h1))
         self.head_label.pack(pady=10)
 
-        paragraph_text = "To use this scheduler:\n" +\
-                         "\t\t - Do this thing if you want this to happen.\n" +\
-                         "\t\t - Do that thing if you want that to happen.\n"
+        paragraph_text = "User Guide: step-by-step\n\n" +\
+                         "1.) Click RUN to begin generating CSC schedules.\n\n" +\
+                         "a.) OPTIONAL: Click the Constraint button to \ngenerate custom schedules.\n\n" +\
+                         "2.) After the scheduling is finished click on the View \nbutton" +\
+                         " to view the schedules.\n"
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
@@ -55,6 +58,8 @@ class MainWindow(Frame):
     def __init__(self, root):
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
+
+        ToolTips(root)
         
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width="500", height="600")
@@ -65,23 +70,23 @@ class MainWindow(Frame):
 
         # MENU BUTTONS
         self.home_btn = Button(self.menu, text='Home', command=self.show_home, \
-                               width="10", height="3", font=(font_style, size_h2)) # specified in characters?
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2') # specified in characters?
         self.home_btn.pack(fill=X, side="top", pady=2)
         
         self.constraint_btn = Button(self.menu, text='Constraint', command=self.show_constraint, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.constraint_btn.pack(fill=X, side="top", pady=2)
         
         self.view_btn = Button(self.menu, text='View', command=self.show_view, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.view_btn.pack(fill=X, side="top", pady=2)
         
         self.misc_btn = Button(self.menu, text='Misc', command=self.show_misc, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.misc_btn.pack(fill=X, side="top", pady=2)
         
         self.run_btn = Button(self.menu, text='RUN', bg='green', command=self.run_scheduler, \
-                               width="10", height="3", font=(font_style, size_h2))
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.run_btn.pack(fill = X, side = "top", pady=2)
 
         # PAGES
