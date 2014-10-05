@@ -9,14 +9,17 @@ from datetime import time, timedelta
 import logging
 
 
-def morning_class(course, this_week):
+def morning_class(this_week, args):
     #Find course returns a list of time slots, but they should all be at the same time
-    holds = this_week.find_course(course)[0].start_time < time(12, 0)
+    holds = False 
+    if isinstance(args[0], Course):
+        holds = this_week.find_course(args[0])[0].start_time < time(12, 0)
+
     return 1 if holds else 0
 
 
 class Constraint:
-    def __init__(self, name, weight, func, course = None):
+    def __init__(self, name, weight, func, args = []):
         if type(name) is not str:
             logging.error("Name is not a string")
             print("Name is not a string")
@@ -37,24 +40,17 @@ class Constraint:
                 print("Func passed is not a function")
                 return
 
-        if not isinstance(course, Course):
-            logging.error("Course is not of object type course")
-            print("Course is not of object type course")
-            return
 
         self.name = name
         self.weight = weight
-        self.course = course
+        self.args = args
         if type(func) is str:
             self.func = func
         else:
             self.func = func
 
     def get_fitness(self, this_week):
-        if self.course == None:
-            return self.func(this_week) * self.weight
-        else:
-            return self.func(self.course, this_week) * self.weight
+            return self.func(this_week, self.args) * self.weight
 
 
 class Scheduler:
@@ -108,8 +104,8 @@ class Scheduler:
         return courses_by_credits
 
 
-    def add_constraint(self, name, weight, func, course = None):
-        self.constraints.append(Constraint(name, weight, func, course)) 
+    def add_constraint(self, name, weight, func, *argv):
+        self.constraints.append(Constraint(name, weight, func, argv)) 
         self.max_fitness += weight
     
 

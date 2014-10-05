@@ -1,0 +1,91 @@
+* [33mc4a1a85[m[33m ([1;36mHEAD[m[33m, [1;31morigin/form[m[33m, [1;32mtemp[m[33m)[m complete flow pattern
+*   [33mfb78ae3[m Merge branch 'gui' of https://github.com/donnell74/CSC-450-Scheduler into form
+[32m|[m[33m\[m  
+[32m|[m * [33mcfdef42[m Remove red bg on menu
+[32m|[m * [33m8475e50[m Button sizing changes, paging is working
+[32m|[m * [33m8c32c5e[m Add font vars in guiClasses
+[32m|[m * [33m814710d[m Fix display issues, color code backgrounds for clarity
+[32m|[m * [33med7ee7f[m New Page classes and main2.py to try a new method
+[32m|[m * [33m9a53f8e[m Attempt to clear frame for new content
+[32m|[m * [33m4627c68[m Remove mainPagenew
+[32m|[m * [33mee766c1[m change from grid to pack for widgets
+[32m|[m * [33me19d2ce[m added paren
+[32m|[m *   [33mf83dc18[m Merge branch 'genetic' of https://www.github.com/donnell74/CSC-450-Scheduler into gui
+[32m|[m [34m|[m[35m\[m  
+[32m|[m [34m|[m * [33m34a245c[m Added export function that exports a concise schedule, also moved find_time_slots_for_week into week class
+[32m|[m [34m|[m * [33m9a0e5c3[m Broke out structures into a module
+[32m|[m [34m|[m * [33m5a85c75[m added raw_inputs between week prints so everything can fit in the terminal window
+[32m|[m [34m|[m * [33md9ad75a[m changed some of the print statements and input
+[32m|[m * [35m|[m [33m88dedc8[m Change to underscore naming convention
+[32m|[m * [35m|[m [33me10526c[m Add separate gui classes file.
+[32m|[m * [35m|[m [33m76bc58d[m Add side buttons, changing header label on click
+[32m|[m * [35m|[m [33mef0c50e[m Basic window made, gui branch now exists
+[32m|[m [35m|[m[35m/[m  
+* [35m|[m [33meb00ce3[m add widgets form constraint
+[35m|[m[35m/[m  
+* [33mf60da01[m[33m ([1;31morigin/master[m[33m, [1;31morigin/develop[m[33m, [1;31morigin/HEAD[m[33m, [1;32mmaster[m[33m, [1;32mdevelop[m[33m)[m Upgraded evolution loop and fixed bug with breed producing 289 instead of 15
+* [33mcb8c3b2[m Merged develop in my genetic
+*   [33m0a284c4[m Merge pull request #1 from donnell74/genetic
+[36m|[m[1;31m\[m  
+[36m|[m * [33m6750e53[m lowered number of iterations; prompt for input at end
+[36m|[m * [33m5b62b6c[m Fixed bug for scheduling 5 hour courses; made minor changes to main and genetic loop
+[36m|[m * [33mebdeef7[m minor changes
+[36m|[m * [33me80c9a5[m added functionality to crossover and breed
+[36m|[m * [33me930a3d[m helper functions for crossover
+[36m|[m * [33me26e51f[m created a randomizer for starting population that creates only 1 section per course
+[36m|[m * [33m849779a[m updated find_time_slot, find_course; added find_respective_time_slot
+[36m|[m * [33m2f6ecdd[m Added evolution loop and bogo breeding
+[36m|[m *   [33m63254cb[m Merge branch 'genetic' of https://github.com/donnell74/CSC-450-Scheduler into genetic
+[36m|[m [1;32m|[m[1;33m\[m  
+[36m|[m [1;32m|[m *   [33mb9c87f2[m Merge branch 'genetic' of https://www.github.com/donnell74/CSC-450-Scheduler into genetic
+[36m|[m [1;32m|[m [1;34m|[m[1;35m\[m  
+[36m|[m [1;32m|[m * [1;35m|[m [33m1f0d4a7[m added csv files and interface.py
+[36m|[m * [1;35m|[m [1;35m|[m [33m7551a17[m Added constraint, main now has three constraints for morning classes
+[36m|[m [1;35m|[m [1;35m|[m[1;35m/[m  
+[36m|[m [1;35m|[m[1;35m/[m[1;35m|[m   
+[36m|[m * [1;35m|[m [33mbac94e3[m Fixed bug in random not accounting for different rooms
+[36m|[m * [1;35m|[m [33meb9a0be[m Added random schedules
+[36m|[m * [1;35m|[m [33m28b0d11[m Merged changes and fixed conflicts
+[36m|[m [1;35m|[m[1;35m/[m  
+[36m|[m * [33mb2f714a[m added find_time_slot method
+[36m|[m * [33maa03eaf[m fixed untracked files
+[36m|[m * [33m913c0d8[m added *.log to .gitignore
+[36m|[m * [33m0b232ea[m Broken code, moving to different computer.  Bug in time_slots is fixed and currently working on random schedules
+[36m|[m * [33mf9ee098[m Fixed bug with printing weeks
+[36m|[m * [33m9a94afe[m[33m ([1;32mstandards[m[33m, [1;32morigin/standards[m[33m)[m added helper function for separating courses by credit hour; added skeleton of crossover method
+[36m|[m * [33m6c73903[m Renamed files
+[36m|[m * [33m7b84bb1[m Added timeslot class
+[36m|[m * [33m78fe418[m Added Week, Day, and Room classes.  Also added type checkign to Scheduler
+[36m|[m * [33ma4b49e6[m Added logging and scheduler class
+[36m|[m * [33m2b50b86[m Set up basic file structure for genetic including unittest
+[36m|[m[36m/[m  
+* [33m90f77f5[m Modified course.py. Made the code easier to understand and fixed a few comments.
+* [33m0defe1f[m A class that defines a course object. This module contains one class, Course.
+* [33m0f9de2b[m Revert "A class that defines course objects. The module, course, contains one class definition."
+* [33me7241c6[m A class that defines course objects. The module, course, contains one class definition.
+* [33m174f6bc[m Revert "Test"
+* [33m66ff976[m Revert "course.py"
+* [33mfb6d7ef[m Revert "test"
+* [33m334362b[m Revert "course.py module that contains a class, Course."
+* [33m6f04c32[m course.py module that contains a class, Course.
+* [33m19e64c0[m test
+* [33m1fdb295[m course.py
+* [33mcc32b68[m Test
+*   [33m79ce4e8[m Merge branch 'master' into develop
+[1;36m|[m[31m\[m  
+[1;36m|[m * [33m5148b2b[m Added test  comment
+* [31m|[m [33m3691652[m removed test
+* [31m|[m   [33md3a96f3[m Merge branch 'master' of https://github.com/donnell74/CSC-450-Scheduler
+[32m|[m[31m\[m [31m\[m  
+[32m|[m [31m|[m[31m/[m  
+[32m|[m *   [33mae8b840[m Merge branch 'master' of https://github.com/donnell74/CSC-450-Scheduler
+[32m|[m [34m|[m[35m\[m  
+[32m|[m * [35m|[m [33m143437d[m Init gitignore
+* [35m|[m [35m|[m [33m47a6f83[m test
+[35m|[m [35m|[m[35m/[m  
+[35m|[m[35m/[m[35m|[m   
+* [35m|[m [33mfb0e175[m removed test.txt
+* [35m|[m [33m5bca79c[m test
+[35m|[m[35m/[m  
+* [33mce5580a[m Update README.md
+* [33me4a15ed[m Initial commit
