@@ -104,9 +104,6 @@ class Week:
 
         try:
             #not using find_time_slot because this way should be faster 
-            print(courses)
-            print('=' * 30)
-            print(self.days)
             for each_course in courses:
                 start_hour, start_min = map(int, each_course["startTime"].strip().split(':'))
                 end_hour, end_min = map(int, each_course["endTime"].strip().split(':'))
@@ -115,14 +112,11 @@ class Week:
                 #loop through days and find timeslot associated with starttime, room, day
                 for each_day in self.days:
                     if each_day.day_code in each_course["days"].lower():
-                        print("day")
                         for each_slot in each_day.get_room(each_course["room"]):
                             if each_slot.start_time == startTime and \
                                each_slot.end_time == endTime:
-                                print("time")
                                 for each_s_course in self.schedule.courses:
                                     if each_s_course.code == each_course["code"]: 
-                                        print("course")
                                         each_slot.course = each_s_course 
 
 
