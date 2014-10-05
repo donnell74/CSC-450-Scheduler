@@ -15,7 +15,7 @@ def init_logging():
 
 def main():
     init_logging()
-    input = open("scheduler.csv")
+    input = open("seeds/scheduler.csv")
     courses_and_details = interface.csv_dict_reader(input)
     instructors = interface.get_instructors(courses_and_details)
     courses_credits_and_instructors = \
