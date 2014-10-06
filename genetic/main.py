@@ -15,7 +15,7 @@ def init_logging():
 
 def main():
     init_logging()
-    input = open("seeds/scheduler.csv")
+    input = open("seeds/Scheduler.csv")
     courses_and_details = interface.csv_dict_reader(input)
     instructors = interface.get_instructors(courses_and_details)
     courses_credits_and_instructors = \
@@ -41,7 +41,7 @@ def main():
     print("\nThe constraints are that no classes can be scheduled in the same place at the",
           "same time, and that all the classes but CSC333 prefer to be scheduled with a",
           "start time before 12") 
-    begin = raw_input("\nPress enter to schedule")
+#begin = raw_input("\nPress enter to schedule")
 
     s = Scheduler(courses, rooms, time_slots, time_slot_divide)
     s.generate_starting_population()
@@ -50,12 +50,12 @@ def main():
     s.add_constraint("morning_classes", 30, morning_class, [s.courses[0]]) 
     s.add_constraint("morning_classes", 30, morning_class, [s.courses[1]]) 
     s.add_constraint("morning_classes", 30, morning_class, [s.courses[2]])
-    s.add_constraint("instructor conflict", 200, instructor_conflict, instructors)
+    s.add_constraint("instructor conflict", 0, instructor_conflict, instructors)
 
     s.evolution_loop()
     export_schedules(s.weeks)
 
-    end = raw_input("Press enter to exit")
+#   end = raw_input("Press enter to exit")
 
 
 if __name__ == "__main__":

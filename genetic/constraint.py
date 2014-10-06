@@ -24,13 +24,15 @@ def instructor_conflict(this_week, instructors):
         count = 0
         for each_instructors_course in each_instructor.courses:
             times.append(this_week.find_course(each_instructors_course)[0].start_time)
-        for each_time in times:
+        while len(times) > 0:
+            each_time = times.pop(0)
             for each_other_time in times:
                 if each_time == each_other_time:
                     count += 1
-        if count > 1:
-            return 0
-    return 1
+        
+        if count > 0:
+            this_week.valid = False
+    return 0 
 
 
 class Constraint:

@@ -310,11 +310,16 @@ class Scheduler:
         #do the replacement
         self.replace_time_slots(cutA, cutB)
         
-        for i in (C1, C2):
+        for i in [C1, C2]:
             #figure out what have extra of/don't have
             inconsistencies = self.assess_inconsistencies(i)
             #clear the excess; try to schedule lacking
             self.resolve_inconsistencies(i, inconsistencies)
+            inconsistencies = self.assess_inconsistencies(i)
+            #THIS IS A BANDAID
+            if len(inconsistencies["surplus"]) > 0:
+                i.valid = False
+
             output.append(i)
         return output
 
@@ -366,9 +371,13 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 5 
+        MAX_TRIES = 50 
 
         def week_slice_helper():
+            no_invalid_weeks = filter(lambda x: x.valid, self.weeks)
+            if len(no_invalid_weeks) > 0:
+                self.weeks = no_invalid_weeks
+
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
 
@@ -379,7 +388,7 @@ class Scheduler:
             #print([i.fitness for i in self.weeks])
 
             week_slice_helper()
-            if counter >= MAX_TRIES:
+            if counter == MAX_TRIES - 1:
                 print('Max tries reached; final output found')
                 break
 
@@ -586,50 +595,3 @@ class Scheduler:
             logging.error("Could not schedule")
             print("Could not schedule")
             return
-
-    '''def randomly_fill_schedules(self):
-        #get all available time slots grouped by day
-        for each_week in self.weeks:
-            time_slots_by_day = dict([(day, list()) for day in "mtwrf"])
-            for day in each_week.days:
-                for room in day.rooms:
-                    time_slots_by_day[day.day_code].extend([t for t in room])
-            
-            for courses_in_curr_credit in self.courses_by_credits.values()[::-1]:
-                index = 0
-                times_on_index = 0 
-                while True:
-                    if index == len(courses_in_curr_credit):
-                        break
-
-                    times_on_index += 1
-                    each_course = courses_in_curr_credit[index]
-                    day_schedule = ""
-                    #if each_course.credit == 3
-                    day_schedule = "tr" if random.randint(0,1) else "mwf"
-                    if each_course.credit == 4:
-                        day_schedule = "mtwf" if random.randint(0,1) else "mwrf"
-                    elif each_course.credit == 5:
-                        day_schedule = "mtwrf"
-
-                    should_index = True
-                    rand_time_slot = time_slots_by_day[day_schedule[0]][random.randint(0, len(time_slots_by_day[day_schedule[0]])-1)]
-                    to_schedule_lyst = [rand_time_slot]
-                    for day_code in day_schedule[1:]:
-                        time_slot_to_schedule, time_found = self.time_slot_available(each_week[day_code], rand_time_slot)
-                        to_schedule_lyst.append(time_slot_to_schedule) 
-                        should_index = should_index and time_found 
-
-                    if should_index or times_on_index > 10:
-                        if times_on_index > 10:
-                            #uncomment for output of bad courses
-                            #print("Unable to schedule ", str(each_course))
-                            pass
-                        else:
-                            for t_slot in to_schedule_lyst:
-                                t_slot.course = each_course
-                        index += 1
-                        times_on_index = 1'''
-
-                    
-
