@@ -8,22 +8,26 @@ from structures import *
 from constraint import * 
 import xml.etree.ElementTree as ET
 import logging
+import os.path
 
 
 def create_scheduler_from_file(path_to_xml):
     """Reads in an xml file and schedules all courses found in it"""
-    tree = ET.parse(path_to_xml)
-    root = tree.getroot()
-    courses = [Course(c.attrib["code"], c.attrib["credit"]) for c in root.find("schedule").find("courseList").getchildren()]
-    rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
-    time_slots = [t.text for t in root.find("schedule").find("timeList").getchildren()]
-    time_slot_divide = root.find("schedule").find("timeSlotDivide").text
-    setCourses = [i.attrib for i in root.findall("course")]
-    return_schedule = Scheduler(courses, rooms, time_slots, time_slot_divide) 
-    return_schedule.weeks[0].fill_week(setCourses)
-    print(return_schedule.weeks[0])
+    try:
+        tree = ET.parse(path_to_xml)
+        root = tree.getroot()
+        courses = [Course(c.attrib["code"], c.attrib["credit"]) for c in root.find("schedule").find("courseList").getchildren()]
+        rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
+        time_slots = [t.text for t in root.find("schedule").find("timeList").getchildren()]
+        time_slot_divide = root.find("schedule").find("timeSlotDivide").text
+        setCourses = [i.attrib for i in root.findall("course")]
+        return_schedule = Scheduler(courses, rooms, time_slots, time_slot_divide) 
+        return_schedule.weeks[0].fill_week(setCourses)
+        return return_schedule
+    except:
+        return None
 
-        
+            
 class Scheduler:
     """Schedules all courses for a week"""
     def __init__(self, courses, rooms, time_slots, time_slot_divide):
@@ -76,9 +80,15 @@ class Scheduler:
 
 
     def add_constraint(self, name, weight, func, course = None):
+        """Adds an constraint to the schedule"""
         self.constraints.append(Constraint(name, weight, func, course)) 
         self.max_fitness += weight
-    
+
+
+    def clear_constraints(self):
+        """Removes all constraints from list"""
+        self.constraints = []
+        self.max_fitness = 0
 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
