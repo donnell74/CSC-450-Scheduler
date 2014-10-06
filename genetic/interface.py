@@ -51,6 +51,7 @@ def get_courses(courses_credits_and_instructors):
     """
     courses = []
     for course, details in courses_credits_and_instructors.iteritems():
-        courses.append(Course(course, details[0], details[1]))
-        details[1].add_course(course)
+        c = Course(course, details[0], details[1])
+        courses.append(c)
+        details[1].add_course(c)
     return courses

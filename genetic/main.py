@@ -47,9 +47,10 @@ def main():
     s.generate_starting_population()
     #for week in s.weeks:
     #    print(week)
-    s.add_constraint("morning_classes", 30, morning_class, s.courses[0]) 
-    s.add_constraint("morning_classes", 30, morning_class, s.courses[1]) 
-    s.add_constraint("morning_classes", 30, morning_class, s.courses[2]) 
+    s.add_constraint("morning_classes", 30, morning_class, [s.courses[0]]) 
+    s.add_constraint("morning_classes", 30, morning_class, [s.courses[1]]) 
+    s.add_constraint("morning_classes", 30, morning_class, [s.courses[2]])
+    s.add_constraint("instructor conflict", 200, instructor_conflict, instructors)
 
     s.evolution_loop()
     export_schedules(s.weeks)
