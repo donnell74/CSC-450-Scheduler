@@ -1,4 +1,5 @@
 from Tkinter import *
+from guiConstraints import *
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -29,12 +30,15 @@ class HomePage(Page):
         self.version_label.pack(side=BOTTOM, pady=5)
 
 
-class ConstraintPage(Page):
+# class ConstraintPage(Page):
+# 
+#     def __init__(self, root):
+#         Frame.__init__(self, root)
+#         self.head_label = Label(self, text="Constraint Page")
+#         self.head_label.pack()
 
-    def __init__(self, root):
-        Frame.__init__(self, root)
-        self.head_label = Label(self, text="Constraint Page")
-        self.head_label.pack()
+
+
 
 class ViewPage(Page):
 
