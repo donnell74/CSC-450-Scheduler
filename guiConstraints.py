@@ -35,8 +35,8 @@ class CourseConstraint(Page):
         message_course.pack({"side": "top"})
 
         self.str_course_default = StringVar(self)
-        self.str_course_default.set("CSC-450") 
-        self.option_course = OptionMenu(self, self.str_course_default, "CSC-450","CSC-220", "CSC-679", "CSC-496")
+        self.str_course_default.set("CSC450") 
+        self.option_course = OptionMenu(self, self.str_course_default, "CSC450","CSC333", "CSC232", "CSC325")
         self.option_course.pack({"side": "top"})
         
         message_when = Label(self, text="When:")
@@ -51,8 +51,8 @@ class CourseConstraint(Page):
         message_time.pack({"side": "top"})
         
         self.str_time_default = StringVar(self)
-        self.str_time_default.set("10:00")
-        self.option_time = OptionMenu(self, self.str_time_default, "10:00", "11:00", "12:00", "13:00")
+        self.str_time_default.set("09:00")
+        self.option_time = OptionMenu(self, self.str_time_default, "09:00", "10:00", "11:00", "12:00")
         self.option_time.pack({"side": "top"})
         
         message_priority = Label(self, text="Priority:")
@@ -60,7 +60,7 @@ class CourseConstraint(Page):
         
         self.str_priority_default = StringVar(self)
         self.str_priority_default.set("Low") # initial value
-        self.option_priority = OptionMenu(self, self.str_priority_default, "Low", "Medium", "High")
+        self.option_priority = OptionMenu(self, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack({"side": "top"})
         
         self.button_go = Button(self, text="go", command=self.go)
