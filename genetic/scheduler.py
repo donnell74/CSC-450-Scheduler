@@ -354,8 +354,23 @@ class Scheduler:
         for each_week in range(0, len(self.weeks) - 1, 2):
             for each_other_week in range(each_week + 1, len(self.weeks), 2):
                 children = self.crossover(self.weeks[each_week], self.weeks[each_other_week])
-                #add to list of weeks
-                self.weeks.extend(children)
+                #Check for invalid children and delete them
+                for each_child in children:
+                    for each_course in self.courses:
+                        #If scheduled for wrong number of slots
+                        if len(each_child.find_course(each_course)) != each_course.credit:
+                            each_child.valid = False
+                    if not each_child.valid:
+                        print("***WEEK DELETED***")
+                        del children[children.index(each_child)]
+                if len(children) > 0:
+                    #add to list of weeks
+                    self.weeks.extend(children)
+                else:
+                    print("No valid children found!")
+                    logging.error("No valid children found")
+                    return
+                    
 #                print(len(self.weeks))
 
 
@@ -578,6 +593,7 @@ class Scheduler:
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             if not each_week.valid: #if impossible to generate (incomplete week)
+                print("***WEEK DELETED***")
                 del self.weeks[self.weeks.index(each_week)]
         if len(self.weeks) == 0:
             logging.error("Could not schedule")

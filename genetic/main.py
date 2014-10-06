@@ -45,6 +45,11 @@ def main():
 
     s.evolution_loop()
     export_schedules(s.weeks)
+
+    #for week in s.weeks:
+    #    progress = raw_input("Press enter to continue")
+    #    print(week)
+
     end = raw_input("Press enter to exit")
 
 
