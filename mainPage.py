@@ -2,7 +2,7 @@ from Tkinter import *
 from guiClasses import *
 
 root = Tk()
-root.title = "CSC Scheduler"
+root.title('CSC Scheduler')
 main = MainWindow(root)
 
 window_width = 850
@@ -14,6 +14,4 @@ root.geometry(str(window_width) + 'x' + str(window_height) +\
                     '+' + str(screen_x_pos) + '+' + str(screen_y_pos))
 
 main.pack()
-main.title = "CSC Scheduler"
-root.title = "CSC Scheduler"
 root.mainloop()

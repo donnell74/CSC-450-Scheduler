@@ -87,10 +87,10 @@ class ViewPage(Page):
 
         self.output_text = StringVar()  # make variable, set text later
         
-        self.output_label = Label(self, textvariable=output_text)
+        self.output_label = Label(self, textvariable=self.output_text)
         self.output_label.pack()
 
-        self.output_text.set(readOutputCSV('schedule_1.csv'))        
+        self.output_text.set(readOutputCSV('schedule_1.csv'))      
         
 
 class MiscPage(Page):
@@ -165,5 +165,8 @@ class MainWindow(Frame):
         self.misc_page.lift()
 
     def run_scheduler(self):
+        # RUN SCHEDULER METHOD
+        # DISPLAY VIEW PAGE
+        self.view_page.lift()
         return
 
