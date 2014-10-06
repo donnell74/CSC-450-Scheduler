@@ -23,6 +23,8 @@ def main():
     courses = interface.get_courses(courses_credits_and_instructors)
     for instructor in instructors:
         instructor.print_full()
+        print()
+    print()
     
     print("Scheduling the following courses:")
     for course in courses:
@@ -51,6 +53,7 @@ def main():
 
     s.evolution_loop()
     export_schedules(s.weeks)
+
     end = raw_input("Press enter to exit")
 
 

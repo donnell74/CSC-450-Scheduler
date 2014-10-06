@@ -141,10 +141,12 @@ class Week:
                     courses_dyct[each_slot.course.code][0] += each_slot.day
                 else:
                     courses_dyct[each_slot.course.code] = [each_slot.day, each_slot.room.number, \
-                                                           each_slot.start_time, each_slot.end_time]
+                                                           each_slot.start_time, each_slot.end_time, \
+                                                           each_slot.instructor]
         concise_schedule_str = ""
         for key, value in courses_dyct.items():
-            concise_schedule_str += str(key) + ' ' + value[0] + ' ' + str(value[1]) + ' ' + str(value[2]) + '-' + str(value[3]) + '\n' 
+            concise_schedule_str += str(key) + ' ' + value[0] + ' ' + str(value[1]) + ' ' + \
+                str(value[2]) + '-' + str(value[3]) + ' ' + str(value[4]) + '\n' 
 
         return concise_schedule_str
 

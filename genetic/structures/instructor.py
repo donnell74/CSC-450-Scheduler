@@ -6,7 +6,6 @@ class Instructor:
     def __init__(self, name):
         self.name = name
         self.courses = []
-        self.timeslots = []
 
     def add_course(self, course):
         self.courses.append(course)

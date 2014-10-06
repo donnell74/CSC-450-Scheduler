@@ -21,6 +21,7 @@ class TimeSlot:
         self.end_time = time(end_time[0], end_time[1])
         self.course = course
         self.duration = self.find_duration(start_time, end_time)
+        self.instructor = None
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given time slot
@@ -54,10 +55,12 @@ class TimeSlot:
     def set_course(self, course):
         """Assigns a course to a time slot."""
         self.course = course
+        if course is not None:
+            self.instructor = course.instructor
 
     def __str__(self):
-        return "Course:%s\nStart time:%s\nEnd time:%s\nDuration:%s" % \
-               (self.course, str(self.start_time), str(self.end_time),
+        return "Course:%s\nInstructor:%s\nStart time:%s\nEnd time:%s\nDuration:%s" % \
+               (self.course, str(self.instructor), str(self.start_time), str(self.end_time),
                 self.duration) +"\n"
 
     def __eq__(self, other):
