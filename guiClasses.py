@@ -1,5 +1,6 @@
 from Tkinter import *
 from toolTips import *
+from readFile import *
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -83,6 +84,14 @@ class ViewPage(Page):
         Frame.__init__(self, root)
         self.head_label = Label(self, text="View Page")
         self.head_label.pack()
+
+        self.output_text = StringVar()  # make variable, set text later
+        
+        self.output_label = Label(self, textvariable=output_text)
+        self.output_label.pack()
+
+        self.output_text.set(readOutputCSV('schedule_1.csv'))        
+        
 
 class MiscPage(Page):
 
