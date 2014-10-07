@@ -1,5 +1,6 @@
 from Tkinter import *
 from guiClasses import *
+from datetime import time
 
 class Page(Frame):
     def __init__(self, root):
@@ -36,7 +37,7 @@ class CourseConstraint(Page):
 
         self.str_course_default = StringVar(self)
         self.str_course_default.set("CSC450") 
-        self.option_course = OptionMenu(self, self.str_course_default, "CSC450","CSC333", "CSC232", "CSC325")
+        self.option_course = OptionMenu(self, self.str_course_default, "CSC450","CSC333", "CSC232", "CSC325", "all")
         self.option_course.pack({"side": "top"})
         
         message_when = Label(self, text="When:")
@@ -63,7 +64,7 @@ class CourseConstraint(Page):
         self.option_priority = OptionMenu(self, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack({"side": "top"})
         
-        self.button_go = Button(self, text="go", command=self.go)
+        self.button_go = Button(self, text="Add Constraint", command=self.go)
         self.button_go.pack({"side": "right"})
         
     def go(self):
@@ -108,11 +109,40 @@ class ConstraintPage(Page):
     def create_widgets(self):
         
         self.button_course = Button(self, text="add course constraint", command=self.add_course_constraint)
-        self.button_course.pack({"side": "top"})
+        self.button_course.pack(side = TOP)
 
         self.button_instructor = Button(self, text="add instructor constraint", command=self.add_instructor_constraint)
-        self.button_instructor.pack({"side": "top"})
+        self.button_instructor.pack(side = TOP)
         
-def createConstraint(course, time, when, priority):
-    pass
-    #Hana, you can do your stuff here
+def createConstraint(course, start_time, when, priority):
+    # convert the priority string to a weight value for fitness score
+    if priority == "Low":
+        priority = 10
+    elif priority == "Medium":
+        priority = 25
+    elif priority == "High":
+        priority = 50
+    else:  # priority should be mandatory
+        priority = 100
+    constraint_name = "{0}_{1}_{2}".format(course, when, start_time)
+    hour, minute = start_time.split(":")
+    time_obj = time( int(hour), int(minute) )
+
+    # MOSTLY PSEUDOCODE, TO BE IMPLEMENTED WHEN GUI AND SCHEDULER ARE LINKED
+    # if course != "all":  
+        #handle finding the course object in s.courses, assign it to course
+        # for c in s.courses:
+        #    if c.code == course:
+        #        course = c
+        # if when == "Before"   
+            # s.add_constraint(Constraint(constraint_name, priority, course_before_constraint, this_week, course, time ) )
+        # else:  # one course AFTER a time
+            # add course_after_constraint(this_week, course, time)
+    # else: # applies to all courses
+        # if when == "before"
+            # add all_before_constraint(this_week, time)
+        # else: # all courses AFTER
+            # add all_after_constraint(this_week, time)
+    print constraint_name, "priority/weight = " + str(priority)
+    return 
+    
