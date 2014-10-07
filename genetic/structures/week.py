@@ -126,6 +126,7 @@ class Week:
         """Returns a concise list of courses for week in the structure:
             course_code day_code room_number start_time-end_time"""
         courses_dyct = {} # structure of {course_code : (day_code, room_number, start_time, end_time)}
+        instructors = [] 
         for each_slot in self.list_time_slots():
             if each_slot.course != None:
                 if courses_dyct.has_key(each_slot.course.code):
@@ -134,11 +135,19 @@ class Week:
                     courses_dyct[each_slot.course.code] = [each_slot.day, each_slot.room.number, \
                                                            each_slot.start_time, each_slot.end_time, \
                                                            each_slot.instructor]
-        concise_schedule_str = ""
-        for key, value in courses_dyct.items():
-            concise_schedule_str += str(key) + ' ' + value[0] + ' ' + str(value[1]) + ' ' + \
-                str(value[2]) + '-' + str(value[3]) + ' ' + str(value[4]) + '\n' 
+                    if each_slot.instructor not in instructors:
+                        instructors.append(each_slot.instructor)
 
+        concise_schedule_str = ""
+        for instructor in instructors:
+            concise_schedule_str += instructor.name + "\n"
+            for key in instructor.courses:
+                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + str(courses_dyct[key.code][1]) + ' ' + \
+                    str(courses_dyct[key.code][2]) + '-' + str(courses_dyct[key.code][3]) + '\n' 
+
+        print ("="*25)
+        print(concise_schedule_str)
+        print ("="*25)
         return concise_schedule_str
 
     def __str__(self):

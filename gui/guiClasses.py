@@ -53,17 +53,11 @@ class ViewPage(Page):
         self.output_label.pack()
 
         text = ''
-        num_of_schedules_to_read = 5
-        error_messages = '\n\n\n'
-        for i in xrange(1, num_of_schedules_to_read + 1):
-            file_name = 'genetic/schedule_' + str(i) + '.csv'
-            try:
-                text += readOutputCSV(file_name)
-                text += '\n   =========================================    \n'
-            except:
-                error_messages += 'Error trying to read: ' + file_name + '\n'
+        for each_week in globs.mainScheduler.weeks:
+            text += each_week.print_concise()
+            text += '\n   =========================================    \n'
             
-        self.output_text.set(text + error_messages)
+        self.output_text.set(text)
         
 
 class MiscPage(Page):
@@ -76,6 +70,7 @@ class MiscPage(Page):
 class MainWindow(Frame):
 
     def __init__(self, root):
+        globs.init()
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
 
@@ -138,7 +133,6 @@ class MainWindow(Frame):
         self.misc_page.lift()
 
     def run_scheduler(self):
-        globs.init()
         # RUN SCHEDULER METHOD
         globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[0]]) 
         globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[1]]) 
