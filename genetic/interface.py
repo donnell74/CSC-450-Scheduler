@@ -41,9 +41,19 @@ def export_schedules(weeks, export_dir = "./", debug = False):
     counter = 0
     for each_week in weeks:
         counter += 1
-        filename = "schedule_" + str(counter) + ".csv"
-        with open(os.path.join(export_dir, filename), 'w') as out:
+        filename = os.path.join(export_dir, "schedule_" + str(counter) + ".csv")
+        if os.path.isfile(filename):
+            os.remove(filename)
+        with open(filename, 'w') as out:
             out.write(each_week.print_concise())
+
+    counter += 1
+    while counter <= 5:
+        filename = os.path.join(export_dir, "schedule_" + str(counter) + ".csv")
+        if os.path.isfile(filename):
+            os.remove(filename)
+        counter += 1
+
 
 def get_courses(courses_credits_and_instructors):
     """
