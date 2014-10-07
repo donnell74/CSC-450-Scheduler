@@ -55,7 +55,7 @@ class ViewPage(Page):
             file_name = 'genetic/schedule_' + str(i) + '.csv'
             try:
                 text += readOutputCSV(file_name)
-                text += '\n   ========================================='
+                text += '\n   =========================================    \n'
             except:
                 error_messages += 'Error trying to read: ' + file_name + '\n'
             
