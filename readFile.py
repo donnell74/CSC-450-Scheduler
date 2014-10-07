@@ -7,5 +7,9 @@ def readOutputCSV(fname):
 
     result = ""
 
+    output_file = file(fname, 'r')
+
+    for line in output_file:
+        result += line
 
     return result

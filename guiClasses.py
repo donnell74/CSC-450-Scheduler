@@ -90,7 +90,18 @@ class ViewPage(Page):
         self.output_label = Label(self, textvariable=self.output_text)
         self.output_label.pack()
 
-        self.output_text.set(readOutputCSV('schedule_1.csv'))      
+        text = ''
+        num_of_schedules_to_read = 5
+        error_messages = '\n\n\n'
+        for i in xrange(1, num_of_schedules_to_read + 1):
+            file_name = 'genetic/schedule_' + str(i) + '.csv'
+            try:
+                text += readOutputCSV(file_name)
+                text += '\n   ========================================='
+            except:
+                error_messages += 'Error trying to read: ' + file_name + '\n'
+            
+        self.output_text.set(text + error_messages)
         
 
 class MiscPage(Page):
