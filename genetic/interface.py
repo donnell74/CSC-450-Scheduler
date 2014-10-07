@@ -39,6 +39,8 @@ def include_instructors_in_dict(courses_and_details, instructors):
         
 def export_schedules(weeks, export_dir = "./", debug = False):
     counter = 0
+    num_to_export = len(weeks)
+    print("\nExporting " + str(num_to_export) + " schedules")
     for each_week in weeks:
         counter += 1
         filename = os.path.join(export_dir, "schedule_" + str(counter) + ".csv")

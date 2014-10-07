@@ -355,7 +355,7 @@ class Scheduler:
                                        len(each_child.find_course(each_course)) != 2):
                                         each_child.valid = False
                     if not each_child.valid:
-                        print("***WEEK DELETED***")
+                        pass
                         #del children[children.index(each_child)]
                 if len(children) > 0:
                     #add to list of weeks
@@ -376,17 +376,12 @@ class Scheduler:
         MAX_TRIES = 10
 
         def week_slice_helper():
-            self.weeks.sort(key=lambda x: x.fitness, reverse=True)
-            self.weeks = self.weeks[:5]
-
-        def cleanup():
             no_invalid_weeks = filter(lambda x: x.valid, self.weeks)
             if len(no_invalid_weeks) > 0:
                 self.weeks = no_invalid_weeks
 
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
-            print([i.valid for i in self.weeks])
 
         while True:
             print('Generation counter:', counter + 1)
@@ -396,14 +391,11 @@ class Scheduler:
 
             week_slice_helper()
             if counter == MAX_TRIES - 1:
-                cleanup()
                 print('Max tries reached; final output found')
                 break
 
             print("Minimum fitness of the generation:", min(i.fitness for i in self.weeks))
-            if min(i.fitness for i in self.weeks) == self.max_fitness and \
-               False not in [i.valid for i in self.weeks]:
-                cleanup()
+            if min(i.fitness for i in self.weeks) == self.max_fitness:
                 break
 
 
@@ -600,7 +592,6 @@ class Scheduler:
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             if not each_week.valid: #if impossible to generate (incomplete week)
-                print("***WEEK DELETED***")
                 del self.weeks[self.weeks.index(each_week)]
         if len(self.weeks) == 0:
             logging.error("Could not schedule")
