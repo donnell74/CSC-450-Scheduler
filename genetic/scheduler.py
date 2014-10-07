@@ -3,55 +3,29 @@ from copy import deepcopy
 from copy import copy
 from random import randint
 from random import choice
-from structures import *
 from datetime import time, timedelta
-
+from structures import *
+from constraint import * 
+import xml.etree.ElementTree as ET
 import logging
+import os.path
 
 
-def morning_class(this_week, args):
-    #Find course returns a list of time slots, but they should all be at the same time
-    holds = False 
-    if isinstance(args[0], Course):
-        holds = this_week.find_course(args[0])[0].start_time < time(12, 0)
-
-    return 1 if holds else 0
-
-
-class Constraint:
-    def __init__(self, name, weight, func, args = []):
-        if type(name) is not str:
-            logging.error("Name is not a string")
-            print("Name is not a string")
-            return
-        
-        if type(weight) is not int:
-            logging.error("Weight is not a string")
-            print("Weight is not a string")
-            return
-
-        if not hasattr(func, '__call__'):
-            if type(func) is str and not known_funcs.has_key(func):
-                logging.error("Func string passed is not known")
-                print("Func string passed is not known")
-                return
-            else:
-                logging.error("Func passed is not a function")
-                print("Func passed is not a function")
-                return
-
-
-        self.name = name
-        self.weight = weight
-        self.args = args
-        if type(func) is str:
-            self.func = func
-        else:
-            self.func = func
-
-    def get_fitness(self, this_week):
-            return self.func(this_week, self.args) * self.weight
-
+def create_scheduler_from_file(path_to_xml):
+    """Reads in an xml file and schedules all courses found in it"""
+    try:
+        tree = ET.parse(path_to_xml)
+        root = tree.getroot()
+        courses = [Course(c.attrib["code"], c.attrib["credit"]) for c in root.find("schedule").find("courseList").getchildren()]
+        rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
+        time_slots = [t.text for t in root.find("schedule").find("timeList").getchildren()]
+        time_slot_divide = root.find("schedule").find("timeSlotDivide").text
+        setCourses = [i.attrib for i in root.findall("course")]
+        return_schedule = Scheduler(courses, rooms, time_slots, time_slot_divide) 
+        return_schedule.weeks[0].fill_week(setCourses)
+        return return_schedule
+    except:
+        return None
 
 class Scheduler:
     """Schedules all courses for a week"""
@@ -104,10 +78,16 @@ class Scheduler:
         return courses_by_credits
 
 
-    def add_constraint(self, name, weight, func, *argv):
-        self.constraints.append(Constraint(name, weight, func, argv)) 
+    def add_constraint(self, name, weight, func, *args):
+        """Adds an constraint to the schedule"""
+        self.constraints.append(Constraint(name, weight, func, *args)) 
         self.max_fitness += weight
-    
+
+
+    def clear_constraints(self):
+        """Removes all constraints from list"""
+        self.constraints = []
+        self.max_fitness = 0
 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
@@ -329,11 +309,16 @@ class Scheduler:
         #do the replacement
         self.replace_time_slots(cutA, cutB)
         
-        for i in (C1, C2):
+        for i in [C1, C2]:
             #figure out what have extra of/don't have
             inconsistencies = self.assess_inconsistencies(i)
             #clear the excess; try to schedule lacking
             self.resolve_inconsistencies(i, inconsistencies)
+            inconsistencies = self.assess_inconsistencies(i)
+            #THIS IS A BANDAID
+            if len(inconsistencies["surplus"]) > 0:
+                i.valid = False
+
             output.append(i)
         return output
 
@@ -358,11 +343,19 @@ class Scheduler:
                 for each_child in children:
                     for each_course in self.courses:
                         #If scheduled for wrong number of slots
-                        if len(each_child.find_course(each_course)) != each_course.credit:
+                        if (each_course.credit == 4) and (len(each_child.find_course(each_course)) != 4):
                             each_child.valid = False
+                        elif (each_course.credit == 3):
+                            for each_slot in each_child.find_course(each_course):
+                                for each_other_slot in each_child.find_course(each_course):
+                                    if each_slot.day in 'mwf' and (each_other_slot.day in 'tr' or \
+                                       len(each_child.find_course(each_course)) != 3) or \
+                                       each_slot.day in 'tr' and (each_other_slot.day in 'mwf' or \
+                                       len(each_child.find_course(each_course)) != 2):
+                                        each_child.valid = False
                     if not each_child.valid:
-                        print("***WEEK DELETED***")
-                        del children[children.index(each_child)]
+                        pass
+                        #del children[children.index(each_child)]
                 if len(children) > 0:
                     #add to list of weeks
                     self.weeks.extend(children)
@@ -370,7 +363,6 @@ class Scheduler:
                     print("No valid children found!")
                     logging.error("No valid children found")
                     return
-                    
 #                print(len(self.weeks))
 
 
@@ -379,9 +371,13 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 5 
+        MAX_TRIES = 10
 
         def week_slice_helper():
+            no_invalid_weeks = filter(lambda x: x.valid, self.weeks)
+            if len(no_invalid_weeks) > 0:
+                self.weeks = no_invalid_weeks
+
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
 
@@ -392,13 +388,14 @@ class Scheduler:
             #print([i.fitness for i in self.weeks])
 
             week_slice_helper()
-            if counter >= MAX_TRIES:
+            if counter == MAX_TRIES - 1:
                 print('Max tries reached; final output found')
                 break
 
             print("Minimum fitness of the generation:", min(i.fitness for i in self.weeks))
             if min(i.fitness for i in self.weeks) == self.max_fitness:
                 break
+
 
             self.breed()
             total_iterations += 1 
@@ -599,50 +596,3 @@ class Scheduler:
             logging.error("Could not schedule")
             print("Could not schedule")
             return
-
-    '''def randomly_fill_schedules(self):
-        #get all available time slots grouped by day
-        for each_week in self.weeks:
-            time_slots_by_day = dict([(day, list()) for day in "mtwrf"])
-            for day in each_week.days:
-                for room in day.rooms:
-                    time_slots_by_day[day.day_code].extend([t for t in room])
-            
-            for courses_in_curr_credit in self.courses_by_credits.values()[::-1]:
-                index = 0
-                times_on_index = 0 
-                while True:
-                    if index == len(courses_in_curr_credit):
-                        break
-
-                    times_on_index += 1
-                    each_course = courses_in_curr_credit[index]
-                    day_schedule = ""
-                    #if each_course.credit == 3
-                    day_schedule = "tr" if random.randint(0,1) else "mwf"
-                    if each_course.credit == 4:
-                        day_schedule = "mtwf" if random.randint(0,1) else "mwrf"
-                    elif each_course.credit == 5:
-                        day_schedule = "mtwrf"
-
-                    should_index = True
-                    rand_time_slot = time_slots_by_day[day_schedule[0]][random.randint(0, len(time_slots_by_day[day_schedule[0]])-1)]
-                    to_schedule_lyst = [rand_time_slot]
-                    for day_code in day_schedule[1:]:
-                        time_slot_to_schedule, time_found = self.time_slot_available(each_week[day_code], rand_time_slot)
-                        to_schedule_lyst.append(time_slot_to_schedule) 
-                        should_index = should_index and time_found 
-
-                    if should_index or times_on_index > 10:
-                        if times_on_index > 10:
-                            #uncomment for output of bad courses
-                            #print("Unable to schedule ", str(each_course))
-                            pass
-                        else:
-                            for t_slot in to_schedule_lyst:
-                                t_slot.course = each_course
-                        index += 1
-                        times_on_index = 1'''
-
-                    
-
