@@ -376,12 +376,17 @@ class Scheduler:
         MAX_TRIES = 10
 
         def week_slice_helper():
+            self.weeks.sort(key=lambda x: x.fitness, reverse=True)
+            self.weeks = self.weeks[:5]
+
+        def cleanup():
             no_invalid_weeks = filter(lambda x: x.valid, self.weeks)
             if len(no_invalid_weeks) > 0:
                 self.weeks = no_invalid_weeks
 
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
+            print([i.valid for i in self.weeks])
 
         while True:
             print('Generation counter:', counter + 1)
@@ -391,12 +396,16 @@ class Scheduler:
 
             week_slice_helper()
             if counter == MAX_TRIES - 1:
+                cleanup()
                 print('Max tries reached; final output found')
                 break
 
             print("Minimum fitness of the generation:", min(i.fitness for i in self.weeks))
-            if min(i.fitness for i in self.weeks) == self.max_fitness:
+            if min(i.fitness for i in self.weeks) == self.max_fitness and \
+               False not in [i.valid for i in self.weeks]:
+                cleanup()
                 break
+
 
             self.breed()
             total_iterations += 1 
