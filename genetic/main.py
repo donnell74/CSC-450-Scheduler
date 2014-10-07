@@ -3,17 +3,10 @@ from scheduler import *
 from structures import *
 
 import unittest
-import logging
 import interface #
 
 
-def init_logging():
-    logging.basicConfig(filename='genetic.log', level=logging.DEBUG)
-    logging.debug("Logging is initialized")
-
-
 def main():
-    init_logging()
     input = open("seeds/Scheduler.csv")
     courses_and_details = interface.csv_dict_reader(input)
     instructors = interface.get_instructors(courses_and_details)

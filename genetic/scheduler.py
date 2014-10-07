@@ -7,7 +7,6 @@ from datetime import time, timedelta
 from structures import *
 from constraint import * 
 import xml.etree.ElementTree as ET
-import logging
 import os.path
 
 
@@ -31,19 +30,15 @@ class Scheduler:
     """Schedules all courses for a week"""
     def __init__(self, courses, rooms, time_slots, time_slot_divide):
         #eventually will include mwf and tr slots instead of general slots
-        logging.debug("Scheduler init")
         if type(courses) is list:
             if not isinstance(courses[0], Course):
-                logging.error("Courses is not a list of Course objects")
                 print("Courses is not a list of Course objects")
                 return
         else:
-            logging.error("Courses is not a list")
             print("Courses is not a list")
             return
 
         if type(rooms) is not list:
-            logging.error("Rooms is not a list")
             print("Rooms is not a list")
             return
 
@@ -101,7 +96,6 @@ class Scheduler:
     def mutate(self, func):
         """Mutates a schedule given an appropriate function"""
         if not hasattr(func, '__call__'):
-            logging.error("Func passed is not a function")
             print("Func passed is not a function")
         
 
@@ -331,7 +325,6 @@ class Scheduler:
         #    list_slots = self.list_time_slots_for_week(each_week)
         #    self.randomly_fill_schedule(each_week, self.courses, list_slots)
         if len(self.weeks) < 2:
-            logging.error("Not enough weeks to breed")
             print("Not enough weeks to breed")
             return
 
@@ -361,7 +354,6 @@ class Scheduler:
                     self.weeks.extend(children)
                 else:
                     print("No valid children found!")
-                    logging.error("No valid children found")
                     return
 #                print(len(self.weeks))
 
@@ -429,7 +421,6 @@ class Scheduler:
                    each_slot.room.day.day_code == time_slot.room.day.day_code:
                    return counter
                 counter += 1
-            logging.error("Index not found")
             print("Index not found")
             return
 
@@ -593,6 +584,5 @@ class Scheduler:
                 print("***WEEK DELETED***")
                 del self.weeks[self.weeks.index(each_week)]
         if len(self.weeks) == 0:
-            logging.error("Could not schedule")
             print("Could not schedule")
             return

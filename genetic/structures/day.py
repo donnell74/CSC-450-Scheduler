@@ -9,7 +9,6 @@ class Day:
         if day_code.lower() in 'mtwrf':
             self.day_code = day_code
         else:
-            logging.error("Day code was not recognized")
             print("Day code was not recognized")
             return
         self.rooms = [structures.Room(number, self) for number in rooms]
@@ -20,7 +19,6 @@ class Day:
         IN: query string
         OUT: object of query's type for given day"""
         if query not in ["Week", "Schedule"]:
-            logging.error("Invalid query for Day")
             print("Invalid query for Day")
             return
         elif query == "Week":

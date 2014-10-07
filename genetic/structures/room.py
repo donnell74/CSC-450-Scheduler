@@ -23,7 +23,6 @@ class Room:
         IN: query string
         OUT: object of query's type for given room"""
         if query not in ["Day", "Week", "Schedule"]:
-            logging.error("Invalid query for Room")
             print("Invalid query for Room")
             return
         elif query == "Day":

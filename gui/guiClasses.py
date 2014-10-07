@@ -2,6 +2,10 @@ from Tkinter import *
 from guiConstraints import *
 from toolTips import *
 from readFile import *
+import sys
+sys.path.append("../")
+import globs
+from genetic import constraint
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -134,7 +138,14 @@ class MainWindow(Frame):
         self.misc_page.lift()
 
     def run_scheduler(self):
+        globs.init()
         # RUN SCHEDULER METHOD
+        print(globs.mainScheduler.courses[0])
+        globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[0]]) 
+        globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[1]]) 
+        globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[2]])
+        globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, globs.instructors)
+        globs.mainScheduler.evolution_loop()
         # DISPLAY VIEW PAGE
         self.view_page.lift()
         return

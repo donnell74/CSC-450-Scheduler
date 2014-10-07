@@ -11,7 +11,6 @@ class TimeSlot:
             start_time = list(map(int, start_time))
             end_time = list(map(int, end_time))
         except ValueError:
-            logging.error("Time slot unavailable with times given")
             print("Time slot unavailable with times given")
             return
 
@@ -29,7 +28,6 @@ class TimeSlot:
         IN: query string
         OUT: object of query's type for given time slot"""
         if query not in ["Room", "Day", "Week", "Schedule"]:
-            logging.error("Invalid query for TimeSlot")
             print("Invalid query for TimeSlot")
             return
         elif query == "Room":

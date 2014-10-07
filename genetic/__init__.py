@@ -1,1 +1,1 @@
-__all__ = ["scheduler", "main", "constraint"]
+__all__ = ["scheduler", "main", "constraint", "interface"]

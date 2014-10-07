@@ -46,6 +46,8 @@ def course_after_time(this_week, args):
     #hold = False
     hold = this_week.find_course(args[0])[0].start_time > args[1]
     return 1 if hold else 0
+
+
 def morning_class(this_week, args):
     #Find course returns a list of time slots, but they should all be at the same time
     holds = False

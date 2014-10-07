@@ -20,7 +20,6 @@ class Week:
         IN: query string
         OUT: object of query's type for given week"""
         if query not in ["Schedule"]:
-            logging.error("Invalid query for Week")
             print("Invalid query for Week")
             return
         elif query == "Schedule":
@@ -43,7 +42,6 @@ class Week:
                             if each_time_slot.start_time == time_slot.start_time:
                                 return each_time_slot
         #todo: specificity on error; fail fast/gracefully
-        logging.error("Time slot not found")
         print("Time slot not found")
         return
 
@@ -64,7 +62,6 @@ class Week:
             return time_slots
         else:
             #todo: add specificity to logged error
-            logging.error("Course not found")
             print("Course not found")
             return
 
