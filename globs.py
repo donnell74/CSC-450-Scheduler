@@ -16,10 +16,16 @@ def init(): # call globals.init() from main
     rooms = ["CHEK212", "CHEK105", "CHEK213"]
     time_slots = ['09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00']
     time_slot_divide = 2
-    mainScheduler = scheduler.Scheduler(courses, rooms, time_slots, time_slot_divide)
+    #DO NOT DO THIS AGAIN
+    #GREG IS SORRY
+    try:
+        mainScheduler
+    except:
+        mainScheduler = scheduler.Scheduler(courses, rooms, time_slots, time_slot_divide)
+        mainScheduler.generate_starting_population()
 
-    # used for gui strings
-    start_times = [':'.join(str(slot.start_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()]
-    end_times = [':'.join(str(slot.end_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()]
-
+        # used for gui strings
+        start_times = [':'.join(str(slot.start_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()]
+        end_times = [':'.join(str(slot.end_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()]
+ 
 

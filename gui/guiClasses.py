@@ -140,7 +140,6 @@ class MainWindow(Frame):
     def run_scheduler(self):
         globs.init()
         # RUN SCHEDULER METHOD
-        globs.mainScheduler.generate_starting_population()
         globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[0]]) 
         globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[1]]) 
         globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[2]])
