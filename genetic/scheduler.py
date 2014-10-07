@@ -349,12 +349,14 @@ class Scheduler:
                         elif (each_course.credit == 3):
                             for each_slot in each_child.find_course(each_course):
                                 for each_other_slot in each_child.find_course(each_course):
-                                    if each_slot.day in 'mwf' and each_other_slot.day in 'tr' or \
-                                       each_slot.day in 'tr' and each_other_slot.day in 'mwf':
+                                    if each_slot.day in 'mwf' and (each_other_slot.day in 'tr' or \
+                                       len(each_child.find_course(each_course)) != 3) or \
+                                       each_slot.day in 'tr' and (each_other_slot.day in 'mwf' or \
+                                       len(each_child.find_course(each_course)) != 2):
                                         each_child.valid = False
                     if not each_child.valid:
                         print("***WEEK DELETED***")
-                        del children[children.index(each_child)]
+                        #del children[children.index(each_child)]
                 if len(children) > 0:
                     #add to list of weeks
                     self.weeks.extend(children)
@@ -371,7 +373,7 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 50 
+        MAX_TRIES = 10
 
         def week_slice_helper():
             no_invalid_weeks = filter(lambda x: x.valid, self.weeks)
