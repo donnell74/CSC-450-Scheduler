@@ -63,8 +63,8 @@ class CourseConstraint(Page):
         
         self.str_time_default = StringVar(self)
         
-        self.str_time_default.set("09:00")
-        self.option_time = OptionMenu(self, self.str_time_default, "09:00", "10:00", "11:00", "12:00")
+        self.str_time_default.set(globs.start_times[0])
+        self.option_time = OptionMenu(self, self.str_time_default, *globs.start_times)
         self.option_time.pack(side = TOP)
         
         message_priority = Label(self, text="Priority:")

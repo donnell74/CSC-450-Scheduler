@@ -23,9 +23,9 @@ def init(): # call globals.init() from main
     except:
         mainScheduler = scheduler.Scheduler(courses, rooms, time_slots, time_slot_divide)
         mainScheduler.generate_starting_population()
-
-        # used for gui strings
-        start_times = [':'.join(str(slot.start_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()]
-        end_times = [':'.join(str(slot.end_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()]
- 
-
+    
+    # used for gui strings
+    # must be in military time
+    # todo: make function to do the below
+    start_times = sorted(list(set([':'.join(str(slot.start_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()])))
+    end_times = sorted(list(set([':'.join(str(slot.end_time).split(":")[0:-1]) for slot in mainScheduler.weeks[0].list_time_slots()])))
