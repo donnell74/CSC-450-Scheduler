@@ -145,26 +145,25 @@ def createConstraint(course, start_time, when, priority):
         for c in globs.mainScheduler.courses:
             if c.code == course:
                 course = c
-                print(type(course))
                 break        
         if when == "Before":
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.course_before_time,
-                                                 [course, time]) 
+                                                 [course, time_obj]) 
         else:  # one course AFTER a time
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                         constraint.course_after_time,
-                                         [course, time]) 
+                                         [course, time_obj]) 
     else: # applies to all courses
         course = globs.mainScheduler.courses
         if when == "Before":
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_before_time,
-                                                 [course, time]) 
+                                                 [course, time_obj]) 
         else: # all courses AFTER
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_before_time,
-                                                 [course, time]) 
-    print constraint_name, "priority/weight = " + str(priority)
+                                                 [course, time_obj]) 
+    print "Added constraint ", constraint_name, "with priority/weight = ", str(priority)
     return 
     
