@@ -89,7 +89,8 @@ class ConstraintPage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Constraint Page")
+        self.head_label = Label(self, text="Constraint Page", \
+                                font =('Helvetica', 18))
         self.head_label.pack()
         self.create_widgets()
         self.pack(side = TOP, fill = "both")
@@ -120,10 +121,10 @@ class ConstraintPage(Page):
         
     def create_widgets(self):
         
-        self.button_course = Button(self, text="add course constraint", command=self.add_course_constraint)
+        self.button_course = Button(self, text="Add Course Constraint", command=self.add_course_constraint)
         self.button_course.pack(side = TOP)
 
-        self.button_instructor = Button(self, text="add instructor constraint", command=self.add_instructor_constraint)
+        self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
         self.button_instructor.pack(side = TOP)
         
 def createConstraint(course, start_time, when, priority):

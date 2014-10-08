@@ -6,6 +6,7 @@ import sys
 sys.path.append("../")
 import globs
 from genetic import constraint, interface
+from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -44,9 +45,17 @@ class ViewPage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="View Page")
+        self.head_label = Label(self, text="View Schedules", \
+                                font =(font_style, size_h2))
         self.head_label.pack()
 
+
+        # scrollbox
+        self.txt = ScrolledText(self, undo = True)
+        self.txt['font'] = ('Courier New', '11')
+        self.txt.pack(fill = BOTH, padx = 20, pady = 20)
+
+        
         self.output_text = StringVar()  # make variable, set text later
         
         self.output_label = Label(self, textvariable=self.output_text)
@@ -57,14 +66,16 @@ class ViewPage(Page):
             text += each_week.print_concise()
             text += '\n   =========================================    \n'
             
-        self.output_text.set(text)
+        #self.output_text.set(text + error_messages)
+        self.txt.insert(INSERT, text)
         
 
 class MiscPage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Misc Page")
+        self.head_label = Label(self, text="Misc Page", \
+                                font =(font_style, size_h2))
         self.head_label.pack()
 
 class MainWindow(Frame):
