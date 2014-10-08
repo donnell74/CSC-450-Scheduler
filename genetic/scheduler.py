@@ -93,10 +93,20 @@ class Scheduler:
         this_week.fitness = total_fitness
 
 
-    def mutate(self, func):
-        """Mutates a schedule given an appropriate function"""
-        if not hasattr(func, '__call__'):
-            print("Func passed is not a function")
+    def mutate(self, this_week):
+        """Mutates a schedule by changing a course's time"""
+        empty_slots = this_week.find_empty_time_slots()
+        if len(empty_slots) == 0:
+            #no mutation performed
+            return this_week
+        roll = randint(1, len(self.courses) - 1)
+        random_course = self.courses[roll]
+        old_slots = this_week.find_course(random_course)
+        for each_old_slot in old_slots:
+            #No longer assigned
+            each_old_slot.remove_course()
+        #Reassign
+        self.randomly_fill_schedule(this_week, [random_course], empty_slots)
         
 
     def find_respective_time_slot(self, time_slot, week):
@@ -350,6 +360,11 @@ class Scheduler:
                         pass
                         #del children[children.index(each_child)]
                 if len(children) > 0:
+                    #Chance of mutation for each child
+                    for each_child in children:
+                        roll = randint(1,3)
+                        if roll == 2:
+                            self.mutate(each_child)
                     #add to list of weeks
                     self.weeks.extend(children)
                 else:
@@ -363,7 +378,7 @@ class Scheduler:
         fitness_baseline = 30
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 10
+        MAX_TRIES = 20
 
         def week_slice_helper():
             no_invalid_weeks = filter(lambda x: x.valid, self.weeks)

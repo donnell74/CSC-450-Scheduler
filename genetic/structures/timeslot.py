@@ -56,6 +56,11 @@ class TimeSlot:
         if course is not None:
             self.instructor = course.instructor
 
+    def remove_course(self):
+        """Removes course and instructor associations from time slot"""
+        self.course = None
+        self.instructor = None
+
     def __str__(self):
         return "Course:%s\nInstructor:%s\nStart time:%s\nEnd time:%s\nDuration:%s" % \
                (self.course, str(self.instructor), str(self.start_time), str(self.end_time),

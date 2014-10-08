@@ -94,6 +94,17 @@ class Week:
         return list_of_slots
 
 
+    def find_empty_time_slots(self):
+        """Returns a list of empty (no course) time slot objects"""
+        empty_slots = []
+        for each_day in self.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    if each_slot.course is None:
+                        empty_slots.append(each_slot)
+        return empty_slots
+
+
     def fill_week(self, courses):
         """Fills the week based on the criteria listed in courses"""
         #check that courses has the correct structure
