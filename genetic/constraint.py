@@ -36,7 +36,6 @@ def all_after_time(this_week, args):
 def course_before_time(this_week, args):
     # find the course and check that its time is before the constraining slot
     # args should be [<course>, <timeslot>]
-    print("args = ", args)  # check that the list is the right objects
     hold = this_week.find_course(args[0])[0].start_time < args[1]
     return 1 if hold else 0
 
