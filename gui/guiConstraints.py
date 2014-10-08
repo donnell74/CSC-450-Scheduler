@@ -162,7 +162,7 @@ def createConstraint(course, start_time, when, priority):
                                                  [course, time_obj]) 
         else: # all courses AFTER
              globs.mainScheduler.add_constraint(constraint_name, priority,
-                                                constraint.all_before_time,
+                                                constraint.all_after_time,
                                                  [course, time_obj]) 
     print "Added constraint ", constraint_name, "with priority/weight = ", str(priority)
     return 
