@@ -68,6 +68,7 @@ class TimeSlot:
 
     def __eq__(self, other):
         return self.start_time == other.start_time and \
-               self.end_time == other.end_time
+               self.room == other.room and \
+               self.day == other.day
 
 
