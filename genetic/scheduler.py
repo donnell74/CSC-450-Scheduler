@@ -158,68 +158,22 @@ class Scheduler:
         """Returns a dictionary of surplus and lacking courses for a schedule/week
         IN: week object
         OUT: dictionary with keys surplus and lacking; former value is list of
-             surplus time slots to be overridden; latter is list of courses not
+             courses with surplus; latter is list of courses not
              scheduled for the week"""
-        #for future reference, ideally not mark subsequent matches as excess,
-        #but rather assess on all possibilities
-        counter = 0
-        days = ['m', 't', 'w', 'r', 'f']
-        seen = [0] * len(self.courses)
         inconsistencies = {'surplus': [], 'lacking': []}
         full_list = this_week.list_time_slots()
 
         for course in self.courses:
-            markers = [0] * 5 #day markers
-            for each_slot in full_list:
-                if each_slot.course is not None:
-                    if each_slot.course.code == course.code:
-                        #update day marker
-                        for i in range(len(days)):
-                            if each_slot.room.day.day_code == days[i]:
-                                markers[i] += 1
-                        #credit-based logic
-                        if course.credit == 1:
-                            #if seen before, add to surplus
-                            if seen[counter] > 0:
-                                inconsistencies['surplus'].append(each_slot)
-                            #any time seen, increment counter
-                            seen[counter] += 1
-                        elif course.credit == 3:
-                            #seen
-                            if seen[counter] > 0:
-                                inconsistencies['surplus'].append(each_slot)
-                            #not seen
-                            else:
-                                #complete mwf/tr found
-                                if (markers[0] and markers[2] and markers[4]) or \
-                                   (markers[1] and markers[3]):
-                                    #increment seen
-                                    seen[counter] = 1
-                        elif course.credit == 4:
-                            #seen
-                            if seen[counter] > 0:
-                                inconsistencies['surplus'].append(each_slot)
-                            #not seen
-                            else:
-                                #complete mtwf/mwrf found
-                                if (markers[0] and markers[1] and markers[2] and markers[4]) or \
-                                   (markers[0] and markers[2] and markers[3] and markers[4]):
-                                    #increment seen
-                                    seen[counter] = 1
-                        elif course.credit == 5:
-                            #seen
-                            if seen[counter] > 0:
-                                inconsistencies['surplus'].append(each_slot)
-                            #not seen
-                            else:
-                                #complete mtwrf found
-                                if markers[0] and markers[1] and markers[2] and markers[3] and markers[4]:
-                                    #increment seen
-                                    seen[counter] = 1
-            #assess lacking
-            if seen[counter] == 0:
-                inconsistencies['lacking'].append(self.courses[counter])
-            counter += 1
+            try:
+                slots = this_week.find_course(course)
+            except:
+                inconsistencies['lacking'].append(course)
+                continue
+            num_slots = len(slots)
+            if num_slots == 0:
+                inconsistencies['lacking'].append(course)
+            elif num_slots > course.credit:
+                inconsistencies['surplus'].append(course)
             
         return inconsistencies
 
@@ -276,18 +230,24 @@ class Scheduler:
     def resolve_inconsistencies(self, this_week, inconsistencies):
         """Removes excess courses and adds lacking courses to week.
         IN: (crossed) week object, inconsistencies dict with surplus and lacking
-             surplus is list of time slots; lacking is list of courses
+             both are list of courses
         OUT: (crossed) week object that represents all courses once"""
         full_list = this_week.list_time_slots()
         open_list = []
 
-        #free excess slots
-        for each_slot in inconsistencies['surplus']:
-            each_slot.course = None
+        for each_course in inconsistencies['surplus']:
+                slots = this_week.find_course(each_course)
+                for each_slot in slots:
+                    each_slot.course = None
+                    #MAKE THIS A REMOVE_COURSE STATEMENT
+
+        inconsistencies['lacking'].extend(inconsistencies['surplus'])
+
         #find all excess slots
         for i in full_list:
             if i.course is None:
                 open_list.append(i)
+
         #fill in missing courses
         self.randomly_fill_schedule(this_week, inconsistencies['lacking'], open_list)           
 
