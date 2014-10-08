@@ -5,7 +5,7 @@ from readFile import *
 import sys
 sys.path.append("../")
 import globs
-from genetic import constraint
+from genetic import constraint, interface
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -139,6 +139,7 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[2]])
         globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, globs.instructors)
         globs.mainScheduler.evolution_loop()
+        interface.export_schedules(globs.mainScheduler.weeks)
         # DISPLAY VIEW PAGE
         self.view_page.lift()
         return
