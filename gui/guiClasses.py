@@ -61,14 +61,13 @@ class ViewPage(Page):
         self.output_label = Label(self, textvariable=self.output_text)
         self.output_label.pack()
 
+    def update(self):
         text = ''
         for each_week in globs.mainScheduler.weeks:
             text += each_week.print_concise()
             text += '\n   =========================================    \n'
-            
         #self.output_text.set(text + error_messages)
         self.txt.insert(INSERT, text)
-        
 
 class MiscPage(Page):
 
@@ -151,6 +150,7 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, globs.instructors)
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
+        self.view_page.update()
         # DISPLAY VIEW PAGE
         self.view_page.lift()
         return

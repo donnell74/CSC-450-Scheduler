@@ -167,11 +167,7 @@ class Scheduler:
         full_list = this_week.list_time_slots()
 
         for course in self.courses:
-            try:
-                slots = this_week.find_course(course)
-            except:
-                inconsistencies['lacking'].append(course)
-                continue
+            slots = this_week.find_course(course)
             num_slots = len(slots)
             if num_slots == 0:
                 inconsistencies['lacking'].append(course)
@@ -241,8 +237,7 @@ class Scheduler:
         for each_course in inconsistencies['surplus']:
                 slots = this_week.find_course(each_course)
                 for each_slot in slots:
-                    each_slot.course = None
-                    #MAKE THIS A REMOVE_COURSE STATEMENT
+                    each_slot.remove_course()
 
         inconsistencies['lacking'].extend(inconsistencies['surplus'])
 
@@ -335,10 +330,10 @@ class Scheduler:
 
     def evolution_loop(self):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
-        fitness_baseline = 30
+        fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 20
+        MAX_TRIES = 10
 
         def week_slice_helper():
             no_invalid_weeks = filter(lambda x: x.valid, self.weeks)

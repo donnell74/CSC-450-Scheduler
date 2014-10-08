@@ -58,12 +58,7 @@ class Week:
                         #If they are the same course
                         if each_slot.course.code == course.code:
                             time_slots.append(each_slot)
-        if len(time_slots) > 0:
-            return time_slots
-        else:
-            #todo: add specificity to logged error
-            print("Course not found")
-            return
+        return time_slots
 
     def __getitem__(self, k):
         if k not in "mtwrf":
