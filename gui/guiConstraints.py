@@ -141,7 +141,7 @@ def createConstraint(course, start_time, when, priority):
     hour, minute = start_time.split(":")
     time_obj = time( int(hour), int(minute) )
 
-    if course != "All" or "all":
+    if course not in ["all", "All"]:
         #handle finding the course object in s.courses, assign it to course
         for c in globs.mainScheduler.courses:
             if c.code == course:

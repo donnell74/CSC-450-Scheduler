@@ -6,7 +6,7 @@ def all_before_time(this_week, args):
      none are before a specific time
      args should be [list of courses, timeslot]   
      Timeslot should be a time object:  time(12, 0) """
-    #args = args[0]  # args is read in as a tuple like: ([args],)
+    
     hold = False
     
     for c in args[0]: # access list of courses
