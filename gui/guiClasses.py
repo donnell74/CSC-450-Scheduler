@@ -48,26 +48,69 @@ class ViewPage(Page):
         self.head_label = Label(self, text="View Schedules", \
                                 font =(font_style, size_h2))
         self.head_label.pack()
+        
+        # schedule buttons show results only if this is True
+        self.is_run_clicked = False
+        
+        # schedule buttons
+        self.schedules = ['Schedule 1', 'Schedule 2', 'Schedule 3', 'Schedule 4', 'Schedule 5']
+        
+        s0 = Button(self, command = lambda n = 0: self.get_schedule(0), \
+                    text = self.schedules[0], \
+                    padx = 10, pady = 10, \
+                    cursor = 'hand2')
+        s0.place(x = 50, y = 47)
+        
+        s1 = Button(self, command = lambda n = 1: self.get_schedule(1), \
+                    text = self.schedules[1], \
+                    padx = 10, pady = 10, \
+                    cursor = 'hand2')
+        s1.place(x = 138, y = 47)
+        
+        s2 = Button(self, command = lambda n = 2: self.get_schedule(2), \
+                    text = self.schedules[2], \
+                    padx = 10, pady = 10, \
+                    cursor = 'hand2')
+        s2.place(x = 226, y = 47)
 
+        s3 = Button(self, command = lambda n = 3: self.get_schedule(3), \
+                    text = self.schedules[3], \
+                    padx = 10, pady = 10, \
+                    cursor = 'hand2')
+        s3.place(x = 314, y = 47)
 
+        s4 = Button(self, command = lambda n = 4: self.get_schedule(4), \
+                    text = self.schedules[4], \
+                    padx = 10, pady = 10, \
+                    cursor = 'hand2')
+        s4.place(x = 402, y = 47)
+        
         # scrollbox
-        self.txt = ScrolledText(self, undo = True)
+        self.txt = ScrolledText(self, undo = True, width = 65)
         self.txt['font'] = ('Courier New', '11')
         self.txt.pack(fill = BOTH, padx = 20, pady = 20)
-
+        self.txt.place(x = 50, y = 107)
         
         self.output_text = StringVar()  # make variable, set text later
         
         self.output_label = Label(self, textvariable=self.output_text)
         self.output_label.pack()
 
-    def update(self):
-        text = ''
-        for each_week in globs.mainScheduler.weeks:
-            text += each_week.print_concise()
-            text += '\n   =========================================    \n'
-        #self.output_text.set(text + error_messages)
-        self.txt.insert(INSERT, text)
+    def get_schedule(self, n):
+        """ Insert schedule n into the text area / scrollbox """
+        # print schedules only if the user has clicked RUN
+        if self.is_run_clicked:
+            weeks = 0
+            for week in globs.mainScheduler.weeks:
+                weeks += 1
+
+            # clear current schedule from text area
+            self.txt.delete(1.0, END)
+
+            if n < weeks:
+                self.txt.insert(INSERT, globs.mainScheduler.weeks[n].print_concise())
+            else:
+                self.txt.insert(INSERT, "Schedule " + str(n + 1) + " does not exist.")
 
 class MiscPage(Page):
 
@@ -150,7 +193,8 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, globs.instructors)
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
-        self.view_page.update()
+        self.view_page.is_run_clicked = True
+        self.view_page.get_schedule(0)  # show the first schedule in the view page
         # DISPLAY VIEW PAGE
         self.view_page.lift()
         return
