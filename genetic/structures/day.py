@@ -11,7 +11,13 @@ class Day:
         else:
             print("Day code was not recognized")
             return
-        self.rooms = [structures.Room(number, self) for number in rooms]
+        
+        room_list = []
+        for room in rooms:
+            temp_room = structures.Room(room.split(' ')[0], room.split(' ')[1], self)
+            room_list.append(temp_room)
+        
+        self.rooms = room_list
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given day

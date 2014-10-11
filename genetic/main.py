@@ -4,7 +4,7 @@ from structures import *
 
 import unittest
 import interface #
-
+import globs
 
 def main():
     input = open("seeds/Scheduler.csv")
@@ -21,7 +21,7 @@ def main():
     print("Scheduling the following courses:")
     for course in courses:
         print(course)
-    rooms = ["CHEK212", "CHEK105", "CHEK213"]
+    rooms = globs.rooms
     #time_slots_mwf = ['08:00-08:50', '09:05-09:55', '10:10-11:00', '11:15-12:05', '12:20-13:10', '13:25-14:15', '14:30-15:20', '15:35-16:25']
     #time_slots_tr = ['08:00-09:15', '09:30-10:45', '11:00-12:15', '12:30-13:45', '14:00-15:15', '15:30-16:45']
     time_slots = ['09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00']
