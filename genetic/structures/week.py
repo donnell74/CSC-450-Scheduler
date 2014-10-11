@@ -127,7 +127,6 @@ class Week:
             #error stuff
             print("Unable to fill week because bad input")
 
-
     def print_concise(self):
         """Returns a concise list of courses for week in the structure:
             course_code day_code room_number start_time-end_time"""
@@ -138,9 +137,9 @@ class Week:
                 if courses_dyct.has_key(each_slot.course.code):
                     courses_dyct[each_slot.course.code][0] += each_slot.day
                 else:
-                    courses_dyct[each_slot.course.code] = [each_slot.day, each_slot.room.number, \
-                                                           each_slot.start_time, each_slot.end_time, \
-                                                           each_slot.instructor]
+                    courses_dyct[each_slot.course.code] =  [each_slot.day, each_slot.room.building, \
+                                                            each_slot.room.number, each_slot.start_time, \
+                                                            each_slot.end_time, each_slot.instructor]
                     if each_slot.instructor not in instructors:
                         instructors.append(each_slot.instructor)
 
@@ -148,8 +147,9 @@ class Week:
         for instructor in instructors:
             concise_schedule_str += instructor.name + "\n"
             for key in instructor.courses:
-                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + str(courses_dyct[key.code][1]) + ' ' + \
-                    str(courses_dyct[key.code][2]) + '-' + str(courses_dyct[key.code][3]) + '\n' 
+                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
+                    str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
+                    str(courses_dyct[key.code][3]) + '-' + str(courses_dyct[key.code][4]) + '\n' 
 
         print ("="*25)
         print(concise_schedule_str)

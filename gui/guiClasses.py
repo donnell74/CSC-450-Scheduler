@@ -39,7 +39,6 @@ class HomePage(Page):
         self.version_label.pack(side=BOTTOM, pady=5)
 
 # Constraint page is located in guiConstraints.py
-       
 
 class ViewPage(Page):
 
@@ -142,12 +141,13 @@ class MainWindow(Frame):
     def show_misc(self):
         self.misc_page.lift()
 
-    def run_scheduler(self):
+    def run_scheduler(self): # MOVE THIS ELSEWHERE?
         # RUN SCHEDULER METHOD
         #globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[0]]) 
         #globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[1]]) 
         #globs.mainScheduler.add_constraint("morning_classes", 30, constraint.morning_class, [globs.mainScheduler.courses[2]])
         globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, globs.instructors)
+        globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0, constraint.sequential_time_different_building_conflict, globs.instructors)
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.update()

@@ -77,8 +77,56 @@ def instructor_conflict(this_week, instructors):
         
         if count > 0:
             this_week.valid = False
-    return 0 
+    return 0
 
+def get_minutes(a_time):
+    """
+    return raw amount of minutes for the sake of comparison
+    """
+    return a_time.hour * 60 + a_time.minute
+
+def times_are_sequential(timeslot1, timeslot2):
+    """
+    return true if timeslots are sequential, else false
+    time_threshold can be used to give the max separation between timeslots
+    """
+    time_threshold = 0
+    start2 = max(timeslot1.start_time, timeslot2.start_time)
+    end1 = min(timeslot1.start_time, timeslot2.start_time)
+    return get_minutes(start2) - get_minutes(end1) - time_threshold <= 0
+
+def sequential_time_different_building_conflict(this_week, instructors):
+    """
+    Checks if an instructor teaches a course in one bulding and in the following
+    timeslot a different building. If this does not occur, passes; else, fails.
+    Note: Currently based purely off start time due to MWF-only timeslot system.
+    IN: list of all instructor objects
+    OUT: 0/1 for "holds"
+    """
+    for instructor in instructors:
+        times = []
+        count = 0
+        for i in range(len(instructor.courses)):
+            for j in range(i, len(instructor.courses)):
+                # get all possible course times
+                course1_times = this_week.find_course(instructor.courses[i]) 
+                course2_times = this_week.find_course(instructor.courses[j])
+                # if they meet the same number of days, they meet on the same days
+                for course1_time in course1_times:
+                    for course2_time in course2_times:
+                        # if there are any overlapping days...
+                        for char in course1_time.day:
+                            if char in course2_time.day:
+                                # if they are immediately sequential...
+                                if times_are_sequential(course1_time, course2_time):
+                                    # if they are in different buildings...
+                                    if course1_time.room.building != course2_time.room.building:
+                                        # inc count of conflicts
+                                        count += 1
+        # if there are any conflicts, week is not valid
+        if count > 0:
+            this_week.valid = False
+    return 0
 
 class Constraint:
     def __init__(self, name, weight, func, args = []):
