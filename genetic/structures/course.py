@@ -12,4 +12,4 @@ class Course:
                self.credit == other.credit
 
     def __str__(self):
-        return self.code
+        return str(self.code) + " " + str(self.credit) + " " + str(self.instructor)
