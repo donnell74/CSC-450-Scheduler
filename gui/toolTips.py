@@ -9,9 +9,23 @@ class ToolTips(object):
         self.animation_delay = 500     # begin animation after 0.5 seconds
         self.animation_speed = 15      # call __animate every 0.015 seconds
         self._animation = None         # holds a call to __animate
-
-        # holds the text that is on the main buttons
-        self.buttons = ['Home', 'Constraint', 'View', 'Misc', 'RUN']
+        self.buttons_clicked = []
+        
+        # holds the button text of the buttons that need tooltips
+        self.buttons = ['Home',
+                        'Constraint',
+                        'View',
+                        'Misc',
+                        'RUN',
+                        'Schedule 1',
+                        'Schedule 2',
+                        'Schedule 3',
+                        'Schedule 4',
+                        'Schedule 5',
+                        'View Constraints',
+                        'Add Course Constraint',
+                        'Add Instructor Constraint',
+                        'Add Constraint']
         
         # button name paired with tool tip description
         self.tips = {self.buttons[0] : 'Return home.',
@@ -37,6 +51,7 @@ class ToolTips(object):
         # create event listeners
         self.root.bind('<Enter>', self.__hover_on)
         self.root.bind('<Leave>', self.__hover_off)
+        self.root.bind('<Button-1>', self.__on_click)
 
     def __hover_on(self, event):
         """ Changes the button color and displays tool tip """
@@ -45,8 +60,9 @@ class ToolTips(object):
             self.btn_name = button['text']
             if self.btn_name in self.buttons:
                 
-                if not (self.btn_name == 'RUN'):
-                    button['bg'] = 'white'
+                if not (self.btn_name == 'RUN') and \
+                   not (button in self.buttons_clicked):
+                        button['bg'] = 'white'
                     
                 self.__tool_tip()
         except:
@@ -59,12 +75,30 @@ class ToolTips(object):
             self.btn_name = button['text']
             if self.btn_name in self.buttons:
                 
-                if not (self.btn_name == 'RUN'):
-                    button['bg'] = 'SystemButtonFace'
+                if not (self.btn_name == 'RUN') and \
+                   not (button in self.buttons_clicked):
+                       button['bg'] = 'SystemButtonFace'
                     
                 # cancel queued call to self.__animate
                 self.root.after_cancel(self._animation)
                 self.tip.destroy()  # destroy tool tip label
+        except:
+            pass
+
+    def __on_click(self, event):
+        """ Changes button color back to normal and deletes tool tip """
+        try:
+            button = event.widget
+            self.btn_name = button['text']
+            if self.btn_name.split(' ')[0] == 'Schedule' or self.btn_name == 'View Constraints':
+                if len(self.buttons_clicked) > 0:
+                    self.buttons_clicked[0]['bg'] = 'SystemButtonFace'
+                    del self.buttons_clicked[:]
+                
+                button['bg'] = 'green'
+                self.buttons_clicked.append(button)
+            if self.btn_name == 'RUN':
+                self.buttons_clicked[0]['bg'] = 'SystemButtonFace'
         except:
             pass
 
