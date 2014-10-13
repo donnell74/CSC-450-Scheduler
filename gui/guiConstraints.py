@@ -63,6 +63,7 @@ class CourseConstraint(Page):
         
         self.str_when_default = StringVar(self)
         self.str_when_default.set("Before")
+        self.str_when_default.trace("w", self.callbackWhen)
         self.option_when = OptionMenu(self, self.str_when_default, "Before", "After")
         self.option_when.pack(side = TOP)
         
@@ -70,9 +71,8 @@ class CourseConstraint(Page):
         message_time.pack(side = TOP)
         
         self.str_time_default = StringVar(self)
-        
-        self.str_time_default.set(globs.start_times[0])
-        self.option_time = OptionMenu(self, self.str_time_default, *globs.start_times)
+        self.str_time_default.set(globs.start_times[1]) #set the second element 
+        self.option_time = OptionMenu(self, self.str_time_default, *globs.start_times[1:])
         self.option_time.pack(side = TOP)
         
         message_priority = Label(self, text="Priority:")
@@ -92,6 +92,17 @@ class CourseConstraint(Page):
         when = self.str_when_default.get()
         priority = self.str_priority_default.get()
         createConstraint(course, time, when, priority)
+    
+    def callbackWhen(self, *args):
+        when = self.str_when_default.get()
+        menu = self.option_time["menu"]
+        menu.delete(0, "end")
+        if(when == "After"):
+            t = globs.start_times[:-1]
+        else:
+             t = globs.start_times[1:]
+        for time in t :
+                menu.add_command(label=time, command=lambda value=time : self.str_time_default.set(value))
         
 class ConstraintPage(Page):
 
