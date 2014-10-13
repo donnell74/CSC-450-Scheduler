@@ -30,6 +30,14 @@ class InstructorConstraint(Page):
         self.head_label = Label(self, text="Instructor Form")
         self.head_label.pack()
 
+        instructor_name = Label(self, text = "Instructor name:")
+        instructor_name.pack(side = TOP)
+
+        self.str_instr_name_default = StringVar(self)
+        list_of_instructors = globs.instructors
+        # list_of_instructors.append("All") # necessary?
+        self.str_instr_name_default.set(list_of_instructors[0])
+
 class CourseConstraint(Page):
  
     def __init__(self, root):
