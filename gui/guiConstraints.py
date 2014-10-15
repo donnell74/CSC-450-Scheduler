@@ -37,6 +37,37 @@ class InstructorConstraint(Page):
         list_of_instructors = globs.instructors
         # list_of_instructors.append("All") # necessary?
         self.str_instr_name_default.set(list_of_instructors[0])
+        self.option_instructors = OptionMenu(self, self.str_instr_name_default, *list_of_instructors)
+        self.option_instructors.pack(side = TOP)
+
+        # time or day
+        label_time_day = Label(self, text = "Type: ")
+        label_time_day.pack(side = TOP)
+        self.time_day_default.set("Day")
+        self.time_day_list = ["Day", "Time"]
+        self.option_time_day = OptionMenu(self, self.time_day_default, \
+                                          *self.time_day_list)
+
+        # dynamically change dropdowns based on time/day being selected
+
+        # time
+        self.label_when = Label(self, text = "When:")
+        self.label_when.pack(side = TOP)
+        
+        self.when_default.set("Before")
+        self.when_options = ["Before", "After"]
+        self.when_menu = OptionMenu(self, self.when_default, *self.when_options)
+        self.when_menu.pack(side = TOP)
+
+        # day
+        self.label_day = Label(self, text = "Day(s):")
+        self.label_day.pack(side = TOP)
+
+        self.day_menu_default.set("MWF")
+        self.day_menu_list = ["MWF", "TR"]  # pull this from globs?
+        self.day_menu = OptionMenu(self, self.day_menu_default, \
+                                   *self.day_menu_list)
+        
 
 class CourseConstraint(Page):
  
