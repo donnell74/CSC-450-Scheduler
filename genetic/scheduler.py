@@ -15,16 +15,12 @@ def create_scheduler_from_file(path_to_xml):
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
-        courses = [Course(c.attrib["code"], c.attrib["credit"]) for c in root.find(
-            "schedule").find("courseList").getchildren()]
-        rooms = [r.text for r in root.find(
-            "schedule").find("roomList").getchildren()]
-        time_slots = [
-            t.text for t in root.find("schedule").find("timeList").getchildren()]
+        courses = [Course(c.attrib["code"], c.attrib["credit"], c.attrib["instructor"]) for c in root.find("schedule").find("courseList").getchildren()]
+        rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
+        time_slots = [ t.text for t in root.find("schedule").find("timeList").getchildren()]
         time_slot_divide = root.find("schedule").find("timeSlotDivide").text
         setCourses = [i.attrib for i in root.findall("course")]
-        return_schedule = Scheduler(
-            courses, rooms, time_slots, time_slot_divide)
+        return_schedule = Scheduler( courses, rooms, time_slots, time_slot_divide)
         return_schedule.weeks[0].fill_week(setCourses)
         return return_schedule
     except:
