@@ -1,4 +1,4 @@
-from day import * 
+from day import *
 from room import *
 from timeslot import *
 from week import *
