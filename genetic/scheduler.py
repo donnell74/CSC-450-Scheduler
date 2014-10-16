@@ -346,6 +346,7 @@ class Scheduler:
         while True:
             print('Generation counter:', counter + 1)
             for each_week in self.weeks:
+                each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
             #print([i.fitness for i in self.weeks])
 

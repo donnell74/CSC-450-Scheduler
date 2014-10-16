@@ -13,6 +13,8 @@ class Week:
         self.days = [structures.Day(rooms, day_code, self) for day_code in 'mtwrf']
         self.fitness = 0
         self.valid = True
+        #Week's copy of courses
+        self.sections = []
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given week
@@ -24,6 +26,28 @@ class Week:
             return
         elif query == "Schedule":
             return self.schedule
+
+    def update_sections(self, courses):
+        """Updates list of sections with all details
+        IN: list of courses
+        OUT: updated section attribute"""
+        if len(self.sections) > 0:
+            self.sections = []
+        for each_course in courses:
+            each_slots = self.find_course(each_course)
+            each_section = structures.Section(each_course, each_slots)
+            self.sections.append(each_section)
+
+    def find_section(self, course_code):
+        """IN: course_code as string
+        OUT: section object; note that its attr's are shallow copies of structure objects
+        Returns None if not found"""
+        for each_section in self.sections:
+            if each_section.course.code == course_code:
+                #found
+                return each_section
+        #not found
+        return None
 
     def deep_copy(self):
         """Returns a deep copy of week"""
