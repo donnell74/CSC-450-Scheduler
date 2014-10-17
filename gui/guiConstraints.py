@@ -44,7 +44,7 @@ class InstructorConstraint(Page):
         self.time_day_default = StringVar(self)
         self.time_day_default.set("Time")
         self.time_day_default.trace("w", self.time_day_toggle)
-        self.time_day_list = ["Day", "Time"]
+        self.time_day_list = ["Time", "Day"]
         self.option_time_day = OptionMenu(self, self.time_day_default, \
                                           *self.time_day_list)
         self.option_time_day.pack(side = TOP)
@@ -85,21 +85,18 @@ class InstructorConstraint(Page):
         self.submit_time.pack(side = RIGHT, pady = 25)
 
         # day - CHECKBOXES
-        self.day_frame = Frame(self, width = 100)
-        #self.day_frame.pack(side = TOP)
-                
+        self.day_frame = Frame(self, width = 100)  # don't pack this because Time is the default option so days shouldn't be visible
+                        
         self.label_day = Label(self.day_frame, text = "Day(s):")
         self.label_day.pack(side = TOP)
 
-        days = ["M", "T", "W", "R", "F"]
-        boxes = []
-        for day in days:
-            self.value = IntVar()
-            box = Checkbutton(self.day_frame, text = day, variable = self.value)
+        self.days = ["M", "T", "W", "R", "F"]
+        self.boxes = [IntVar() for i in range(5)]
+        for i in range(len(self.days)):
+            self.value = self.boxes[i]
+            box = Checkbutton(self.day_frame, text = self.days[i], variable = self.value)
             box.pack(side = TOP, anchor = CENTER)
-            boxes.append(self.value)
-
-
+            
         self.priority_label = Label(self.day_frame, text = "Priority: ")
         self.priority_label.pack()
         self.str_priority_default = StringVar(self)
@@ -114,7 +111,7 @@ class InstructorConstraint(Page):
         
 
     def add_instr_time(self):
-        instructor = self.instructor_default.get()       
+        instructor = self.str_instr_name_default.get()       
         before_after = self.when_default.get()
         timeslot = self.time_default.get()
         priority = self.str_priority_default.get()
@@ -123,11 +120,17 @@ class InstructorConstraint(Page):
     
 
     def add_instr_day(self):
-        instructor = self.instructor_default.get()
-        
-        # pull days, get the bit string thing - Hana has this almost done
-        
+        instructor = self.str_instr_name_default.get()
+        checkboxes = self.boxes
+        days = self.days
+        day_code = []
+        for i in range(len(checkboxes)):  # check each box to see if it's ticked
+            if checkboxes[i].get() == 1:  #checked, so push the day to day_code
+                day_code.append(days[i])
+
+        day_code = ''.join(day_code)              
         priority = self.str_priority_default.get()
+        #create_day_pref_constraint(instructor, day_code, priority)
         pass
 
 
