@@ -251,8 +251,8 @@ class ConstraintPage(Page):
         self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
         self.button_instructor.pack(side = TOP)
         
-def createConstraint(course, start_time, when, priority):
-    # convert the priority string to a weight value for fitness score
+
+def get_priority_value(priority):
     if priority == "Low":
         priority = 10
     elif priority == "Medium":
@@ -261,6 +261,12 @@ def createConstraint(course, start_time, when, priority):
         priority = 50
     else:  # priority should be mandatory
         priority = 100
+    return priority
+
+
+def createConstraint(course, start_time, when, priority):
+    # convert the priority string to a weight value for fitness score
+    priority = get_priority_value(priority)
     constraint_name = "{0}_{1}_{2}".format(course, when, start_time)
     hour, minute = start_time.split(":")
     time_obj = time( int(hour), int(minute) )
