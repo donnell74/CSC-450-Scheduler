@@ -13,6 +13,9 @@ class TestScheduler(unittest.TestCase):
     def tearDown(self):
         scheduler.clear_constraints()
 
+    def test_init(self):
+        pass
+
     def test_clear_constraints(self):
         self.assertEquals(len(scheduler.constraints), 0)
         self.assertEquals(scheduler.max_fitness, 0)

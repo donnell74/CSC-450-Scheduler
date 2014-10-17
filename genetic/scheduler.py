@@ -10,6 +10,22 @@ import xml.etree.ElementTree as ET
 import os.path
 
 
+class SchedulerInitError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class BreedError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 def create_scheduler_from_file(path_to_xml):
     """Reads in an xml file and schedules all courses found in it"""
     try:
@@ -20,10 +36,11 @@ def create_scheduler_from_file(path_to_xml):
         time_slots = [ t.text for t in root.find("schedule").find("timeList").getchildren()]
         time_slot_divide = root.find("schedule").find("timeSlotDivide").text
         setCourses = [i.attrib for i in root.findall("course")]
-        return_schedule = Scheduler( courses, rooms, time_slots, time_slot_divide)
+        return_schedule = Scheduler( courses, rooms, time_slots, int(time_slot_divide))
         return_schedule.weeks[0].fill_week(setCourses)
         return return_schedule
-    except:
+    except Exception as inst:
+        print(inst)
         return None
 
 
@@ -33,17 +50,26 @@ class Scheduler:
 
     def __init__(self, courses, rooms, time_slots, time_slot_divide):
         # eventually will include mwf and tr slots instead of general slots
-        if type(courses) is list:
-            if not isinstance(courses[0], Course):
-                print("Courses is not a list of Course objects")
-                return
-        else:
-            print("Courses is not a list")
-            return
+        try:
+            courses[0].code
+        except:
+            raise SchedulerInitError("Courses")
 
-        if type(rooms) is not list:
-            print("Rooms is not a list")
-            return
+        try:
+            assert type(rooms[0]) == str
+        except:
+            raise SchedulerInitError("Rooms")
+
+        try:
+            assert type(time_slots[0]) == str
+        except:
+            raise SchedulerInitError("Time Slots")
+
+        try:
+            assert type(time_slot_divide) == int
+            assert 0 < time_slot_divide and time_slot_divide < len(time_slots)
+        except:
+            raise SchedulerInitError("Time Slot Divide")
 
         #self.time_slots_mwf = time_slots_mwf
         #self.time_slots_tr = time_slots_tr
@@ -99,6 +125,7 @@ class Scheduler:
         if len(empty_slots) == 0:
             # no mutation performed
             return this_week
+
         roll = randint(1, len(self.courses) - 1)
         random_course = self.courses[roll]
         old_slots = this_week.find_course(random_course)
@@ -277,14 +304,11 @@ class Scheduler:
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
-        # for x in range(15):
-        #    self.weeks.append(Week(self.rooms, self))
-        # for each_week in self.weeks:
-        #    list_slots = self.list_time_slots_for_week(each_week)
-        #    self.randomly_fill_schedule(each_week, self.courses, list_slots)
-        if len(self.weeks) < 2:
-            print("Not enough weeks to breed")
-            return
+        try:
+            assert len(self.weeks) > 1
+            assert isinstance(self.weeks[0], Week)
+        except:
+            raise BreedError("Weeks")
 
         # combinations...(ex) 5 choose 2
         for each_week in range(0, len(self.weeks) - 1, 2):
@@ -329,9 +353,9 @@ class Scheduler:
         MAX_TRIES = 10
 
         def week_slice_helper():
-            no_invalid_weeks = filter(lambda x: x.valid, self.weeks)
-            if len(no_invalid_weeks) > 0:
-                self.weeks = no_invalid_weeks
+            valid_weeks = filter(lambda x: x.valid, self.weeks)
+            if len(valid_weeks) > 0:
+                self.weeks = valid_weeks
 
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
