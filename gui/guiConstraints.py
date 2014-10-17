@@ -60,6 +60,7 @@ class InstructorConstraint(Page):
 
         self.when_default = StringVar(self)
         self.when_default.set("Before")
+        self.when_default.trace("w", self.callbackWhen)
         self.when_options = ["Before", "After"]
         self.when_menu = OptionMenu(self.time_frame, self.when_default, *self.when_options)
         self.when_menu.pack(side = TOP)
@@ -69,9 +70,9 @@ class InstructorConstraint(Page):
 
         self.time_slots = globs.start_times
         self.time_default = StringVar(self)
-        self.time_default.set(self.time_slots[0])
+        self.time_default.set(self.time_slots[1]) 
 
-        self.time_slot_menu = OptionMenu(self.time_frame, self.time_default, *self.time_slots)
+        self.time_slot_menu = OptionMenu(self.time_frame, self.time_default, *self.time_slots[1:]) # default is before so knock out the first slot to avoid invalid constraints
         self.time_slot_menu.pack(side = TOP)
 
         self.priority_label = Label(self.time_frame, text = "Priority: ")
@@ -133,6 +134,19 @@ class InstructorConstraint(Page):
         #create_day_pref_constraint(instructor, day_code, priority)
         pass
 
+
+    def callbackWhen(self, *args):
+        when = self.when_default.get()
+        menu = self.time_slot_menu["menu"]
+        menu.delete(0, "end")
+        if when == "After":
+            t = globs.start_times[:-1]
+        else:
+             t = globs.start_times[1:]
+        for time in t :
+                menu.add_command(label=time, command=lambda value=time : self.time_default.set(value))
+        self.time_default.set(t[0])        
+        
 
     def time_day_toggle(self, *args):
         time_day = self.time_day_default.get()
@@ -208,6 +222,7 @@ class CourseConstraint(Page):
              t = globs.start_times[1:]
         for time in t :
                 menu.add_command(label=time, command=lambda value=time : self.str_time_default.set(value))
+        self.str_time_default.set(t[0])   
         
 class ConstraintPage(Page):
 
@@ -298,3 +313,10 @@ def createConstraint(course, start_time, when, priority):
     print "Added constraint ", constraint_name, "with priority/weight = ", str(priority)
     return 
     
+
+def create_time_pref_constraint(instructor, before_after, timeslot, priority):
+    pass
+
+
+def create_day_pref_constraint(instructor, day_code, priority):
+    pass
