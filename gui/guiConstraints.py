@@ -27,8 +27,6 @@ class InstructorConstraint(Page):
  
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Instructor Form")
-        self.head_label.pack()
 
         instructor_name = Label(self, text = "Instructor name:")
         instructor_name.pack(side = TOP)
@@ -40,42 +38,115 @@ class InstructorConstraint(Page):
         self.option_instructors = OptionMenu(self, self.str_instr_name_default, *list_of_instructors)
         self.option_instructors.pack(side = TOP)
 
-        # time or day
+        # time or day toggle box
         label_time_day = Label(self, text = "Type: ")
         label_time_day.pack(side = TOP)
-        self.time_day_default.set("Day")
+        self.time_day_default = StringVar(self)
+        self.time_day_default.set("Time")
+        self.time_day_default.trace("w", self.time_day_toggle)
         self.time_day_list = ["Day", "Time"]
         self.option_time_day = OptionMenu(self, self.time_day_default, \
                                           *self.time_day_list)
+        self.option_time_day.pack(side = TOP)
 
-        # dynamically change dropdowns based on time/day being selected
+        # dynamically change based on time/day being selected in the toggle
+        
 
         # time
-        self.label_when = Label(self, text = "When:")
+        self.time_frame = Frame(self)
+        self.time_frame.pack()
+        self.label_when = Label(self.time_frame, text = "When:")
         self.label_when.pack(side = TOP)
-        
+
+        self.when_default = StringVar(self)
         self.when_default.set("Before")
         self.when_options = ["Before", "After"]
-        self.when_menu = OptionMenu(self, self.when_default, *self.when_options)
+        self.when_menu = OptionMenu(self.time_frame, self.when_default, *self.when_options)
         self.when_menu.pack(side = TOP)
 
-        # day
-        self.label_day = Label(self, text = "Day(s):")
+        self.time_label = Label(self.time_frame, text = "Timeslot:")
+        self.time_label.pack(side = TOP)
+
+        self.time_slots = globs.start_times
+        self.time_default = StringVar(self)
+        self.time_default.set(self.time_slots[0])
+
+        self.time_slot_menu = OptionMenu(self.time_frame, self.time_default, *self.time_slots)
+        self.time_slot_menu.pack(side = TOP)
+
+        self.priority_label = Label(self.time_frame, text = "Priority: ")
+        self.priority_label.pack()
+        self.str_priority_default = StringVar(self)
+        self.str_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self.time_frame, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.option_priority.pack(side = TOP)
+
+        self.submit_time = Button(self.time_frame, text = "Add Constraint", command = self.add_instr_time)
+        self.submit_time.pack(side = RIGHT, pady = 25)
+
+        # day - CHECKBOXES
+        self.day_frame = Frame(self, width = 100)
+        #self.day_frame.pack(side = TOP)
+                
+        self.label_day = Label(self.day_frame, text = "Day(s):")
         self.label_day.pack(side = TOP)
 
-        self.day_menu_default.set("MWF")
-        self.day_menu_list = ["MWF", "TR"]  # pull this from globs?
-        self.day_menu = OptionMenu(self, self.day_menu_default, \
-                                   *self.day_menu_list)
+        days = ["M", "T", "W", "R", "F"]
+        boxes = []
+        for day in days:
+            self.value = IntVar()
+            box = Checkbutton(self.day_frame, text = day, variable = self.value)
+            box.pack(side = TOP, anchor = CENTER)
+            boxes.append(self.value)
+
+
+        self.priority_label = Label(self.day_frame, text = "Priority: ")
+        self.priority_label.pack()
+        self.str_priority_default = StringVar(self)
+        self.str_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self.day_frame, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.option_priority.pack(side = TOP)
         
+
+        self.submit_day = Button(self.day_frame, text = "Add Constraint", command = self.add_instr_day)
+        self.submit_day.pack(side = TOP, pady = 25)
+
+        
+
+    def add_instr_time(self):
+        instructor = self.instructor_default.get()       
+        before_after = self.when_default.get()
+        timeslot = self.time_default.get()
+        priority = self.str_priority_default.get()
+        #create_time_pref_constraint(instructor, before_after, timeslot, priority)
+        pass
+    
+
+    def add_instr_day(self):
+        instructor = self.instructor_default.get()
+        
+        # pull days, get the bit string thing - Hana has this almost done
+        
+        priority = self.str_priority_default.get()
+        pass
+
+
+    def time_day_toggle(self, *args):
+        time_day = self.time_day_default.get()
+        if time_day == "Day":
+            self.time_frame.pack_forget()
+            self.day_frame.pack()
+        else:
+            self.time_frame.pack()
+            self.day_frame.pack_forget()
+
+        
+    
 
 class CourseConstraint(Page):
  
     def __init__(self, root):
         Frame.__init__(self, root)
-#         self.head_label = Label(self, text="Course Form")
-#         self.head_label.pack()
-#
 
         globs.init()
         
