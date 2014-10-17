@@ -11,7 +11,7 @@ class Week:
 
     def __init__(self, rooms, this_scheduler):
         """Initialize week object with list of room objects"""
-        self.schedule = copy(this_scheduler)
+        self.schedule = this_scheduler
         self.days = [structures.Day(rooms, day_code, self)
                      for day_code in 'mtwrf']
         self.fitness = 0

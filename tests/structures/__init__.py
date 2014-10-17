@@ -1,1 +1,1 @@
-all = ["week_test"]
+all = ["test_week", "test_day"]
