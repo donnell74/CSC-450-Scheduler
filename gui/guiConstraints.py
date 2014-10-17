@@ -116,7 +116,7 @@ class InstructorConstraint(Page):
         before_after = self.when_default.get()
         timeslot = self.time_default.get()
         priority = self.str_priority_default.get()
-        #create_time_pref_constraint(instructor, before_after, timeslot, priority)
+        create_time_pref_constraint(instructor, before_after, timeslot, priority)
         pass
     
 
@@ -131,7 +131,7 @@ class InstructorConstraint(Page):
 
         day_code = ''.join(day_code)              
         priority = self.str_priority_default.get()
-        #create_day_pref_constraint(instructor, day_code, priority)
+        create_day_pref_constraint(instructor, day_code, priority)
         pass
 
 
@@ -279,6 +279,13 @@ def get_priority_value(priority):
     return priority
 
 
+def pull_instructor_obj(instructor):
+    for i in range(len(globs.instructors)):
+        if instructor == globs.instructors[i].name:  # look for appropriate instructor object
+            instructor = globs.instructors[i]
+            break
+    return instructor
+
 def createConstraint(course, start_time, when, priority):
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
@@ -315,8 +322,32 @@ def createConstraint(course, start_time, when, priority):
     
 
 def create_time_pref_constraint(instructor, before_after, timeslot, priority):
-    pass
+    priority = get_priority_value(priority)
+    instructor = pull_instructor_obj(instructor)
+    hour, minute = timeslot.split(":")
+    time_obj = time( int(hour), int(minute) )
+    constraint_name = "{0}_prefers_{1}_{2}".format(instructor.name, before_after.lower(), str(time_obj))
+    print(constraint_name, "weight = " + str(priority))
+    
+    if before_after == "Before":
+        #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.FELIX_B, [instructor, timeslot])
+        pass
+    else:  # after a time
+        #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.FELIX_A, [instructor, timeslot])
+        pass
+    
+    return
 
 
 def create_day_pref_constraint(instructor, day_code, priority):
-    pass
+    priority = get_priority_value(priority)
+    instructor = pull_instructor_obj(instructor)
+    if len(day_code) > 4:  # can't select every day of the week, bad constraint
+        print("Error, a day preference can't be all days of the week, try again.")
+        return # return False?  Or, the error mesage
+    constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
+    print(constraint_name, "weight = " + str(priority))
+    
+    #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.RENATO, [instructor, day_code])
+    return
+
