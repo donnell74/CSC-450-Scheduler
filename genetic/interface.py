@@ -55,6 +55,7 @@ def export_schedules(weeks, export_dir="./", debug=False):
         with open(filename, 'w') as out:
             out.write(each_week.print_concise())
 
+    # delete past extra schedules
     counter += 1
     while counter <= 5:
         filename = os.path.join(

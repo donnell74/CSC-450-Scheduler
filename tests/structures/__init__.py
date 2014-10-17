@@ -1,0 +1,1 @@
+all = ["week_test"]

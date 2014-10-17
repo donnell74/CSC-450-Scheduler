@@ -37,6 +37,15 @@ class TestScheduler(unittest.TestCase):
         scheduler.calc_fitness(scheduler.weeks[0])
         self.assertEquals(scheduler.weeks[0].fitness, 60)
 
+    def test_separate_by_credit(self):
+        self.assertEquals(len(scheduler.separated["1"]), 0)
+        self.assertEquals(len(scheduler.separated["3"]), 1)
+        self.assertEquals(len(scheduler.separated["4"]), 1)
+        self.assertEquals(len(scheduler.separated["5"]), 1)
+        self.assertEquals(scheduler.separated["3"][0].code, "CSC130")
+        self.assertEquals(scheduler.separated["4"][0].code, "CSC131")
+        self.assertEquals(scheduler.separated["5"][0].code, "CSC232")
+
 
 if __name__ == "__main__":
     unittest.main()

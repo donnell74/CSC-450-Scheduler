@@ -91,7 +91,7 @@ class Scheduler:
         """Groups the courses based on number of credit hours.
         IN: list of course objects
         OUT: dictionary with keys=credit hours and values=list of course objects"""
-        courses_by_credits = {}
+        courses_by_credits = {"1":[], "2":[], "3":[], "4":[], "5":[]}
         for each_course in courses_list:
             # Case 1: New key-value pair (make new list)
             if each_course.credit not in courses_by_credits.keys():
@@ -355,7 +355,7 @@ class Scheduler:
         def week_slice_helper():
             valid_weeks = filter(lambda x: x.valid, self.weeks)
             if len(valid_weeks) > 0:
-                self.weeks = valid_weeks
+                self.weeks = valid_weeks + filter(lambda x: not x.valid, self.weeks)[:5-len(valid_weeks)]
 
             self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
@@ -374,7 +374,8 @@ class Scheduler:
 
             print("Minimum fitness of the generation:",
                   min(i.fitness for i in self.weeks))
-            if min(i.fitness for i in self.weeks) == self.max_fitness:
+            if min(i.fitness for i in self.weeks) == self.max_fitness and \
+              len(self.weeks) >= 5:
                 break
 
             self.breed()
