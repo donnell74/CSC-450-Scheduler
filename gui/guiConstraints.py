@@ -210,7 +210,7 @@ class CourseConstraint(Page):
         time =  self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.str_priority_default.get()
-        createConstraint(course, time, when, priority)
+        create_course_time_constraint(course, time, when, priority)
     
     def callbackWhen(self, *args):
         when = self.str_when_default.get()
@@ -286,7 +286,7 @@ def pull_instructor_obj(instructor):
             break
     return instructor
 
-def createConstraint(course, start_time, when, priority):
+def create_course_time_constraint(course, start_time, when, priority):
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
     constraint_name = "{0}_{1}_{2}".format(course, when, start_time)
@@ -347,7 +347,7 @@ def create_day_pref_constraint(instructor, day_code, priority):
         return # return False?  Or, the error mesage
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
     print(constraint_name, "weight = " + str(priority))
-    
+    day_code = day_code.lower()    
     #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.RENATO, [instructor, day_code])
     return
 
