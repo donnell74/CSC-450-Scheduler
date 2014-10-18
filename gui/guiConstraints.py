@@ -7,6 +7,7 @@ import globs
 from genetic import constraint
 
 
+
 class Page(Frame):
     def __init__(self, root):
         Frame.__init__(self, root)
@@ -14,6 +15,14 @@ class Page(Frame):
     def show(self):
         self.lift()
 
+class AddedConstraintsScreen(Page):
+    def __init__(self, root):
+        Frame.__init__(self, root, bg = "red", width = 30, height = 50)
+        textL = " KYLE'S SCREEN GOES HERE "
+        self.text = Label(self, text = textL)
+        self.text.pack(side = RIGHT, expand = YES)
+
+        
 class HomeConstraintPage(Page):
 
     def __init__(self, root):
@@ -109,6 +118,8 @@ class InstructorConstraint(Page):
         self.submit_day = Button(self.day_frame, text = "Add Constraint", command = self.add_instr_day)
         self.submit_day.pack(side = TOP, pady = 25)
 
+
+
         
 
     def add_instr_time(self):
@@ -203,7 +214,7 @@ class CourseConstraint(Page):
         self.option_priority.pack(side = TOP)
         
         self.button_go = Button(self, text="Add Constraint", command=self.go)
-        self.button_go.pack(side = RIGHT)
+        self.button_go.pack(side = RIGHT, pady = 25)
         
     def go(self):
         course = self.str_course_default.get()
@@ -241,22 +252,32 @@ class ConstraintPage(Page):
         
         # PAGES
         self.home_page = HomeConstraintPage(self.content_container)
-        self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        self.home_page.pack()
         
         self.instructor_page = InstructorConstraint(self.content_container)
-        self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.instructor_page.pack(side = LEFT)
         
         self.course_page = CourseConstraint(self.content_container)
-        self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.course_page.pack(side = LEFT)
+        
+        self.added_constraints = AddedConstraintsScreen(self.content_container)
+        #self.added_constraints.place(in_ = self.instructor_page, anchor = E)
+        #self.added_constraints.place(in_ = self.course_page, anchor = E)
+        self.added_constraints.pack(side = RIGHT, anchor = NE)
         
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
         
     def add_instructor_constraint(self):
-        self.instructor_page.lift()
+        self.instructor_page.pack(padx = 25)
+        self.course_page.pack_forget()
         
     def add_course_constraint(self):
-        self.course_page.lift()
+        self.course_page.pack(padx = 25)
+        self.instructor_page.pack_forget()
         
     def create_widgets(self):
         
