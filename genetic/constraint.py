@@ -55,6 +55,47 @@ def morning_class(this_week, args):
     return 1 if holds else 0
 
 
+def instructor_time_pref_before(this_week, args):
+	#args should be a list containing this_instructor, courses, and before_time;
+	#this will have to be passed to you from the constraint generator
+        #args looks like this [chosen_instructor, list_of_all_courses, chosen_before_or_after_time]
+	instructor.courses = args[0]
+	time_slot = args[1]
+	for each_course in args[1]:
+		#section object for course
+		each_section = this_week.find_section(this_week, [c, args[1]])
+		#only want section obujects for this_instructor
+		if each_section.instructor == this_instructor:
+			if each_section.time_slots[0].start_time >= before_time:
+				#case 1: a course fails
+				return 0
+	#case 2: all courses for instructor pass
+	return 1
+
+    
+
+def instructor_time_pref_after(this_week, args):
+	#args should be a list containing this_instructor, courses, and after_time;
+	#this will have to be passed to you from the constraint generator
+	this_instructor = args[0]
+	time_slot = args[1]
+	for each_course in args[1]:
+		#section object for course
+		each_section = this_week.find_section(this_week, [c, args[1]])
+		#only want section obujects for this_instructor
+		if each_section.instructor == this_instructor:
+			if each_section.time_slots[0].start_time <= after_time:
+				#case 1: a course fails
+				return 0
+	#case 2: all courses for instructor pass
+	return 1
+
+
+
+            
+    
+
+
 def instructor_conflict(this_week, instructors):
     """
     Checks for instructors teaching multiple courses at once.  If none are found,
