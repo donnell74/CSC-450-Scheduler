@@ -407,7 +407,7 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
     print(constraint_name, "weight = " + str(priority))
     day_code = day_code.lower()    
-    #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.RENATO, [instructor, day_code])
+    globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_day, [instructor, day_code])
 
     # update scrollbox with this created constraint
     # added_constraints.view_constraints((constraint_name + " Priority = ", priority))

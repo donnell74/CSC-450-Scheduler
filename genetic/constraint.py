@@ -42,7 +42,7 @@ def course_before_time(this_week, args):
 def course_after_time(this_week, args):
     # find the course and check that its time is after the constraining slot
     # args should be [<course>, <timeslot>]
-    hold = this_week.find_course(args[0])[0].start_time > args[1]
+    hold = this_week.sectionfind_course(args[0])[0].start_time > args[1]
     return 1 if hold else 0
 
 
@@ -78,6 +78,18 @@ def instructor_conflict(this_week, instructors):
         if count > 0:
             this_week.valid = False
     return 0 
+
+def instructor_preference_day(this_week, args):
+    instructor = args[0]
+    day_code = args[1]
+    
+    for section_week in this_week.sections:
+        if instructor.name == section_week.instructor.name:
+            for day in section_week.days:
+                if not day.day_code in day_code:
+                    return 0
+                    
+    return 1
 
 
 class Constraint:
