@@ -5,7 +5,7 @@ import sys
 sys.path.append("../")
 import globs
 from genetic import constraint
-
+from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
 
 
 class Page(Frame):
@@ -16,12 +16,32 @@ class Page(Frame):
         self.lift()
 
 class AddedConstraintsScreen(Page):
-    def __init__(self, root):
-        Frame.__init__(self, root, bg = "red", width = 30, height = 50)
-        textL = " KYLE'S SCREEN GOES HERE "
+    def __init__(self, root, constraints):
+        Frame.__init__(self, root, width = 30, height = 50)
+        self.constraints = constraints # list that holds Constraint objects
+        textL = " Constraints Added: "
         self.text = Label(self, text = textL)
-        self.text.pack(side = RIGHT, expand = YES)
-
+        self.text.pack(anchor = NW, expand = YES)
+        
+        view_constraints_btn = Button(self, command = self.view_constraints,
+                    text = 'View Constraints',
+                    width = 50,
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
+        view_constraints_btn.pack(side = TOP)
+        
+        # scrollbox
+        self.txt = ScrolledText(self, undo = True, width = 40, height = 15)
+        self.txt['font'] = ('Courier New', '11')
+        self.txt.pack(fill = BOTH, padx = 5, pady = 5)
+        
+    def view_constraints(self):
+        print self.constraints
+        self.txt.delete('1.0', END)
+        for constraint in self.constraints:
+            print constraint.name + ' ' + str(constraint.weight)
+            self.txt.insert(INSERT,
+                            constraint.name + ' ' + str(constraint.weight) + '\n')
         
 class HomeConstraintPage(Page):
 
@@ -237,23 +257,23 @@ class CourseConstraint(Page):
         
 class ConstraintPage(Page):
 
-    def __init__(self, root):
+    def __init__(self, root, constraints):
         Frame.__init__(self, root)
         self.head_label = Label(self, text="Constraint Page", \
                                 font =('Helvetica', 18))
         self.head_label.pack()
         self.create_widgets()
         self.pack(side = TOP, fill = "both")
-
+        
         
         # CONTENT
         self.content_container = Frame(self, width="400", height="300")
-        self.content_container.pack(side=LEFT, fill="both")
+        self.content_container.pack(fill="both")
         
         # PAGES
         self.home_page = HomeConstraintPage(self.content_container)
         #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        self.home_page.pack()
+        self.home_page.pack(anchor = NW, padx = 50)
         
         self.instructor_page = InstructorConstraint(self.content_container)
         #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
@@ -263,29 +283,29 @@ class ConstraintPage(Page):
         #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.course_page.pack(side = LEFT)
         
-        self.added_constraints = AddedConstraintsScreen(self.content_container)
+        self.added_constraints = AddedConstraintsScreen(self.content_container, constraints)
         #self.added_constraints.place(in_ = self.instructor_page, anchor = E)
         #self.added_constraints.place(in_ = self.course_page, anchor = E)
-        self.added_constraints.pack(side = RIGHT, anchor = NE)
-        
+        self.added_constraints.pack(side = RIGHT, anchor = NE, padx = 50)
+
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
         
     def add_instructor_constraint(self):
-        self.instructor_page.pack(padx = 25)
+        self.instructor_page.pack(side = LEFT, padx = 50)
         self.course_page.pack_forget()
         
     def add_course_constraint(self):
-        self.course_page.pack(padx = 25)
+        self.course_page.pack(side = LEFT, padx = 50)
         self.instructor_page.pack_forget()
         
     def create_widgets(self):
         
         self.button_course = Button(self, text="Add Course Constraint", command=self.add_course_constraint)
-        self.button_course.pack(side = TOP)
+        self.button_course.pack(anchor = NW, padx = 50, pady = 10)
 
         self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
-        self.button_instructor.pack(side = TOP)
+        self.button_instructor.pack(anchor = NW, padx = 50)
         
 
 def get_priority_value(priority):
