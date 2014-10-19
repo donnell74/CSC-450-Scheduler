@@ -117,9 +117,9 @@ class InstructorConstraint(Page):
 
         self.priority_label = Label(self.time_frame, text = "Priority: ")
         self.priority_label.pack()
-        self.str_priority_default = StringVar(self)
-        self.str_priority_default.set("Low") # initial value
-        self.option_priority = OptionMenu(self.time_frame, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.instr_time_priority_default = StringVar(self)
+        self.instr_time_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self.time_frame, self.instr_time_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
 
         self.submit_time = Button(self.time_frame, text = "Add Constraint", command = self.add_instr_time)
@@ -140,9 +140,9 @@ class InstructorConstraint(Page):
             
         self.priority_label = Label(self.day_frame, text = "Priority: ")
         self.priority_label.pack()
-        self.str_priority_default = StringVar(self)
-        self.str_priority_default.set("Low") # initial value
-        self.option_priority = OptionMenu(self.day_frame, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.instr_day_priority_default = StringVar(self)
+        self.instr_day_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self.day_frame, self.instr_day_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
         
 
@@ -157,7 +157,7 @@ class InstructorConstraint(Page):
         instructor = self.str_instr_name_default.get()       
         before_after = self.when_default.get()
         timeslot = self.time_default.get()
-        priority = self.str_priority_default.get()
+        priority = self.instr_time_priority_default.get()
         create_time_pref_constraint(instructor, before_after, timeslot, priority, self.constraints)
         pass
     
@@ -172,7 +172,7 @@ class InstructorConstraint(Page):
                 day_code.append(days[i])
 
         day_code = ''.join(day_code)              
-        priority = self.str_priority_default.get()
+        priority = self.instr_day_priority_default.get()
         create_day_pref_constraint(instructor, day_code, priority, self.constraints)
         pass
 
@@ -241,9 +241,9 @@ class CourseConstraint(Page):
         message_priority = Label(self, text="Priority:")
         message_priority.pack(side = TOP)
         
-        self.str_priority_default = StringVar(self)
-        self.str_priority_default.set("Low") # initial value
-        self.option_priority = OptionMenu(self, self.str_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.course_time_priority_default = StringVar(self)
+        self.course_time_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self, self.course_time_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
         
         self.button_go = Button(self, text="Add Constraint", command=self.go)
@@ -253,7 +253,7 @@ class CourseConstraint(Page):
         course = self.str_course_default.get()
         time =  self.str_time_default.get()
         when = self.str_when_default.get()
-        priority = self.str_priority_default.get()
+        priority = self.course_time_priority_default.get()
         create_course_time_constraint(course, time, when, priority, self.constraints)
     
     def callbackWhen(self, *args):
@@ -384,17 +384,19 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     hour, minute = timeslot.split(":")
     time_obj = time( int(hour), int(minute) )
     constraint_name = "{0}_prefers_{1}_{2}".format(instructor.name, before_after.lower(), str(time_obj))
-    print(constraint_name, "weight = " + str(priority))
+    #print(constraint_name, "weight = " + str(priority))
     
     if before_after == "Before":
-        #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.FELIX_B, [instructor, timeslot])
-        pass
+        globs.mainScheduler.add_constraint(constraint_name, priority,  \
+                                           constraint.instructor_time_pref_before, [instructor, timeslot])
+        
     else:  # after a time
-        #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.FELIX_A, [instructor, timeslot])
+        globs.mainScheduler.add_constraint(constraint_name, priority, \
+                                           constraint.instructor_time_pref_after, [instructor, timeslot])
         pass
     
     # update scrollbox with this created constraint
-    # added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
 
 
@@ -410,6 +412,6 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_day, [instructor, day_code])
 
     # update scrollbox with this created constraint
-    # added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
 
