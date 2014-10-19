@@ -18,30 +18,39 @@ class Page(Frame):
 class AddedConstraintsScreen(Page):
     def __init__(self, root, constraints):
         Frame.__init__(self, root, width = 30, height = 50)
-        self.constraints = constraints # list that holds Constraint objects
+        
+        # list that holds Constraint objects
+        self.constraints = constraints
+
+        # holds the scrollbox output text for the added constraints
+        self.added_constraints = []
+        
         textL = " Constraints Added: "
         self.text = Label(self, text = textL)
         self.text.pack(anchor = NW, expand = YES)
         
-        view_constraints_btn = Button(self, command = self.view_constraints,
-                    text = 'View Constraints',
-                    width = 50,
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        view_constraints_btn.pack(side = TOP)
-        
         # scrollbox
-        self.txt = ScrolledText(self, undo = True, width = 40, height = 15)
-        self.txt['font'] = ('Courier New', '11')
-        self.txt.pack(fill = BOTH, padx = 5, pady = 5)
+        self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
+        self.scroll['font'] = ('Courier New', '11')
+        self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
         
-    def view_constraints(self):
-        print self.constraints
-        self.txt.delete('1.0', END)
-        for constraint in self.constraints:
-            print constraint.name + ' ' + str(constraint.weight)
-            self.txt.insert(INSERT,
-                            constraint.name + ' ' + str(constraint.weight) + '\n')
+    def view_constraints(self, text):
+        output = text[0]
+        if text[1] == 10:
+            output += 'Low'
+        elif text[1] == 25:
+            output += 'Medium'
+        elif text[1] == 50:
+            output += 'High'
+        elif text[1] == 100:
+            output += 'Mandatory'
+
+        output += '\n'
+        self.added_constraints.append(output)
+
+        self.scroll.delete('1.0', END)
+        for i in xrange(len(self.constraints)):
+            self.scroll.insert(INSERT, self.added_constraints[i])
         
 class HomeConstraintPage(Page):
 
@@ -54,9 +63,11 @@ class HomeConstraintPage(Page):
 
 class InstructorConstraint(Page):
  
-    def __init__(self, root):
+    def __init__(self, root, constraints):
         Frame.__init__(self, root)
 
+        self.constraints = constraints
+        
         instructor_name = Label(self, text = "Instructor name:")
         instructor_name.pack(side = TOP)
 
@@ -147,7 +158,7 @@ class InstructorConstraint(Page):
         before_after = self.when_default.get()
         timeslot = self.time_default.get()
         priority = self.str_priority_default.get()
-        create_time_pref_constraint(instructor, before_after, timeslot, priority)
+        create_time_pref_constraint(instructor, before_after, timeslot, priority, self.constraints)
         pass
     
 
@@ -162,7 +173,7 @@ class InstructorConstraint(Page):
 
         day_code = ''.join(day_code)              
         priority = self.str_priority_default.get()
-        create_day_pref_constraint(instructor, day_code, priority)
+        create_day_pref_constraint(instructor, day_code, priority, self.constraints)
         pass
 
 
@@ -193,10 +204,12 @@ class InstructorConstraint(Page):
 
 class CourseConstraint(Page):
  
-    def __init__(self, root):
+    def __init__(self, root, constraints):
         Frame.__init__(self, root)
-
+        
         globs.init()
+
+        self.constraints = constraints
         
         message_course = Label(self, text="Course code:")
         message_course.pack(side = TOP)
@@ -241,7 +254,7 @@ class CourseConstraint(Page):
         time =  self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.str_priority_default.get()
-        create_course_time_constraint(course, time, when, priority)
+        create_course_time_constraint(course, time, when, priority, self.constraints)
     
     def callbackWhen(self, *args):
         when = self.str_when_default.get()
@@ -274,20 +287,20 @@ class ConstraintPage(Page):
         self.home_page = HomeConstraintPage(self.content_container)
         #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         self.home_page.pack(anchor = NW, padx = 50)
-        
-        self.instructor_page = InstructorConstraint(self.content_container)
-        #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        #self.instructor_page.pack(side = LEFT)
-        
-        self.course_page = CourseConstraint(self.content_container)
-        #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        #self.course_page.pack(side = LEFT)
-        
+
         self.added_constraints = AddedConstraintsScreen(self.content_container, constraints)
         #self.added_constraints.place(in_ = self.instructor_page, anchor = E)
         #self.added_constraints.place(in_ = self.course_page, anchor = E)
         self.added_constraints.pack(side = RIGHT, anchor = NE, padx = 50)
-
+        
+        self.instructor_page = InstructorConstraint(self.content_container, self.added_constraints)
+        #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.instructor_page.pack(side = LEFT)
+        
+        self.course_page = CourseConstraint(self.content_container, self.added_constraints)
+        #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+        #self.course_page.pack(side = LEFT)
+        
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
         
@@ -327,7 +340,7 @@ def pull_instructor_obj(instructor):
             break
     return instructor
 
-def create_course_time_constraint(course, start_time, when, priority):
+def create_course_time_constraint(course, start_time, when, priority, added_constraints):
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
     constraint_name = "{0}_{1}_{2}".format(course, when, start_time)
@@ -359,10 +372,13 @@ def create_course_time_constraint(course, start_time, when, priority):
                                                 constraint.all_after_time,
                                                  [course, time_obj]) 
     print "Added constraint ", constraint_name, "with priority/weight = ", str(priority)
+
+    # update scrollbox with this created constraint
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return 
     
 
-def create_time_pref_constraint(instructor, before_after, timeslot, priority):
+def create_time_pref_constraint(instructor, before_after, timeslot, priority, added_constraints):
     priority = get_priority_value(priority)
     instructor = pull_instructor_obj(instructor)
     hour, minute = timeslot.split(":")
@@ -377,10 +393,12 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority):
         #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.FELIX_A, [instructor, timeslot])
         pass
     
+    # update scrollbox with this created constraint
+    # added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
 
 
-def create_day_pref_constraint(instructor, day_code, priority):
+def create_day_pref_constraint(instructor, day_code, priority, added_constraints):
     priority = get_priority_value(priority)
     instructor = pull_instructor_obj(instructor)
     if len(day_code) > 4:  # can't select every day of the week, bad constraint
@@ -390,5 +408,8 @@ def create_day_pref_constraint(instructor, day_code, priority):
     print(constraint_name, "weight = " + str(priority))
     day_code = day_code.lower()    
     #globs.mainScheduler.add_constraint(constraint_name, priority, constraint.RENATO, [instructor, day_code])
+
+    # update scrollbox with this created constraint
+    # added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
 
