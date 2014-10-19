@@ -133,6 +133,53 @@ def instructor_preference_day(this_week, args):
     return 1
 
 
+def num_subsequent_courses(this_week, instructors):
+    TIME_BETWEEN_COURSES = 15  # can change this based on timeslot list
+    for instructor in instructors:
+        """ check each instructor's course list, then
+        check each course's start time.  If there are
+        3 courses with adjacent start times, fail entire constraint"""
+        # WHEN WE IMPLEMENT MWF VS TR TIMES, THIS NEEDS TO BE EDITED FOR THAT
+        course_list = instructor.courses
+        for i in range(len(course_list)):
+            c = course_list[i]
+            gap_time = time_finder(c.end_time, TIME_BETWEEN_COURSES)
+            for j in range(i, len(course_list)):
+                if gap_time == course_list[j].start_time:
+                    # check for third course
+                    course_j = course_list[j]
+                    for k in range(j, len(course_list)):
+                        k_gap_time = time_finder(course_j.end_time, TIME_BETWEEN_COURSES)
+                        if k_gap_time == course_list[k].start_time: # third adjacent course
+                            this_week.valid = False
+                            return
+
+    # if it didn't fail by now, it passed everyone
+    return 0
+
+
+
+def time_finder(end_t, time_gap):
+    """ Helper function for num_subsequent_courses.
+        Creates a new time object <time_gap> minutes after the end_t
+        of a different course to mimic the next course's start time.
+        Returns the new time object. """
+    time_str = str(end_t)[5:]
+    t_hr, t_min = time_str.split(":")
+
+    if t_min < (59 - time_gap):  # can add the time_gap without problems
+        t_min += time_gap
+    else:  # less than time_gap to the next hour
+        diff = 59 - time_gap
+        t_hr += 1
+        t_min = diff
+
+    next_start_time = time(t_hr, t_min)
+    return next_start_time
+
+
+
+
 class Constraint:
     def __init__(self, name, weight, func, args = []):
         if type(name) is not str:
