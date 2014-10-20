@@ -23,7 +23,7 @@ class AddedConstraintsScreen(Page):
         self.constraints = constraints
 
         # holds the scrollbox output text for the added constraints
-        self.added_constraints = []
+        self.constraint_output = []
         
         textL = " Constraints Added: "
         self.text = Label(self, text = textL)
@@ -34,23 +34,28 @@ class AddedConstraintsScreen(Page):
         self.scroll['font'] = ('Courier New', '11')
         self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
         
-    def view_constraints(self, text):
-        output = text[0]
-        if text[1] == 10:
+    def view_constraints(self, constraint):
+        output = constraint[0]
+        #output = output.strip("Constraint Conflict")
+        
+        if constraint[1] == 10:
             output += 'Low'
-        elif text[1] == 25:
+        elif constraint[1] == 25:
             output += 'Medium'
-        elif text[1] == 50:
+        elif constraint[1] == 50:
             output += 'High'
-        elif text[1] == 100:
+        elif constraint[1] == 100:
             output += 'Mandatory'
-
+            
         output += '\n'
-        self.added_constraints.append(output)
+        self.constraint_output.append(output)
 
+        # clear scrollbox
         self.scroll.delete('1.0', END)
-        for i in xrange(len(self.constraints)):
-            self.scroll.insert(INSERT, self.added_constraints[i])
+
+        # insert constraint output to scrollbox
+        for constraint in self.constraint_output:
+            self.scroll.insert(INSERT, constraint)
         
 class HomeConstraintPage(Page):
 
