@@ -1,4 +1,5 @@
 class Course:
+
     def __init__(self, code, credit, instructor):
         self.code = code
         self.credit = credit
@@ -9,7 +10,7 @@ class Course:
             return False
 
         return self.code == other.code and \
-               self.credit == other.credit
+            self.credit == other.credit
 
     def __str__(self):
         return self.code

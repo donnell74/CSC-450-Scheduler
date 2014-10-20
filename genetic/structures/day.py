@@ -2,8 +2,11 @@ from __future__ import print_function
 from copy import copy
 import structures
 
+
 class Day:
+
     """A particular day, consisting of a list of room objects"""
+
     def __init__(self, rooms, day_code, this_week):
         self.week = copy(this_week)
         if day_code.lower() in 'mtwrf':
@@ -26,18 +29,14 @@ class Day:
         elif query == "Schedule":
             return self.week.schedule
 
-
     def get_room(self, query_number):
         for each_room in self.rooms:
             if each_room.number == query_number:
                 return each_room
-        
-        return None
 
+        return None
 
     def __str__(self):
         return "-----------------------\n" + \
-                "Day: " + self.day_code + '\n' + "Rooms:\n" + \
-                "\n".join([str(r) for r in self.rooms])
-
-
+            "Day: " + self.day_code + '\n' + "Rooms:\n" + \
+            "\n".join([str(r) for r in self.rooms])
