@@ -4,6 +4,14 @@ class Course:
         self.code = code
         self.credit = credit
         self.instructor = instructor
+        self.absolute_course = self.determine_absolute_course_code()
+
+    def determine_absolute_course_code(self):
+        """Examples: CSC 130 001 -> CSC130; CSC 450 -> CSC450"""
+        #todo: error if invalid code structure (less than 2 parts)
+        code = self.code
+        two_part_code = "".join(code.split(' ')[:2])
+        return two_part_code
 
     def __eq__(self, other):
         if other == None:

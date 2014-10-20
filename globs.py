@@ -11,6 +11,13 @@ def init(): # call globals.init() from main
         interface.include_instructors_in_dict(courses_and_details, instructors)
     courses = interface.get_courses(courses_credits_and_instructors)
     course_titles = [course.code for course in courses]
+    prereqs = interface.get_prereqs(courses_credits_and_instructors, courses)
+    prereqs = interface.get_extended_prereqs(prereqs, courses)
+    for prereq in prereqs:
+        print "absolute course:", prereq.absolute_course
+        for course in prereq.courses:
+            print course
+        print
 
     # stuff that should be moved to a file
     rooms = ["CHEK212", "CHEK105", "CHEK213"]
