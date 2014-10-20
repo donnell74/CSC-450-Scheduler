@@ -394,11 +394,11 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     
     if before_after == "Before":
         globs.mainScheduler.add_constraint(constraint_name, priority,  \
-                                           constraint.instructor_time_pref_before, [instructor, timeslot])
+                                           constraint.instructor_time_pref_before, [instructor, time_obj])
         
     else:  # after a time
         globs.mainScheduler.add_constraint(constraint_name, priority, \
-                                           constraint.instructor_time_pref_after, [instructor, timeslot])
+                                           constraint.instructor_time_pref_after, [instructor, time_obj])
         pass
     
     # update scrollbox with this created constraint
