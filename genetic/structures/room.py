@@ -4,9 +4,11 @@ from copy import copy
 
 
 class Room:
+
     """A particular room, consisting of a room number and a list of time slot objects"""
+
     def __init__(self, number, this_day):
-        self.day = copy(this_day)
+        self.day = this_day
         self.number = number
 
         time_slots = self.info("Schedule").time_slots
@@ -15,7 +17,8 @@ class Room:
         else:
             time_slots = self.info("Schedule").time_slots_tr'''
 
-        self.schedule = self.generate_time_slots(time_slots) #list of time slot objects
+        self.schedule = self.generate_time_slots(
+            time_slots)  # list of time slot objects
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given room
@@ -36,7 +39,8 @@ class Room:
         this_schedule = []
         for each_slot in time_slots:
             start, end = each_slot.split('-')
-            this_schedule.append(structures.TimeSlot(start.split(':'), end.split(':'), self))
+            this_schedule.append(
+                structures.TimeSlot(start.split(':'), end.split(':'), self))
 
         return this_schedule
 
@@ -46,5 +50,3 @@ class Room:
     def __iter__(self):
         for t_slot in self.schedule:
             yield t_slot
-
-

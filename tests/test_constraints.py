@@ -3,7 +3,7 @@ import unittest
 import random
 from genetic import *
 
-scheduler = scheduler.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+scheduler = scheduler.create_scheduler_from_file("test/schedules/morning_class_test.xml")
 
 class TestConstraints(unittest.TestCase):
 
