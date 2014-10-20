@@ -3,8 +3,8 @@
     <schedule name="test">
         <courseList>
           <item code="CSC130" credit="3" instructor="Scroggins"></item>
-          <item code="CSC131" credit="3" instructor="Smith"></item>
-          <item code="CSC232" credit="3" instructor="Volmar"></item>
+          <item code="CSC131" credit="4" instructor="Smith"></item>
+          <item code="CSC232" credit="5" instructor="Volmar"></item>
         </courseList>
         <roomList>
           <item>CHEK209</item>

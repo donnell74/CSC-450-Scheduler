@@ -17,7 +17,7 @@ class TimeSlot:
             print("Time slot unavailable with times given")
             return
 
-        self.room = copy(this_room)
+        self.room = this_room
         self.day = self.room.day.day_code
         self.start_time = time(start_time[0], start_time[1])
         self.end_time = time(end_time[0], end_time[1])
@@ -70,6 +70,6 @@ class TimeSlot:
                 self.duration) + "\n"
 
     def __eq__(self, other):
-        return self.start_time == other.start_time and \
-            self.room == other.room and \
-            self.day == other.day
+        return self.start_time == other.start_time and self.room == other.room and \
+               self.day == other.day and self.end_time == other.end_time and \
+               self.instructor == other.instructor and self.course == other.course

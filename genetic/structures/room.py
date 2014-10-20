@@ -8,7 +8,7 @@ class Room:
     """A particular room, consisting of a room number and a list of time slot objects"""
 
     def __init__(self, number, this_day):
-        self.day = copy(this_day)
+        self.day = this_day
         self.number = number
 
         time_slots = self.info("Schedule").time_slots

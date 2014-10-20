@@ -11,7 +11,7 @@ class Week:
 
     def __init__(self, rooms, this_scheduler):
         """Initialize week object with list of room objects"""
-        self.schedule = copy(this_scheduler)
+        self.schedule = this_scheduler
         self.days = [structures.Day(rooms, day_code, self)
                      for day_code in 'mtwrf']
         self.fitness = 0
@@ -150,6 +150,7 @@ class Week:
                                 for each_s_course in self.schedule.courses:
                                     if each_s_course.code == each_course["code"]:
                                         each_slot.course = each_s_course
+                                        each_slot.instructor = each_s_course.instructor
 
         except KeyError, AttributeError:
             # error stuff
@@ -181,7 +182,9 @@ class Week:
                     str(courses_dyct[key.code][3]) + '\n'
 
         print ("=" * 25)
-        print(concise_schedule_str)
+        print ("Fitness score: ", self.fitness)
+        print ("Is Valid: ", self.valid)
+        print (concise_schedule_str)
         print ("=" * 25)
         return concise_schedule_str
 

@@ -8,7 +8,7 @@ class Day:
     """A particular day, consisting of a list of room objects"""
 
     def __init__(self, rooms, day_code, this_week):
-        self.week = copy(this_week)
+        self.week = this_week
         if day_code.lower() in 'mtwrf':
             self.day_code = day_code
         else:
