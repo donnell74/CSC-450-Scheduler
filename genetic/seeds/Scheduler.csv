@@ -1,0 +1,11 @@
+Course,Credit,Instructor,Prereqs
+CSC 111,3,Scroggins,None
+CSC 130 001,3,Smith,None
+CSC 130 002,3,Smith,None
+CSC 131,3,Saquer,CSC130
+CSC 232,3,Vollmar,CSC131
+CSC 320,3,Liu,CSC131
+CSC 325,3,Shade,CSC232
+CSC 333,4,Shade,CSC232 CSC320
+CSC 365,3,Saquer,CSC131
+CSC 460,3,Wang,CSC320 CSC325
