@@ -50,6 +50,7 @@ def main():
     s.add_constraint("morning_classes", 30, morning_class, [s.courses[1]]) 
     s.add_constraint("morning_classes", 30, morning_class, [s.courses[2]])
     s.add_constraint("instructor conflict", 0, instructor_conflict, instructors)
+    s.add_constraint("subsequent courses", 0, num_subsequent_courses, instructors)
 
     s.evolution_loop()
     interface.export_schedules(s.weeks)

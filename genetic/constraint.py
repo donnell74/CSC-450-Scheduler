@@ -142,14 +142,16 @@ def num_subsequent_courses(this_week, instructors):
         # WHEN WE IMPLEMENT MWF VS TR TIMES, THIS NEEDS TO BE EDITED FOR THAT
         course_list = instructor.courses
         for i in range(len(course_list)):
-            c = course_list[i]
+            course = course_list[i]
+            c = this_week.find_course(course)[0]
             gap_time = time_finder(c.end_time, TIME_BETWEEN_COURSES)
             for j in range(i, len(course_list)):
-                if gap_time == course_list[j].start_time:
-                    # check for third course
-                    course_j = course_list[j]
+                course_j = this_week.find_course(course_list[j])[0]
+                if gap_time == course_j.start_time:
+                    # check for third adjacent course
                     for k in range(j, len(course_list)):
                         k_gap_time = time_finder(course_j.end_time, TIME_BETWEEN_COURSES)
+                        course_k = this_week.find_course(course_list[k])[0]
                         if k_gap_time == course_list[k].start_time: # third adjacent course
                             this_week.valid = False
                             return
@@ -164,9 +166,10 @@ def time_finder(end_t, time_gap):
         Creates a new time object <time_gap> minutes after the end_t
         of a different course to mimic the next course's start time.
         Returns the new time object. """
-    time_str = str(end_t)[5:]
+    time_str = str(end_t)[:5]
     t_hr, t_min = time_str.split(":")
-
+    t_hr = int(t_hr)
+    t_min = int(t_min)
     if t_min < (59 - time_gap):  # can add the time_gap without problems
         t_min += time_gap
     else:  # less than time_gap to the next hour
