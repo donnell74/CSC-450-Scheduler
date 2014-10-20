@@ -23,13 +23,19 @@ def create_scheduler_from_file(path_to_xml):
 
 
 def create_course_list_from_file(path_to_xml, instructors_dict):
-    """Reads an xml file and creates a list of course objects from it and the list of unique instructors in a dict"""
+    """Reads an xml file and creates a list of course objects from it
+    IN: xml path and the list of unique instructors in a dict
+    OUT: list of course objects; courses are added to instructors"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
         instructor_strings = [c.attrib["instructor"] for c in root.find("schedule").find("courseList").getchildren()]
-        courses = [Course(c.attrib["code"], c.attrib["credit"], instructors_dict[c.attrib["instructor"]]) \
-            for c in root.find("schedule").find("courseList").getchildren()]
+        courses = []
+        for c in root.find("schedule").find("courseList").getchildren():
+            instructor = instructors_dict[c.attrib["instructor"]]
+            course = Course(c.attrib["code"], c.attrib["credit"], instructor)
+            instructor.add_course(course)
+            courses.append(course)
         return courses
     except Exception as inst:
         print(inst)

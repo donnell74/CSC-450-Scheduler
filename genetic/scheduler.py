@@ -28,6 +28,7 @@ class BreedError(Exception):
 
 def create_scheduler_from_file(path_to_xml):
     """Reads in an xml file and schedules all courses found in it"""
+    print("create schedule")
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
@@ -375,7 +376,7 @@ class Scheduler:
         while True:
             print('Generation counter:', counter + 1)
             for each_week in self.weeks:
-                each_week.update_sections(self.courses)
+                #each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
             #print([i.fitness for i in self.weeks])
 

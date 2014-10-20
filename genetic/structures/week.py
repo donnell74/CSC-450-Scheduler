@@ -38,6 +38,7 @@ class Week:
             self.sections = []
         for each_course in courses:
             each_slots = self.find_course(each_course)
+            print("each slots for course", each_course.code, each_slots)
             each_section = structures.Section(each_course, each_slots)
             self.sections.append(each_section)
 

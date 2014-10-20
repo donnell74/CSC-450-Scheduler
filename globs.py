@@ -11,14 +11,20 @@ def init(): # call globals.init() from main
     rooms = interface.create_room_list_from_file(input_path)
     time_slots = interface.create_time_slot_list_from_file(input_path)
     course_titles = [course.code for course in courses]
-
-    #
+    
+    for course in courses:
+        print course.code, course.credit, course.instructor
+    
+    print
     for instructor in instructors:
         print instructor.name
-    for course in courses:
-        print course.code
-    print rooms
+        for course in instructor.courses:
+            print course.code
+        print
+    
     print time_slots
+    print course_titles
+    print rooms
 
     # stuff that should be moved to a file
     time_slot_divide = 2 #todo: remove this from xml
@@ -29,6 +35,10 @@ def init(): # call globals.init() from main
     except:
         mainScheduler = scheduler.Scheduler(courses, rooms, time_slots, time_slot_divide)
         mainScheduler.generate_starting_population()
+        print(str(len(mainScheduler.weeks)))
+        for week in mainScheduler.weeks:
+            next = raw_input("press enter")
+            print week
     
     # used for gui strings
     # must be in military time
