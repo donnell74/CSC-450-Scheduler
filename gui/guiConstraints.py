@@ -128,7 +128,8 @@ class InstructorConstraint(Page):
         # day - CHECKBOXES
         self.day_frame = Frame(self, width = 100)  # don't pack this because Time is the default option so days shouldn't be visible
                         
-        self.label_day = Label(self.day_frame, text = "Day(s):")
+        self.label_day = Label(self.day_frame, text = "Day(s) instructor prefers to teach:", \
+                               wraplength = 100)
         self.label_day.pack(side = TOP)
 
         self.days = ["M", "T", "W", "R", "F"]
@@ -407,7 +408,7 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
         print("Error, a day preference can't be all days of the week, try again.")
         return # return False?  Or, the error mesage
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
-    print(constraint_name, "weight = " + str(priority))
+    
     day_code = day_code.lower()    
     globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_day, [instructor, day_code])
 
