@@ -3,8 +3,8 @@ import unittest
 import random
 from genetic import *
 
-sample_scheduler = scheduler.create_scheduler_from_file("test/schedules/morning_class_test.xml")
-sample_courses = scheduler.create_course_list_from_file("test/schedules/morning_class_test.xml")
+sample_scheduler = scheduler.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_courses = scheduler.create_course_list_from_file("tests/schedules/morning_class_test.xml")
 
 class TestScheduler(unittest.TestCase):
 
@@ -38,10 +38,6 @@ class TestScheduler(unittest.TestCase):
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 60)
 
-    def test_separate_by_credit(self):
-        separated_by_credits = sample_scheduler.separate_by_credit(sample_courses)
-        self.assertEquals(separated_by_credits, {'3': sample_courses})
-
     def test_find_respective_time_slot(self):
         week = sample_scheduler.weeks[0]
         room = week.days[0].rooms[0]
@@ -54,17 +50,14 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(new_time_slot.room, time_slot.room)
         #Make sure not exact same time slot obj
 
-    
-        
-
     def test_separate_by_credit(self):
-        self.assertEquals(len(scheduler.separated["1"]), 0)
-        self.assertEquals(len(scheduler.separated["3"]), 1)
-        self.assertEquals(len(scheduler.separated["4"]), 1)
-        self.assertEquals(len(scheduler.separated["5"]), 1)
-        self.assertEquals(scheduler.separated["3"][0].code, "CSC130")
-        self.assertEquals(scheduler.separated["4"][0].code, "CSC131")
-        self.assertEquals(scheduler.separated["5"][0].code, "CSC232")
+        self.assertEquals(len(sample_scheduler.separated["1"]), 0)
+        self.assertEquals(len(sample_scheduler.separated["3"]), 1)
+        self.assertEquals(len(sample_scheduler.separated["4"]), 1)
+        self.assertEquals(len(sample_scheduler.separated["5"]), 1)
+        self.assertEquals(sample_scheduler.separated["3"][0].code, "CSC130")
+        self.assertEquals(sample_scheduler.separated["4"][0].code, "CSC131")
+        self.assertEquals(sample_scheduler.separated["5"][0].code, "CSC232")
 
 
 if __name__ == "__main__":
