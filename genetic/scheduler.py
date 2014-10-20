@@ -44,6 +44,18 @@ def create_scheduler_from_file(path_to_xml):
         return None
 
 
+def create_course_list_from_file(path_to_xml):
+    """Reads an xml file and creates a list of course objects from it"""
+    try:
+        tree = ET.parse(path_to_xml)
+        root = tree.getroot()
+        courses = [Course(c.attrib["code"], c.attrib["credit"], c.attrib["instructor"]) for c in root.find("schedule").find("courseList").getchildren()]
+        return courses
+    except Exception as inst:
+        print(inst)
+        return None
+
+
 class Scheduler:
 
     """Schedules all courses for a week"""

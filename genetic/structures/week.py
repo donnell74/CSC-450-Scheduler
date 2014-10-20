@@ -150,6 +150,7 @@ class Week:
                                 for each_s_course in self.schedule.courses:
                                     if each_s_course.code == each_course["code"]:
                                         each_slot.course = each_s_course
+                                        each_slot.instructor = each_s_course.instructor
 
         except KeyError, AttributeError:
             # error stuff

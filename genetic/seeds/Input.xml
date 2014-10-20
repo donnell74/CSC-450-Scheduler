@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<data>
+    <schedule name="test">
+        <courseList>
+          <item code="CSC111" credit="3" instructor="Scroggins"></item>
+          <item code="CSC130 001" credit="3" instructor="Smith"></item>
+          <item code="CSC130 002" credit="3" instructor="Smith"></item>
+          <item code="CSC131" credit="3" instructor="Saquer"></item>
+          <item code="CSC232" credit="3" instructor="Vollmar"></item>
+          <item code="CSC320" credit="3" instructor="Liu"></item>
+          <item code="CSC325" credit="3" instructor="Shade"></item>
+          <item code="CSC333" credit="4" instructor="Shade"></item>
+          <item code="CSC365" credit="3" instructor="Saquer"></item>
+          <item code="CSC460" credit="3" instructor="Wang"></item>
+        </courseList>
+        <roomList>
+          <item>CHEK209</item>
+          <item>CHEK105</item>
+          <item>CHEK212</item>
+        </roomList>
+        <timeList>
+          <item>09:00-10:00</item>
+          <item>10:00-11:00</item>
+          <item>11:00-12:00</item>
+          <item>12:00-13:00</item>
+        </timeList>
+        <timeSlotDivide>2</timeSlotDivide>
+    </schedule>
+</data>
