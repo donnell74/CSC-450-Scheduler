@@ -87,13 +87,6 @@ class ViewPage(Page):
                     cursor = 'hand2')
         s4.place(x = 402, y = 47)
         
-        # View Constraints button
-        c0 = Button(self, command = self.view_constraints,
-                    text = 'View Constraints',
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        c0.place(x = 527, y = 47)
-
         # background place holder for the schedules
         self.bg_label = Label(self, width = 37, height= 13,
                          text = 'Click RUN to generate schedules',

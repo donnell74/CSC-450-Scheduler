@@ -6,6 +6,7 @@ sys.path.append("../")
 import globs
 from genetic import constraint
 from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
+import tkMessageBox 
 
 
 class Page(Frame):
@@ -410,8 +411,13 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     priority = get_priority_value(priority)
     instructor = pull_instructor_obj(instructor)
     if len(day_code) > 4:  # can't select every day of the week, bad constraint
-        print("Error, a day preference can't be all days of the week, try again.")
+        error_message = "Error, a day preference can't be all days of the week, try again."
+        tkMessageBox.showerror("Error", error_message)
         return # return False?  Or, the error mesage
+    if len(day_code) < 1: # can't pick no days, instructors have to work
+        error_message = "Error, a day preference must include at least one day."
+        tkMessageBox.showerror("Error", error_message)
+        return # pop up an error message
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
     
     day_code = day_code.lower()    
