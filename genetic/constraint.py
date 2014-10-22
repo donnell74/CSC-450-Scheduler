@@ -110,10 +110,10 @@ def sequential_time_different_building_conflict(this_week, instructors):
         for section in this_week.sections:
             if section.instructor == instructor:
                 instructor_slots.append(section)
-        for i in range(len(instructor_slots)):
+        for i in range(len(instructor_slots) - 1):
             section1 = instructor_slots[i]
             days1 = [day.day_code for day in section1.days]
-            for j in range(i, len(instructor_slots)):
+            for j in range(i + 1, len(instructor_slots)):
                 section2 = instructor_slots[j]
                 days2 = [day.day_code for day in section2.days]
                 if len(set(days1).intersection(days2)) > 0: #if sections days overlap
