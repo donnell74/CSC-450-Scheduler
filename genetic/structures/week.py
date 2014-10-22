@@ -9,10 +9,13 @@ class Week:
 
     """A particular week of courses, consisting of 5 day objects"""
 
-    def __init__(self, rooms, this_scheduler):
+    def __init__(self, rooms, this_scheduler, test = False):
         """Initialize week object with list of room objects"""
-        self.schedule = this_scheduler
-        self.days = [structures.Day(rooms, day_code, self)
+        if test:
+            self.schedule = this_scheduler
+        else:
+            self.schedule = copy(this_scheduler)
+        self.days = [structures.Day(rooms, day_code, self, test)
                      for day_code in 'mtwrf']
         self.fitness = 0
         self.valid = True

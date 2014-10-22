@@ -43,7 +43,7 @@ def course_before_time(this_week, args):
 def course_after_time(this_week, args):
     # find the course and check that its time is after the constraining slot
     # args should be [<course>, <timeslot>]
-    hold = this_week.sectionfind_course(args[0])[0].start_time > args[1]
+    hold = this_week.find_course(args[0])[0].start_time > args[1]
     return 1 if hold else 0
 
 

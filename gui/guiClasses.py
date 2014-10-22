@@ -122,7 +122,7 @@ class ViewPage(Page):
             # destroy old labels to make room for new ones
             self.clear_labels(self.table_labels)
             
-            if n < weeks:
+            if n < weeks and globs.mainScheduler.weeks[n].valid:
                 # format the schedule
                 self.format_schedule(globs.mainScheduler.weeks[n].print_concise())
             else:
