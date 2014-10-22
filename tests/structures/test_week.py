@@ -3,12 +3,12 @@ import unittest
 from genetic.structures import *
 from genetic import *
 
-scheduler = scheduler.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
 
 class TestWeek(unittest.TestCase):
 
     def setUp(self):
-        self.week = scheduler.weeks[0] 
+        self.week = sample_scheduler.weeks[0] 
 
     def tearDown(self):
         pass
@@ -17,10 +17,10 @@ class TestWeek(unittest.TestCase):
         self.assertEqual(len(self.week.days), 5)
 
     def test_info(self):
-        self.assertEqual(self.week.info("Schedule"), scheduler)
+        self.assertEqual(self.week.info("Schedule"), sample_scheduler)
 
     def test_find_course(self):
-        self.assertEqual(len(self.week.find_course(scheduler.courses[0])), 3)
+        self.assertEqual(len(self.week.find_course(sample_scheduler.courses[0])), 3)
         self.assertEqual(len(self.week.find_course(Course("BIO123", "4", "Some Guy"))), 0)
 
     def test_list_time_slots(self):

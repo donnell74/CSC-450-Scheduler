@@ -3,7 +3,7 @@ import unittest
 import random
 from genetic import *
 
-scheduler = scheduler.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
 
 class TestInterface(unittest.TestCase):
 

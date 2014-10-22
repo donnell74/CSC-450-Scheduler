@@ -20,7 +20,7 @@ class Day:
         
         room_list = []
         for room in rooms:
-            temp_room = structures.Room(room.split(' ')[0], room.split(' ')[1], self)
+            temp_room = structures.Room(room.split(' ')[0], room.split(' ')[1], self, test)
             room_list.append(temp_room)
         
         self.rooms = room_list

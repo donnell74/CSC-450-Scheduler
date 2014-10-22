@@ -2,9 +2,10 @@ from __future__ import print_function
 import unittest
 import random
 from genetic import *
+import genetic.interface
 
-sample_scheduler = scheduler.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
-sample_courses = scheduler.create_course_list_from_file("tests/schedules/morning_class_test.xml")
+sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_courses = interface.create_course_list_from_file_test("tests/schedules/morning_class_test.xml")
 
 class TestScheduler(unittest.TestCase):
 
@@ -51,13 +52,13 @@ class TestScheduler(unittest.TestCase):
         #Make sure not exact same time slot obj
 
     def test_separate_by_credit(self):
-        self.assertEquals(len(sample_scheduler.separated["1"]), 0)
-        self.assertEquals(len(sample_scheduler.separated["3"]), 1)
-        self.assertEquals(len(sample_scheduler.separated["4"]), 1)
-        self.assertEquals(len(sample_scheduler.separated["5"]), 1)
-        self.assertEquals(sample_scheduler.separated["3"][0].code, "CSC130")
-        self.assertEquals(sample_scheduler.separated["4"][0].code, "CSC131")
-        self.assertEquals(sample_scheduler.separated["5"][0].code, "CSC232")
+#self.assertEquals(len(sample_scheduler.separated[1]), 0)
+        self.assertEquals(len(sample_scheduler.separated[3]), 1)
+        self.assertEquals(len(sample_scheduler.separated[4]), 1)
+        self.assertEquals(len(sample_scheduler.separated[5]), 1)
+        self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130")
+        self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 131")
+        self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
 
 
 if __name__ == "__main__":

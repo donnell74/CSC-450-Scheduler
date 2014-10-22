@@ -6,8 +6,12 @@ from copy import copy
 class Room:
 
     """A particular room, consisting of a room number and a list of time slot objects"""
-    def __init__(self, building, number, this_day):
-        self.day = copy(this_day)
+    def __init__(self, building, number, this_day, test = False):
+        if test:
+            self.day = this_day
+        else:
+            self.day = copy(this_day)
+        
         self.building = building
         self.number = number
 

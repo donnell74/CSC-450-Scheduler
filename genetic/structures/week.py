@@ -157,7 +157,7 @@ class Week:
                 # starttime, room, day
                 for each_day in self.days:
                     if each_day.day_code in each_course["days"].lower():
-                        for each_slot in each_day.get_room(each_course["room"]):
+                        for each_slot in each_day.get_room(each_course["room"].split()[1]):
                             if each_slot.start_time == startTime and \
                                each_slot.end_time == endTime:
                                 for each_s_course in self.schedule.courses:

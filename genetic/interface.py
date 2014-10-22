@@ -2,25 +2,28 @@ import csv
 from structures import *
 import os
 import xml.etree.ElementTree as ET
+import interface
+from scheduler import *
 
 def create_scheduler_from_file(path_to_xml):
     """Reads in an xml file and schedules all courses found in it"""
-    try:
-        tree = ET.parse(path_to_xml)
-        root = tree.getroot()
-        instructors = interface.create_instructors_from_courses(path_to_xml)
-        instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
-        courses = interface.create_course_list_from_file(input_path, instructors_dict)
-        rooms = interface.create_room_list_from_file(input_path)
-        time_slots = interface.create_time_slot_list_from_file(input_path)
-        course_titles = [course.code for course in courses]
-        setCourses = [i.attrib for i in root.findall("course")]
-        return_schedule = Scheduler(courses, rooms, time_slots, int(time_slot_divide), True)
-        return_schedule.weeks[0].fill_week(setCourses)
-        return return_schedule
-    except Exception as inst:
-        print(inst)
-        return None
+#try:
+    tree = ET.parse(path_to_xml)
+    root = tree.getroot()
+    instructors = interface.create_instructors_from_courses(path_to_xml)
+    instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
+    courses = interface.create_course_list_from_file(path_to_xml, instructors_dict)
+    rooms = interface.create_room_list_from_file(path_to_xml)
+    time_slots = interface.create_time_slot_list_from_file(path_to_xml)
+    time_slot_divide = root.find("schedule").find("timeSlotDivide").text
+    course_titles = [course.code for course in courses]
+    setCourses = [i.attrib for i in root.findall("course")]
+    return_schedule = Scheduler(courses, rooms, time_slots, int(time_slot_divide), True)
+    return_schedule.weeks[0].fill_week(setCourses)
+    return return_schedule
+#    except Exception as inst:
+#        print(inst)
+#        return None
 
 
 def create_course_list_from_file_test(path_to_xml):
@@ -109,7 +112,7 @@ def export_schedules(weeks, export_dir="./", debug=False):
             if os.path.isfile(filename):
                 os.remove(filename)
             with open(filename, 'w') as out:
-                out.write(each_week.print_concise())
+                out.write(each_week.print_concise().replace(' ', ','))
     print("\nExporting " + str(counter) + " schedules")
 
     counter += 1

@@ -3,12 +3,12 @@ import unittest
 from genetic.structures import *
 from genetic import *
 
-scheduler = scheduler.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
 
 class TestRoom(unittest.TestCase):
 
     def setUp(self):
-        self.room = scheduler.weeks[0].days[0].rooms[0] 
+        self.room = sample_scheduler.weeks[0].days[0].rooms[0] 
 
     def tearDown(self):
         pass
@@ -17,9 +17,9 @@ class TestRoom(unittest.TestCase):
         self.assertEqual(len(self.room.schedule), 3)
 
     def test_info(self):
-        self.assertEqual(self.room.info("Day"), scheduler.weeks[0].days[0])
-        self.assertEqual(self.room.info("Week"), scheduler.weeks[0])
-        self.assertEqual(self.room.info("Schedule"), scheduler) 
+        self.assertEqual(self.room.info("Day"), sample_scheduler.weeks[0].days[0])
+        self.assertEqual(self.room.info("Week"), sample_scheduler.weeks[0])
+        self.assertEqual(self.room.info("Schedule"), sample_scheduler) 
 
 
 if __name__ == "__main__":
