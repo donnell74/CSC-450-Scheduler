@@ -177,9 +177,11 @@ class Week:
         for instructor in instructors:
             concise_schedule_str += instructor.name + "\n"
             for key in instructor.courses:
+                # course / days / building / room number / start time / - / end time 
                 concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
                     str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
-                    str(courses_dyct[key.code][3]) + '-' + str(courses_dyct[key.code][4]) + '\n'
+                    str(courses_dyct[key.code][3])[:-3] + '-' + str(courses_dyct[key.code][4])[:-3] + '\n'
+                    #format start and end time to remove seconds value
 
         print ("=" * 25)
         print ("Fitness score: ", self.fitness)
