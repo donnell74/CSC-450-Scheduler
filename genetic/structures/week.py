@@ -129,6 +129,16 @@ class Week:
                         empty_slots.append(each_slot)
         return empty_slots
 
+
+    def is_empty(self):
+        """Returns true is empty; else, false"""
+        for each_day in self.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    if each_slot is not None:
+                        return False
+        return True
+
     def fill_week(self, courses):
         """Fills the week based on the criteria listed in courses"""
         # check that courses has the correct structure

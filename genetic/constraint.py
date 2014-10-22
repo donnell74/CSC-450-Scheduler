@@ -89,7 +89,7 @@ def instructor_time_pref_after(this_week, args):
 	return 1
 
 
-def instructor_conflict(this_week, instructors):
+def instructor_conflict(this_week, args):
     """
     Checks for instructors teaching multiple courses at once.  If none are found,
     passes; else, fails.
@@ -98,6 +98,7 @@ def instructor_conflict(this_week, instructors):
     IN: list of all instructor objects
     OUT: 0/1 for "holds"
     """
+    instructors = args[0]
     for each_instructor in instructors:
         times = []
         count = 0
@@ -133,7 +134,7 @@ def times_are_sequential(timeslot1, timeslot2):
     return result
 
 
-def sequential_time_different_building_conflict(this_week, instructors):
+def sequential_time_different_building_conflict(this_week, args):
     """
     Checks if an instructor teaches a course in one bulding and in the following
     timeslot a different building. If this does not occur, passes; else, fails.
@@ -141,6 +142,7 @@ def sequential_time_different_building_conflict(this_week, instructors):
     IN: list of all instructor objects
     OUT: 0/1 for "holds"
     """
+    instructors = args[0]
     for instructor in instructors:
         instructor_slots = []
         count = 0
@@ -175,30 +177,34 @@ def instructor_preference_day(this_week, args):
     return 1
 
 
-def num_subsequent_courses(this_week, instructors):
-    TIME_BETWEEN_COURSES = 15  # can change this based on timeslot list
+def num_subsequent_courses(this_week, args):
+    """An instructor may not have more than 2 courses back-to-back"""
+    instructors = args[0]
     for instructor in instructors:
-        """ check each instructor's course list, then
-        check each course's start time.  If there are
-        3 courses with adjacent start times, fail entire constraint"""
-        # WHEN WE IMPLEMENT MWF VS TR TIMES, THIS NEEDS TO BE EDITED FOR THAT
-        course_list = instructor.courses
-        for i in range(len(course_list)):
-            course = course_list[i]
-            c = this_week.find_course(course)[0]
-            gap_time = time_finder(c.end_time, TIME_BETWEEN_COURSES)
-            for j in range(i, len(course_list)):
-                course_j = this_week.find_course(course_list[j])[0]
-                if gap_time == course_j.start_time:
-                    # check for third adjacent course
-                    for k in range(j, len(course_list)):
-                        k_gap_time = time_finder(course_j.end_time, TIME_BETWEEN_COURSES)
-                        course_k = this_week.find_course(course_list[k])[0]
-                        if k_gap_time == course_list[k].start_time: # third adjacent course
-                            this_week.valid = False
-                            return
-
-    # if it didn't fail by now, it passed everyone
+        instructor_slots = []
+        count = 0
+        for section in this_week.sections:
+            if section.instructor == instructor:
+                instructor_slots.append(section)
+        for i in range(len(instructor_slots) - 2):
+            section1 = instructor_slots[i]
+            days1 = [day.day_code for day in section1.days]
+            for j in range(i + 1, len(instructor_slots) - 1):
+                section2 = instructor_slots[j]
+                days2 = [day.day_code for day in section2.days]
+                for k in range(j + 1, len(instructor_slots)):
+                    section3 = instructor_slots[k]
+                    days3 = [day.day_code for day in section3.days]
+                    all_days = [days1, days2, days3]
+                    if len(set(all_days[0]).intersection(*all_days[1:])) > 0: #if sections days overlap
+                        compare_1_2 = times_are_sequential(section1.time_slots[0], section2.time_slots[0])
+                        compare_2_3 = times_are_sequential(section2.time_slots[0], section3.time_slots[0])
+                        compare_1_3 = times_are_sequential(section1.time_slots[0], section3.time_slots[0])
+                        if (compare_1_2 and compare_2_3) or (compare_1_3 and compare_2_3) or \
+                           (compare_1_3 and compare_1_2):
+                            count += 1
+        if count > 0:
+            this_week.valid = False
     return 0
 
 

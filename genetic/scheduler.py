@@ -338,10 +338,12 @@ class Scheduler:
 
         def week_slice_helper():
             valid_weeks = filter(lambda x: x.valid, self.weeks)
+            valid_weeks.sort(key=lambda x: x.fitness, reverse=True)
             if len(valid_weeks) > 0:
-                self.weeks = valid_weeks + filter(lambda x: not x.valid, self.weeks)[:5-len(valid_weeks)]
+                temp = filter(lambda x: not x.valid, self.weeks)[:5-len(valid_weeks)]
+                temp.sort(key=lambda x: x.fitness, reverse=True)
+                self.weeks = valid_weeks + temp
 
-            self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
             return valid_weeks
 
@@ -362,8 +364,8 @@ class Scheduler:
                   min(i.fitness for i in self.weeks))
             print("Number of valid weeks for the generation:", str(len(valid_weeks)))
 
-            #special case: first generation has no valid weeks
-            if counter == 0 and len(valid_weeks) == 0:
+            #insufficient valid weeks
+            if len(valid_weeks) == 0:
                 print("Generating a new population")
                 self.weeks = []
                 self.generate_starting_population()
@@ -589,7 +591,6 @@ class Scheduler:
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             # if impossible to generate (incomplete week)
             if not each_week.valid:
-                print("***WEEK DELETED***")
                 del self.weeks[self.weeks.index(each_week)]
         if len(self.weeks) == 0:
             print("Could not schedule")
