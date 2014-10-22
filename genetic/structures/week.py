@@ -177,9 +177,9 @@ class Week:
         for instructor in instructors:
             concise_schedule_str += instructor.name + "\n"
             for key in instructor.courses:
-                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + str(courses_dyct[key.code][1]) + ' ' + \
-                    str(courses_dyct[key.code][2]) + '-' + \
-                    str(courses_dyct[key.code][3]) + '\n'
+                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
+                    str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
+                    str(courses_dyct[key.code][3]) + '-' + str(courses_dyct[key.code][4]) + '\n'
 
         print ("=" * 25)
         print ("Fitness score: ", self.fitness)
