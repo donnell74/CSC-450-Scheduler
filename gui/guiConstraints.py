@@ -1,5 +1,3 @@
-# THIS SHOULD BE ADDED TO GUICLASSES.PY
-
 from Tkinter import *
 from guiClasses import *
 from datetime import time
