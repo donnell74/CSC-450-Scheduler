@@ -42,12 +42,13 @@ def export_schedules(weeks, export_dir = "./", debug = False):
     num_to_export = len(weeks)
     print("\nExporting " + str(num_to_export) + " schedules")
     for each_week in weeks:
-        counter += 1
-        filename = os.path.join(export_dir, "schedule_" + str(counter) + ".csv")
-        if os.path.isfile(filename):
-            os.remove(filename)
-        with open(filename, 'w') as out:
-            out.write(each_week.print_concise())
+        if each_week.valid:
+            counter += 1
+            filename = os.path.join(export_dir, "schedule_" + str(counter) + ".csv")
+            if os.path.isfile(filename):
+                os.remove(filename)
+            with open(filename, 'w') as out:
+                out.write(each_week.print_concise())
 
     counter += 1
     while counter <= 5:

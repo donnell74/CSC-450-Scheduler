@@ -13,7 +13,7 @@ def init(): # call globals.init() from main
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
-    rooms = ["CHEK 212", "CHEK 105", "CHEK 213", "TEMP 001"]
+    rooms = ["CHEK 212", "CHEK 105", "GLAS 213", "TEMP 001"]
     time_slots = ['09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00']
     time_slot_divide = 2
     #DO NOT DO THIS AGAIN

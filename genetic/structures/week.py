@@ -176,6 +176,7 @@ class Week:
                     str(courses_dyct[key.code][3]) + '-' + str(courses_dyct[key.code][4]) + '\n' 
 
         print ("="*25)
+        print(self.valid)
         print(concise_schedule_str)
         print ("="*25)
         return concise_schedule_str

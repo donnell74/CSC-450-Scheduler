@@ -63,8 +63,9 @@ class ViewPage(Page):
     def update(self):
         text = ''
         for each_week in globs.mainScheduler.weeks:
-            text += each_week.print_concise()
-            text += '\n   =========================================    \n'
+            if each_week.valid:
+                text += each_week.print_concise()
+                text += '\n   =========================================    \n'
         #self.output_text.set(text + error_messages)
         self.txt.insert(INSERT, text)
 

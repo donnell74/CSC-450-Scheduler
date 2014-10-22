@@ -42,7 +42,7 @@ class Room:
         return this_schedule
 
     def __str__(self):
-        return str(self.building) + " " + str(self.number) + "\n" + "\n".join([str(t) for t in self.schedule])
+        return str(self.building) + " " + str(self.number) # + "\n"  + "\n".join([str(t) for t in self.schedule])
 
     def __iter__(self):
         for t_slot in self.schedule:

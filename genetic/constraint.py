@@ -74,7 +74,6 @@ def instructor_conflict(this_week, instructors):
             for each_other_time in times:
                 if each_time == each_other_time:
                     count += 1
-        
         if count > 0:
             this_week.valid = False
     return 0
@@ -92,8 +91,9 @@ def times_are_sequential(timeslot1, timeslot2):
     """
     time_threshold = 0
     start2 = max(timeslot1.start_time, timeslot2.start_time)
-    end1 = min(timeslot1.start_time, timeslot2.start_time)
-    return get_minutes(start2) - get_minutes(end1) - time_threshold <= 0
+    end1 = min(timeslot1.end_time, timeslot2.end_time)
+    result = get_minutes(start2) - get_minutes(end1) - time_threshold <= 0
+    return result
 
 def sequential_time_different_building_conflict(this_week, instructors):
     """
@@ -103,27 +103,23 @@ def sequential_time_different_building_conflict(this_week, instructors):
     IN: list of all instructor objects
     OUT: 0/1 for "holds"
     """
+
     for instructor in instructors:
-        times = []
+        instructor_slots = []
         count = 0
-        for i in range(len(instructor.courses)):
-            for j in range(i, len(instructor.courses)):
-                # get all possible course times
-                course1_times = this_week.find_course(instructor.courses[i]) 
-                course2_times = this_week.find_course(instructor.courses[j])
-                # if they meet the same number of days, they meet on the same days
-                for course1_time in course1_times:
-                    for course2_time in course2_times:
-                        # if there are any overlapping days...
-                        for char in course1_time.day:
-                            if char in course2_time.day:
-                                # if they are immediately sequential...
-                                if times_are_sequential(course1_time, course2_time):
-                                    # if they are in different buildings...
-                                    if course1_time.room.building != course2_time.room.building:
-                                        # inc count of conflicts
-                                        count += 1
-        # if there are any conflicts, week is not valid
+        for section in this_week.sections:
+            if section.instructor == instructor:
+                instructor_slots.append(section)
+        for i in range(len(instructor_slots)):
+            section1 = instructor_slots[i]
+            days1 = [day.day_code for day in section1.days]
+            for j in range(i, len(instructor_slots)):
+                section2 = instructor_slots[j]
+                days2 = [day.day_code for day in section2.days]
+                if len(set(days1).intersection(days2)) > 0: #if sections days overlap
+                    if times_are_sequential(section1.time_slots[0], section2.time_slots[0]):
+                        if section1.room.building == section2.room.building:
+                            count += 1
         if count > 0:
             this_week.valid = False
     return 0
