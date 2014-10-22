@@ -118,7 +118,7 @@ def sequential_time_different_building_conflict(this_week, instructors):
                 days2 = [day.day_code for day in section2.days]
                 if len(set(days1).intersection(days2)) > 0: #if sections days overlap
                     if times_are_sequential(section1.time_slots[0], section2.time_slots[0]):
-                        if section1.room.building == section2.room.building:
+                        if section1.room.building != section2.room.building:
                             count += 1
         if count > 0:
             this_week.valid = False
