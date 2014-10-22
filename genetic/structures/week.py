@@ -9,10 +9,13 @@ class Week:
 
     """A particular week of courses, consisting of 5 day objects"""
 
-    def __init__(self, rooms, this_scheduler):
+    def __init__(self, rooms, this_scheduler, test = False):
         """Initialize week object with list of room objects"""
-        self.schedule = this_scheduler
-        self.days = [structures.Day(rooms, day_code, self)
+        if test:
+            self.schedule = this_scheduler
+        else:
+            self.schedule = copy(this_scheduler)
+        self.days = [structures.Day(rooms, day_code, self, test)
                      for day_code in 'mtwrf']
         self.fitness = 0
         self.valid = True
@@ -38,7 +41,6 @@ class Week:
             self.sections = []
         for each_course in courses:
             each_slots = self.find_course(each_course)
-            print("each slots for course", each_course.code, each_slots)
             each_section = structures.Section(each_course, each_slots)
             self.sections.append(each_section)
 
@@ -127,6 +129,16 @@ class Week:
                         empty_slots.append(each_slot)
         return empty_slots
 
+
+    def is_empty(self):
+        """Returns true is empty; else, false"""
+        for each_day in self.days:
+            for each_room in each_day.rooms:
+                for each_slot in each_room.schedule:
+                    if each_slot is not None:
+                        return False
+        return True
+
     def fill_week(self, courses):
         """Fills the week based on the criteria listed in courses"""
         # check that courses has the correct structure
@@ -168,9 +180,9 @@ class Week:
                 if courses_dyct.has_key(each_slot.course.code):
                     courses_dyct[each_slot.course.code][0] += each_slot.day
                 else:
-                    courses_dyct[each_slot.course.code] = [each_slot.day, each_slot.room.number,
-                                                           each_slot.start_time, each_slot.end_time,
-                                                           each_slot.instructor]
+                    courses_dyct[each_slot.course.code] =  [each_slot.day, each_slot.room.building, \
+                                                            each_slot.room.number, each_slot.start_time, \
+                                                            each_slot.end_time, each_slot.instructor]
                     if each_slot.instructor not in instructors:
                         instructors.append(each_slot.instructor)
 
@@ -178,9 +190,11 @@ class Week:
         for instructor in instructors:
             concise_schedule_str += instructor.name + "\n"
             for key in instructor.courses:
-                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + str(courses_dyct[key.code][1]) + ' ' + \
-                    str(courses_dyct[key.code][2]) + '-' + \
-                    str(courses_dyct[key.code][3]) + '\n'
+                # course / days / building / room number / start time / - / end time 
+                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
+                    str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
+                    str(courses_dyct[key.code][3])[:-3] + '-' + str(courses_dyct[key.code][4])[:-3] + '\n'
+                    #format start and end time to remove seconds value
 
         print ("=" * 25)
         print ("Fitness score: ", self.fitness)

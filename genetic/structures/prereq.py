@@ -28,4 +28,4 @@ class Prereq:
         return out
 
     def __str__(self):
-        return self.absolute_course
+        return self.absolute_course + " requires " + "".join([str(p) + ", " for p in self.absolute_prereqs])

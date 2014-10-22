@@ -26,42 +26,11 @@ class BreedError(Exception):
         return repr(self.value)
 
 
-def create_scheduler_from_file(path_to_xml):
-    """Reads in an xml file and schedules all courses found in it"""
-    print("create schedule")
-    try:
-        tree = ET.parse(path_to_xml)
-        root = tree.getroot()
-        courses = [Course(c.attrib["code"], c.attrib["credit"], c.attrib["instructor"]) for c in root.find("schedule").find("courseList").getchildren()]
-        rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
-        time_slots = [ t.text for t in root.find("schedule").find("timeList").getchildren()]
-        time_slot_divide = root.find("schedule").find("timeSlotDivide").text
-        setCourses = [i.attrib for i in root.findall("course")]
-        return_schedule = Scheduler( courses, rooms, time_slots, int(time_slot_divide))
-        return_schedule.weeks[0].fill_week(setCourses)
-        return return_schedule
-    except Exception as inst:
-        print(inst)
-        return None
-
-
-def create_course_list_from_file(path_to_xml):
-    """Reads an xml file and creates a list of course objects from it"""
-    try:
-        tree = ET.parse(path_to_xml)
-        root = tree.getroot()
-        courses = [Course(c.attrib["code"], c.attrib["credit"], c.attrib["instructor"]) for c in root.find("schedule").find("courseList").getchildren()]
-        return courses
-    except Exception as inst:
-        print(inst)
-        return None
-
-
 class Scheduler:
 
     """Schedules all courses for a week"""
 
-    def __init__(self, courses, rooms, time_slots, time_slot_divide):
+    def __init__(self, courses, rooms, time_slots, time_slot_divide, test = False):
         # eventually will include mwf and tr slots instead of general slots
         try:
             courses[0].code
@@ -90,8 +59,10 @@ class Scheduler:
         self.slot_divide = time_slot_divide
         self.courses = courses
         self.rooms = rooms
-        self.weeks = [Week(rooms, self), Week(rooms, self), Week(rooms, self),
-                      Week(rooms, self), Week(rooms, self)]
+        self.weeks = [Week(rooms, self, test), Week(rooms, self, test),
+                      Week(rooms, self, test), Week(rooms, self, test),
+                      Week(rooms, self, test)]
+
         self.constraints = []
         self.max_fitness = 0
 
@@ -104,7 +75,7 @@ class Scheduler:
         """Groups the courses based on number of credit hours.
         IN: list of course objects
         OUT: dictionary with keys=credit hours and values=list of course objects"""
-        courses_by_credits = {"1":[], "2":[], "3":[], "4":[], "5":[]}
+        courses_by_credits = {}
         for each_course in courses_list:
             # Case 1: New key-value pair (make new list)
             if each_course.credit not in courses_by_credits.keys():
@@ -367,19 +338,23 @@ class Scheduler:
 
         def week_slice_helper():
             valid_weeks = filter(lambda x: x.valid, self.weeks)
+            valid_weeks.sort(key=lambda x: x.fitness, reverse=True)
             if len(valid_weeks) > 0:
-                self.weeks = valid_weeks + filter(lambda x: not x.valid, self.weeks)[:5-len(valid_weeks)]
+                temp = filter(lambda x: not x.valid, self.weeks)[:5-len(valid_weeks)]
+                temp.sort(key=lambda x: x.fitness, reverse=True)
+                self.weeks = valid_weeks + temp
 
-            self.weeks.sort(key=lambda x: x.fitness, reverse=True)
             self.weeks = self.weeks[:5]
+            return valid_weeks
 
         while True:
             print('Generation counter:', counter + 1)
             for each_week in self.weeks:
-                #each_week.update_sections(self.courses)
+                each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
             #print([i.fitness for i in self.weeks])
 
+            valid_weeks = week_slice_helper()
             week_slice_helper()
             if counter == MAX_TRIES - 1:
                 print('Max tries reached; final output found')
@@ -387,8 +362,19 @@ class Scheduler:
 
             print("Minimum fitness of the generation:",
                   min(i.fitness for i in self.weeks))
+            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+
+            #insufficient valid weeks
+            if len(valid_weeks) == 0:
+                print("Generating a new population")
+                self.weeks = []
+                self.generate_starting_population()
+                total_iterations += 1
+                counter += 1
+                continue
+
             if min(i.fitness for i in self.weeks) == self.max_fitness and \
-              len(self.weeks) >= 5:
+              len(self.weeks) >= 5 and len(valid_weeks) >= 5:
                 break
 
             self.breed()
@@ -597,7 +583,7 @@ class Scheduler:
 
     def generate_starting_population(self):
         """Generates starting population"""
-        for x in range(5):
+        for x in range(10):
             self.weeks.append(Week(self.rooms, self))
 
         for each_week in self.weeks:
@@ -605,8 +591,10 @@ class Scheduler:
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             # if impossible to generate (incomplete week)
             if not each_week.valid:
-                print("***WEEK DELETED***")
                 del self.weeks[self.weeks.index(each_week)]
         if len(self.weeks) == 0:
             print("Could not schedule")
             return
+        #for each_week in self.weeks:
+            #self.calc_fitness(each_week)
+            #each_week.print_concise()

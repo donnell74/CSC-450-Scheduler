@@ -65,9 +65,9 @@ class TimeSlot:
         self.instructor = None
 
     def __str__(self):
-        return "Course:%s\nInstructor:%s\nStart time:%s\nEnd time:%s\nDuration:%s" % \
-               (self.course, str(self.instructor), str(self.start_time), str(self.end_time),
-                self.duration) + "\n"
+        return "Course: %s\nInstructor: %s\nRoom: %s\nStart time: %s\nEnd time: %s\nDuration: %s" % \
+               (self.course, str(self.instructor), str(self.room), str(self.start_time), str(self.end_time),
+                self.duration) +"\n"
 
     def __eq__(self, other):
         return self.start_time == other.start_time and self.room == other.room and \
