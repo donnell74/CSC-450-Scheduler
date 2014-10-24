@@ -59,7 +59,36 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130")
         self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 131")
         self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
+"""
+    def test_generator(self):
+        generated = sample_scheduler.generator(sample_scheduler.weeks[0], sample_courses, sample_scheduler.weeks[0].find_empty_time_slots()) 
+        if generated.valid == True:
+            for each_course in sample_courses:
+                check if each_course in generated
+                if each_course.pre_schedule:
+                    check if each_course.start_time is correct
 
+        if generated.valid == False:
+            check that there is at least one course missing or a course is schedule twice or ...
+        
+    def test_assess_inconsistences(self):
+        generic unit tests based on pre defined seeds
+
+    def test_resolve_inconsistences(self):
+        generic unit tests based on pre defined seeds
+
+    def test_inconsistences_integration(self):
+        test that both work together
+
+    def test_crossover(self):
+        make sure it produces two schedules
+    
+    def test_breed(self):
+        output size == input + (n choose 2)
+
+    def test_mutate(self):
+        given week with no empty slots returns week
+"""
 
 if __name__ == "__main__":
     unittest.main()
