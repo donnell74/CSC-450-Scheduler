@@ -347,10 +347,28 @@ def pull_instructor_obj(instructor):
             break
     return instructor
 
+def check_constraint_exists(name):
+    """ Checks to see if a constraint name is already found in the
+    scheduler's constraint list.
+    IN:  A string that is the constraint name
+    OUT: 0 if the constraint already exists, 1 if it does not
+    """
+    for constraint in globs.mainScheduler.constraints:
+        if constraint.name == name:
+            return 0
+    return 1
+            
+
 def create_course_time_constraint(course, start_time, when, priority, added_constraints):
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
     constraint_name = "{0}_{1}_{2}".format(course, when, start_time)
+
+    if check_constraint_exists(constraint_name) == 0:
+        tkMessageBox.showerror("Duplicate Constraint", \
+                               "This constraint already exists.")
+        return
+    
     hour, minute = start_time.split(":")
     time_obj = time( int(hour), int(minute) )
 
@@ -378,8 +396,7 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_after_time,
                                                  [course, time_obj]) 
-    print "Added constraint ", constraint_name, "with priority/weight = ", str(priority)
-
+    
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return 
@@ -391,7 +408,11 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     hour, minute = timeslot.split(":")
     time_obj = time( int(hour), int(minute) )
     constraint_name = "{0}_prefers_{1}_{2}".format(instructor.name, before_after.lower(), str(time_obj))
-    #print(constraint_name, "weight = " + str(priority))
+
+    if check_constraint_exists(constraint_name) == 0:
+        tkMessageBox.showerror("Duplicate Constraint", \
+                               "This constraint already exists.")
+        return
     
     if before_after == "Before":
         globs.mainScheduler.add_constraint(constraint_name, priority,  \
@@ -413,13 +434,18 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     if len(day_code) > 4:  # can't select every day of the week, bad constraint
         error_message = "Error, a day preference can't be all days of the week, try again."
         tkMessageBox.showerror("Error", error_message)
-        return # return False?  Or, the error mesage
+        return 
     if len(day_code) < 1: # can't pick no days, instructors have to work
         error_message = "Error, a day preference must include at least one day."
         tkMessageBox.showerror("Error", error_message)
-        return # pop up an error message
+        return
+
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
-    
+    if check_constraint_exists(constraint_name) == 0:
+        tkMessageBox.showerror("Duplicate Constraint", \
+                               "This constraint already exists.")
+        return
+        
     day_code = day_code.lower()    
     globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_day, [instructor, day_code])
 
