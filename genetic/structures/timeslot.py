@@ -8,7 +8,7 @@ class TimeSlot:
 
     """A particular time slot, consisting of a time range and a course object"""
 
-    def __init__(self, start_time, end_time, this_room, course=None):
+    def __init__(self, start_time, end_time, this_room, isTR, course=None, static=False):
         try:
             # make sure we are given 4 integers for times
             start_time = list(map(int, start_time))
@@ -18,9 +18,11 @@ class TimeSlot:
             return
 
         self.room = this_room
-        self.day = self.room.day.day_code
+        self.day = self.room.day.day_code 
         self.start_time = time(start_time[0], start_time[1])
         self.end_time = time(end_time[0], end_time[1])
+        self.isTR = isTR
+        self.static = static
         self.course = course
         self.duration = self.find_duration(start_time, end_time)
         self.instructor = None

@@ -15,14 +15,15 @@ class Room:
         self.building = building
         self.number = number
 
-        time_slots = self.info("Schedule").time_slots
-        '''if self.day.day_code in 'mwf':
-            time_slots = self.info("Schedule").time_slots_mwf
-        else:
-            time_slots = self.info("Schedule").time_slots_tr'''
+        time_slots_mwf = self.info("Schedule").time_slots_mwf
 
-        self.schedule = self.generate_time_slots(
-            time_slots)  # list of time slot objects
+        if self.day.day_code in 'tr':
+            time_slots_tr = self.info("Schedule").time_slots_tr
+        else:
+            time_slots_tr = []
+
+        # list of time slot objects
+        self.schedule = self.generate_time_slots(time_slots_mwf, time_slots_tr)  
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given room
@@ -39,12 +40,17 @@ class Room:
         elif query == "Schedule":
             return self.day.week.schedule
 
-    def generate_time_slots(self, time_slots):
+    def generate_time_slots(self, time_slots_mwf, time_slots_tr):
         this_schedule = []
-        for each_slot in time_slots:
+        for each_slot in time_slots_mwf:
             start, end = each_slot.split('-')
             this_schedule.append(
-                structures.TimeSlot(start.split(':'), end.split(':'), self))
+                structures.TimeSlot(start.split(':'), end.split(':'), self, isTR=False))
+
+        for each_slot in time_slots_tr:
+            start, end = each_slot.split('-')
+            this_schedule.append(
+                structures.TimeSlot(start.split(':'), end.split(':'), self, isTR=True))
 
         return this_schedule
 

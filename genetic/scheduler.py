@@ -31,7 +31,7 @@ class Scheduler:
 
     """Schedules all courses for a week"""
 
-    def __init__(self, courses, rooms, time_slots, time_slot_divide, test = False):
+    def __init__(self, courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide, test = False):
         # eventually will include mwf and tr slots instead of general slots
         try:
             courses[0].code
@@ -44,19 +44,24 @@ class Scheduler:
             raise SchedulerInitError("Rooms")
 
         try:
-            assert type(time_slots[0]) == str
+            assert type(time_slots_mwf[0]) == str
         except:
             raise SchedulerInitError("Time Slots")
 
         try:
+            assert type(time_slots_tr[0]) == str
+        except:
+            raise SchedulerInitError("Time Slots")
+
+        self.time_slots_mwf = time_slots_mwf
+        self.time_slots_tr = time_slots_tr
+        self.time_slots = time_slots_mwf + time_slots_tr
+        try:
             assert type(time_slot_divide) == int
-            assert 0 < time_slot_divide and time_slot_divide < len(time_slots)
+            assert 0 < time_slot_divide and time_slot_divide <= min(len(self.time_slots_mwf), len(self.time_slots_tr))
         except:
             raise SchedulerInitError("Time Slot Divide")
 
-        #self.time_slots_mwf = time_slots_mwf
-        #self.time_slots_tr = time_slots_tr
-        self.time_slots = time_slots
         self.slot_divide = time_slot_divide
         self.courses = courses
         self.rooms = rooms
@@ -125,12 +130,6 @@ class Scheduler:
         day = time_slot.info("Day")
         room = time_slot.info("Room")
         return week.find_time_slot(day, room, time_slot)
-
-    def swap(self, course1, course2, schedule):
-        """Performs swaps around 2 courses in a schedule
-        IN: 2 Course objects, schedule object
-        OUT: schedule object with swap performed"""
-        pass
 
     def find_time_slots_from_cuts(self, this_week, slots_list):
         """For a given week, returns all time slots matching the slots list"""

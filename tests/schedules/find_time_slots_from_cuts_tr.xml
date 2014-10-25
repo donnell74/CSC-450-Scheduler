@@ -1,0 +1,178 @@
+<?xml version='1.0'?>
+<data>
+<schedule name='20141025-141707'>
+<courseList>
+<item code='CSC 111' credit='3' instructor='Scroggins'></item>
+<item code='CSC 130 001' credit='3' instructor='Smith'></item>
+<item code='CSC 130 002' credit='3' instructor='Smith'></item>
+<item code='CSC 131' credit='3' instructor='Saquer'></item>
+<item code='CSC 232' credit='3' instructor='Vollmar'></item>
+<item code='CSC 320' credit='3' instructor='Liu'></item>
+<item code='CSC 325' credit='3' instructor='Shade'></item>
+<item code='CSC 333' credit='4' instructor='Shade'></item>
+<item code='CSC 365' credit='3' instructor='Saquer'></item>
+<item code='CSC 450' credit='3' instructor='Shade'></item>
+<item code='CSC 460' credit='3' instructor='Wang'></item>
+</courseList>
+<roomList>
+<item>CHEK 213</item>
+<item>CHEK 105</item>
+<item>CHEK 212</item>
+<item>GLAS 345</item>
+<item>TEMP 001</item>
+</roomList>
+<timeListMWF>
+<item>08:00-08:50</item>
+<item>09:05-09:55</item>
+<item>10:10-11:00</item>
+<item>11:15-12:05</item>
+</timeListMWF>
+<timeListTR>
+<item>08:00-09:15</item>
+<item>09:30-10:45</item>
+<item>11:00-12:15</item>
+</timeListTR>
+<timeSlotDivide>2</timeSlotDivide>
+</schedule>
+<course 
+code="CSC 325"
+credit="3"
+startTime="08:00"
+endTime="09:15"
+days="tr"
+room="GLAS 345"
+instructor="Shade">
+</course>
+<course 
+code="CSC 333"
+credit="4"
+startTime="10:10"
+endTime="11:00"
+days="mtwf"
+room="TEMP 001"
+instructor="Shade">
+</course>
+<course 
+code="CSC 450"
+credit="3"
+startTime="09:05"
+endTime="09:55"
+days="mwf"
+room="CHEK 213"
+instructor="Shade">
+</course>
+<course 
+code="CSC 232"
+credit="3"
+startTime="10:10"
+endTime="11:00"
+days="mwf"
+room="CHEK 105"
+instructor="Vollmar">
+</course>
+<course 
+code="CSC 320"
+credit="3"
+startTime="11:15"
+endTime="12:05"
+days="mwf"
+room="CHEK 105"
+instructor="Liu">
+</course>
+<course 
+code="CSC 460"
+credit="3"
+startTime="09:30"
+endTime="10:45"
+days="tr"
+room="CHEK 213"
+instructor="Wang">
+</course>
+<course 
+code="CSC 131"
+credit="3"
+startTime="12:30"
+endTime="13:45"
+days="tr"
+room="CHEK 213"
+instructor="Saquer">
+</course>
+<course 
+code="CSC 365"
+credit="3"
+startTime="11:00"
+endTime="12:15"
+days="tr"
+room="CHEK 212"
+instructor="Saquer">
+</course>
+<course 
+code="CSC 111"
+credit="3"
+startTime="09:30"
+endTime="10:45"
+days="tr"
+room="CHEK 105"
+instructor="Scroggins">
+</course>
+<course 
+code="CSC 130 001"
+credit="3"
+startTime="12:30"
+endTime="13:45"
+days="tr"
+room="CHEK 212"
+instructor="Smith">
+</course>
+<course 
+code="CSC 130 002"
+credit="3"
+startTime="11:00"
+endTime="12:15"
+days="tr"
+room="CHEK 105"
+instructor="Smith">
+</course>
+<extra>
+<slots_list>
+<item>08:00-09:15</item>
+<item>09:30-10:45</item>
+</slots_list>
+<matching_slots>
+<item>m - CHEK - 105 - 08:00</item>
+<item>m - CHEK - 212 - 08:00</item>
+<item>m - GLAS - 345 - 08:00</item>
+<item>m - TEMP - 001 - 08:00</item>
+<item>t - CHEK - 213 - 08:00</item>
+<item>t - CHEK - 213 - 09:30</item>
+<item>t - CHEK - 105 - 08:00</item>
+<item>t - CHEK - 105 - 09:30</item>
+<item>t - CHEK - 212 - 08:00</item>
+<item>t - CHEK - 212 - 09:30</item>
+<item>t - GLAS - 345 - 08:00</item>
+<item>t - GLAS - 345 - 09:30</item>
+<item>t - TEMP - 001 - 08:00</item>
+<item>t - TEMP - 001 - 09:30</item>
+<item>w - CHEK - 213 - 08:00</item>
+<item>w - CHEK - 105 - 08:00</item>
+<item>w - CHEK - 212 - 08:00</item>
+<item>w - GLAS - 345 - 08:00</item>
+<item>w - TEMP - 001 - 08:00</item>
+<item>r - CHEK - 213 - 08:00</item>
+<item>r - CHEK - 213 - 09:30</item>
+<item>r - CHEK - 105 - 08:00</item>
+<item>r - CHEK - 105 - 09:30</item>
+<item>r - CHEK - 212 - 08:00</item>
+<item>r - CHEK - 212 - 09:30</item>
+<item>r - GLAS - 345 - 08:00</item>
+<item>r - GLAS - 345 - 09:30</item>
+<item>r - TEMP - 001 - 08:00</item>
+<item>r - TEMP - 001 - 09:30</item>
+<item>f - CHEK - 213 - 08:00</item>
+<item>f - CHEK - 105 - 08:00</item>
+<item>f - CHEK - 212 - 08:00</item>
+<item>f - GLAS - 345 - 08:00</item>
+<item>f - TEMP - 001 - 08:00</item>
+</matching_slots>
+</extra>
+</data>

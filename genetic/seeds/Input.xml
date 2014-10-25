@@ -21,12 +21,16 @@
           <item>GLAS 345</item>
           <item>TEMP 001</item>
         </roomList>
-        <timeList>
+        <timeListMWF>
           <item>09:00-10:00</item>
           <item>10:00-11:00</item>
           <item>11:00-12:00</item>
           <item>12:00-13:00</item>
-        </timeList>
+        </timeListMWF>
+        <timeListTR>
+          <item>09:15-10:30</item>
+          <item>11:00-12:15</item>
+        </timeListTR>
         <timeSlotDivide>2</timeSlotDivide>
     </schedule>
 </data>

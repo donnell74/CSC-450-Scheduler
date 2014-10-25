@@ -9,11 +9,15 @@
         <roomList>
           <item>CHEK 209</item>
         </roomList>
-        <timeList>
+        <timeListMWF>
           <item>10:00-11:00</item>
           <item>11:00-12:00</item>
           <item>13:00-14:00</item>
-        </timeList>
+        </timeListMWF>
+        <timeListTR>
+            <item>08:00-09:15</item>
+            <item>09:30-10:45</item>
+        </timeListTR>
         <timeSlotDivide>2</timeSlotDivide>
     </schedule>
     <course 
@@ -27,7 +31,7 @@
     </course>
     <course 
         code="CSC 131"
-        credit="3"
+        credit="4"
         startTime="10:00"
         endTime="11:00"
         days="MWF"
@@ -36,10 +40,10 @@
     </course>
     <course
         code="CSC 232"
-        credit="3"
+        credit="5"
         startTime="13:00"
         endTime="14:00"
-        days="TR"
+        days="MWF"
         room="CHEK 209"
         instructor="Volmar">
     </course>

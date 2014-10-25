@@ -14,11 +14,11 @@ def create_scheduler_from_file(path_to_xml):
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
     courses = create_course_list_from_file(path_to_xml, instructors_dict)
     rooms = create_room_list_from_file(path_to_xml)
-    time_slots = create_time_slot_list_from_file(path_to_xml)
+    time_slots_mwf, time_slots_tr = create_time_slot_list_from_file(path_to_xml)
     time_slot_divide = root.find("schedule").find("timeSlotDivide").text
     course_titles = [course.code for course in courses]
     setCourses = [i.attrib for i in root.findall("course")]
-    return_schedule = Scheduler(courses, rooms, time_slots, int(time_slot_divide), True)
+    return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr, int(time_slot_divide), True)
     return_schedule.weeks[0].fill_week(setCourses)
     return return_schedule
 #    except Exception as inst:
@@ -77,8 +77,9 @@ def create_time_slot_list_from_file(path_to_xml):
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
-        time_slots = [r.text for r in root.find("schedule").find("timeList").getchildren()]
-        return time_slots
+        time_slots_mwf = [r.text for r in root.find("schedule").find("timeListMWF").getchildren()]
+        time_slots_tr = [r.text for r in root.find("schedule").find("timeListTR").getchildren()]
+        return (time_slots_mwf, time_slots_tr)
     except Exception as inst:
         print(inst)
         return None

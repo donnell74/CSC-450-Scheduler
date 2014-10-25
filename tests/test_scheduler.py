@@ -60,14 +60,21 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 131")
         self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
 
-    def test_find_time_slots_from_cuts(self):
-        this_scheduler = interface.create_scheduler_from_file("tests/schedules/find_time_slots_from_cuts_1.xml")
-        this_courses = interface.create_course_list_from_file_test("tests/schedules/find_time_slots_from_cuts_1.xml")
-        extras = interface.create_extras_list_from_file("tests/schedules/find_time_slots_from_cuts_1.xml")
+    def test_find_time_slots_from_cuts_mwf(self):
+        this_scheduler = interface.create_scheduler_from_file("tests/schedules/find_time_slots_from_cuts_mwf.xml")
+        this_courses = interface.create_course_list_from_file_test("tests/schedules/find_time_slots_from_cuts_mwf.xml")
+        extras = interface.create_extras_list_from_file("tests/schedules/find_time_slots_from_cuts_mwf.xml")
         converted = [s.day + " - " + s.room.building + " - " + s.room.number + " - "\
                 + str(s.start_time)[:-3] for s in this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], extras["slots_list"])]
         self.assertEquals(converted, extras["matching_slots"]) 
 
+    def test_find_time_slots_from_cuts_tr(self):
+        this_scheduler = interface.create_scheduler_from_file("tests/schedules/find_time_slots_from_cuts_tr.xml")
+        this_courses = interface.create_course_list_from_file_test("tests/schedules/find_time_slots_from_cuts_tr.xml")
+        extras = interface.create_extras_list_from_file("tests/schedules/find_time_slots_from_cuts_tr.xml")
+        converted = [s.day + " - " + s.room.building + " - " + s.room.number + " - "\
+                + str(s.start_time)[:-3] for s in this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], extras["slots_list"])]
+        self.assertEquals(converted, extras["matching_slots"]) 
 
     def test_replace_time_slots(self):
         pass

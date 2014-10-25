@@ -9,7 +9,7 @@ def init(): # call globals.init() from main
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
     courses = interface.create_course_list_from_file(input_path, instructors_dict)
     rooms = interface.create_room_list_from_file(input_path)
-    time_slots = interface.create_time_slot_list_from_file(input_path)
+    time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(input_path)
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
@@ -19,7 +19,7 @@ def init(): # call globals.init() from main
     try:
         mainScheduler
     except:
-        mainScheduler = scheduler.Scheduler(courses, rooms, time_slots, time_slot_divide)
+        mainScheduler = scheduler.Scheduler(courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide)
         mainScheduler.generate_starting_population()
         #prereqs computation and display
         prereqs = interface.get_prereqs(input_path, courses)
