@@ -6,6 +6,7 @@ from random import choice
 from datetime import time, timedelta
 from structures import *
 from constraint import *
+#import interface # uncomment to use export_schedule_xml 
 import xml.etree.ElementTree as ET
 import os.path
 
@@ -149,6 +150,13 @@ class Scheduler:
         for each_slot in full_list:
             if each_slot.start_time in times:
                 matching_slots.append(each_slot)
+
+#        extras = "<slots_list>\n%s</slots_list>\n<matching_slots>\n%s</matching_slots>\n" %\
+#                  ("<item>" + "</item>\n<item>".join(slots_list), \
+#                   "<item>" + "</item>\n<item>".join([s.day + " - " + s.room.building + " - " + s.room.number + " - " \
+#                       + str(s.start_time)[:-3] for s in matching_slots]))
+#        interface.export_schedule_xml(this_week, extras, "find_time_slots_from_cuts_")
+
         return matching_slots
 
     def replace_time_slots(self, slotsA, slotsB):

@@ -52,13 +52,37 @@ class TestScheduler(unittest.TestCase):
         #Make sure not exact same time slot obj
 
     def test_separate_by_credit(self):
-#self.assertEquals(len(sample_scheduler.separated[1]), 0)
+       #self.assertEquals(len(sample_scheduler.separated[1]), 0)
         self.assertEquals(len(sample_scheduler.separated[3]), 1)
         self.assertEquals(len(sample_scheduler.separated[4]), 1)
         self.assertEquals(len(sample_scheduler.separated[5]), 1)
         self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130")
         self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 131")
         self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
+
+    def test_find_time_slots_for_cuts(self):
+        pass
+
+    def test_replace_time_slots(self):
+        pass
+
+    def test_assess_inconsistences(self):
+        #generic unit tests based on pre defined seeds
+        pass
+
+    def test_resolve_inconsistences(self):
+        #generic unit tests based on pre defined seeds
+        pass
+
+    def test_crossover(self):
+        #make sure it produces two schedules
+        #everything else is tested in other unit tests
+        pass
+
+    def test_inconsistences_integration(self):
+        #test that both work together
+        pass
+    
 """
     def test_generator(self):
         generated = sample_scheduler.generator(sample_scheduler.weeks[0], sample_courses, sample_scheduler.weeks[0].find_empty_time_slots()) 
@@ -71,18 +95,6 @@ class TestScheduler(unittest.TestCase):
         if generated.valid == False:
             check that there is at least one course missing or a course is schedule twice or ...
         
-    def test_assess_inconsistences(self):
-        generic unit tests based on pre defined seeds
-
-    def test_resolve_inconsistences(self):
-        generic unit tests based on pre defined seeds
-
-    def test_inconsistences_integration(self):
-        test that both work together
-
-    def test_crossover(self):
-        make sure it produces two schedules
-    
     def test_breed(self):
         output size == input + (n choose 2)
 

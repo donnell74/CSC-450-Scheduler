@@ -2,19 +2,19 @@ import csv
 from structures import *
 import os
 import xml.etree.ElementTree as ET
-import interface
 from scheduler import *
+from time import strftime, gmtime
 
 def create_scheduler_from_file(path_to_xml):
     """Reads in an xml file and schedules all courses found in it"""
 #try:
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
-    instructors = interface.create_instructors_from_courses(path_to_xml)
+    instructors = create_instructors_from_courses(path_to_xml)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
-    courses = interface.create_course_list_from_file(path_to_xml, instructors_dict)
-    rooms = interface.create_room_list_from_file(path_to_xml)
-    time_slots = interface.create_time_slot_list_from_file(path_to_xml)
+    courses = create_course_list_from_file(path_to_xml, instructors_dict)
+    rooms = create_room_list_from_file(path_to_xml)
+    time_slots = create_time_slot_list_from_file(path_to_xml)
     time_slot_divide = root.find("schedule").find("timeSlotDivide").text
     course_titles = [course.code for course in courses]
     setCourses = [i.attrib for i in root.findall("course")]
@@ -31,9 +31,9 @@ def create_course_list_from_file_test(path_to_xml):
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
-        instructors = interface.create_instructors_from_courses(path_to_xml)
+        instructors = create_instructors_from_courses(path_to_xml)
         instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
-        courses = interface.create_course_list_from_file(path_to_xml, instructors_dict)
+        courses = create_course_list_from_file(path_to_xml, instructors_dict)
         return courses
     except Exception as inst:
         print(inst)
@@ -100,6 +100,70 @@ def create_instructors_from_courses(path_to_xml):
     except Exception as inst:
         print(inst)
         return None
+
+
+def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"):
+    timestr = strftime("%Y%m%d-%H%M%S", gmtime())
+    filename = os.path.join(export_dir, prefix + timestr + ".xml")
+    with open(filename, 'w') as out:
+        out.write("<?xml version='1.0'?>\n<data>\n")
+        out.write("<schedule name='" + timestr + "'>\n")
+
+        out.write("<courseList>\n")
+        for each_course in week.schedule.courses:
+            out.write("<item code='%s' credit='%d' instructor='%s'></item>\n"\
+                  % (each_course.code, each_course.credit, each_course.instructor))
+
+        out.write("</courseList>\n")
+
+        out.write("<roomList>\n")
+        for each_room in week.days[0].rooms:
+            out.write("<item>%s %s</item>\n"\
+                  % (each_room.building, each_room.number))
+
+        out.write("</roomList>\n")
+
+        out.write("<timeList>\n")
+        for each_slot in week.schedule.time_slots: 
+            out.write("<item>%s</item>\n" % (each_slot))
+        out.write("</timeList>\n")
+
+        out.write("<timeSlotDivide>" + str(week.schedule.slot_divide) + "</timeSlotDivide>\n")
+        out.write("</schedule>\n")
+
+        # create the all the courses
+        courses_dyct = {
+        }  # structure of {course_code : (day_code, room_number, start_time, end_time)}
+        instructors = []
+        for each_slot in week.list_time_slots():
+            if each_slot.course != None:
+                if courses_dyct.has_key(each_slot.course.code):
+                    courses_dyct[each_slot.course.code][3] += each_slot.day
+                else:
+                    courses_dyct[each_slot.course.code] =  [each_slot.course.credit, \
+                                                            each_slot.start_time, each_slot.end_time, \
+                                                            each_slot.day, each_slot.room.building + each_slot.room.number, \
+                                                            each_slot.instructor]
+                    if each_slot.instructor not in instructors:
+                        instructors.append(each_slot.instructor)
+
+        for instructor in instructors:
+            for key in instructor.courses:
+                # course / credit / startTime / endTime / room number / instructor 
+                out.write("""<course 
+code="%s"
+credit="%s"
+startTime="%s"
+endTime="%s"
+days="%s"
+room="%s"
+instructor="%s">
+</course>\n""" % (str(key), str(courses_dyct[key.code][0]),\
+                str(courses_dyct[key.code][1])[:-3], str(courses_dyct[key.code][2])[:-3], courses_dyct[key.code][3],\
+                courses_dyct[key.code][4], courses_dyct[key.code][5]))
+
+        out.write("<extra>\n%s</extra>\n" % (extras))
+        out.write("</data>")
 
 
 def export_schedules(weeks, export_dir="./", debug=False):
