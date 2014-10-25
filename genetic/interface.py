@@ -84,6 +84,18 @@ def create_time_slot_list_from_file(path_to_xml):
         return None
 
 
+def create_extras_list_from_file(path_to_xml):
+    try:
+        tree = ET.parse(path_to_xml)
+        root = tree.getroot()
+        extras = dict([(parent.tag, [child.text for child in parent.getchildren()])\
+                for parent in root.find("extra").getchildren()])
+        return extras
+    except Exception as inst:
+        print(inst)
+        return None
+
+
 def create_instructors_from_courses(path_to_xml):
     """Reads an xml file and creates a list of unique instructor objects"""
     instructors = []
@@ -133,7 +145,7 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
 
         # create the all the courses
         courses_dyct = {
-        }  # structure of {course_code : (day_code, room_number, start_time, end_time)}
+        }  # structure of {course_code : (day_code, room, start_time, end_time)}
         instructors = []
         for each_slot in week.list_time_slots():
             if each_slot.course != None:
@@ -142,7 +154,7 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
                 else:
                     courses_dyct[each_slot.course.code] =  [each_slot.course.credit, \
                                                             each_slot.start_time, each_slot.end_time, \
-                                                            each_slot.day, each_slot.room.building + each_slot.room.number, \
+                                                            each_slot.day, each_slot.room.building + " " + each_slot.room.number, \
                                                             each_slot.instructor]
                     if each_slot.instructor not in instructors:
                         instructors.append(each_slot.instructor)

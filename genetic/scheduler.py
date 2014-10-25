@@ -151,9 +151,9 @@ class Scheduler:
             if each_slot.start_time in times:
                 matching_slots.append(each_slot)
 
-#        extras = "<slots_list>\n%s</slots_list>\n<matching_slots>\n%s</matching_slots>\n" %\
-#                  ("<item>" + "</item>\n<item>".join(slots_list), \
-#                   "<item>" + "</item>\n<item>".join([s.day + " - " + s.room.building + " - " + s.room.number + " - " \
+#        extras = "<slots_list>\n<item>%s</item></slots_list>\n<matching_slots>\n<item>%s</item></matching_slots>\n" %\
+#                  ("</item>\n<item>".join(slots_list), \
+#                   "</item>\n<item>".join([s.day + " - " + s.room.building + " - " + s.room.number + " - " \
 #                       + str(s.start_time)[:-3] for s in matching_slots]))
 #        interface.export_schedule_xml(this_week, extras, "find_time_slots_from_cuts_")
 
