@@ -54,38 +54,14 @@ class ViewPage(Page):
         self.table_labels = []  # holds the labels for the schedules
         
         # schedule buttons
-        self.schedules = ['Schedule 1', 'Schedule 2', 'Schedule 3', 'Schedule 4', 'Schedule 5']
-        
-        s0 = Button(self, command = lambda n = 0: self.insert_schedule(0),
-                    text = self.schedules[0],
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        s0.place(x = 50, y = 47)
-        
-        s1 = Button(self, command = lambda n = 1: self.insert_schedule(1),
-                    text = self.schedules[1],
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        s1.place(x = 138, y = 47)
-        
-        s2 = Button(self, command = lambda n = 2: self.insert_schedule(2),
-                    text = self.schedules[2],
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        s2.place(x = 226, y = 47)
+        self.schedules = ['Schedule 1',
+                          'Schedule 2',
+                          'Schedule 3',
+                          'Schedule 4',
+                          'Schedule 5']
 
-        s3 = Button(self, command = lambda n = 3: self.insert_schedule(3),
-                    text = self.schedules[3],
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        s3.place(x = 314, y = 47)
+        self.create_buttons()
 
-        s4 = Button(self, command = lambda n = 4: self.insert_schedule(4),
-                    text = self.schedules[4],
-                    padx = 10, pady = 10,
-                    cursor = 'hand2')
-        s4.place(x = 402, y = 47)
-        
         # background place holder for the schedules
         self.bg_label = Label(self, width = 37, height= 13,
                          text = 'Click RUN to generate schedules',
@@ -96,41 +72,90 @@ class ViewPage(Page):
         # initial color of the schedule labels
         self.color = [255, 255, 255]
 
+    def create_buttons(self):
+        """ Create / initialize the 5 view schedule buttons """
         
-        # scrollbox
-        #self.txt = ScrolledText(self, undo = True, width = 65)
-        #self.txt['font'] = ('Courier New', '11')
-        #self.txt.pack(fill = BOTH, padx = 20, pady = 20)
-        #self.txt.place(x = 50, y = 107)
-        
-        #self.output_text = StringVar()  # make variable, set text later
-        
-        #self.output_label = Label(self, textvariable=self.output_text)
-        #self.output_label.pack()
+        self.s0 = Button(self, command = lambda n = 0: self.insert_schedule(0),
+                    text = self.schedules[0],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
 
-    def insert_schedule(self, n):
-        """ Inserts schedule n into the textarea/scrollbox of the View page """
-        # print schedules only if the user has clicked RUN
-        if self.is_run_clicked:
-            # hide bg_label text
-            self.bg_label['fg'] = 'white'
+        self.s1 = Button(self, command = lambda n = 1: self.insert_schedule(1),
+                    text = self.schedules[1],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
+
+        self.s2 = Button(self, command = lambda n = 2: self.insert_schedule(2),
+                    text = self.schedules[2],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
+
+        self.s3 = Button(self, command = lambda n = 3: self.insert_schedule(3),
+                    text = self.schedules[3],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
+
+        self.s4 = Button(self, command = lambda n = 4: self.insert_schedule(4),
+                    text = self.schedules[4],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
+        
+    def place_buttons(self):
+        """ Place the View Schedule Buttons on the view page """
+
+        # get valid weeks so we know how many view schedule buttons to show
+        weeks = self.get_valid_weeks() - 1
+
+        if 0 <= weeks:
+            self.s0.pack()
+            self.s0.place(x = 50, y = 47)
+        else:
+            self.s0.pack_forget()
             
-            weeks = 0
-            for week in globs.mainScheduler.weeks:
+        if 1 <= weeks:
+            self.s1.pack()
+            self.s1.place(x = 138, y = 47)
+        else:
+            self.s1.pack_forget()
+            
+        if 2 <= weeks:
+            self.s2.pack()
+            self.s2.place(x = 226, y = 47)
+        else:
+            self.s2.pack_forget()
+            
+        if 3 <= weeks:
+            self.s3.pack()
+            self.s3.place(x = 314, y = 47)
+        else:
+            self.s3.pack_forget()
+            
+        if 4 <= weeks:
+            self.s4.pack()
+            self.s4.place(x = 402, y = 47)
+        else:
+            self.s4.pack_forget()
+
+    def get_valid_weeks(self):
+        """ Returns the number of valid weeks that were generated """
+        weeks = 0
+        for week in globs.mainScheduler.weeks:
+            if week.valid:
                 weeks += 1
 
-            # destroy old labels to make room for new ones
-            self.clear_labels(self.table_labels)
-            
-            if n < weeks and globs.mainScheduler.weeks[n].valid:
-                # format the schedule
-                self.format_schedule(globs.mainScheduler.weeks[n].print_concise())
-            else:
-                self.table_labels.append(Label(self, text = 'Schedule ' + str(n + 1) + ' is empty.',
-                               font=(font_style, size_l),
-                               width = 60, bg = 'white',
-                               anchor = NW))
-                self.table_labels[0].place(x = 50, y = 107)
+        return weeks
+    
+    def insert_schedule(self, n):
+        """ Inserts schedule n into the textarea/scrollbox of the View page """
+    
+        self.place_buttons()                # place the schedule buttons  
+        self.bg_label['fg'] = 'white'       # hide bg_label text
+
+        # destroy old labels to make room for new ones
+        self.clear_labels(self.table_labels)
+        
+        # format the schedule
+        self.format_schedule(globs.mainScheduler.weeks[n].print_concise())
                 
     def format_schedule(self, schedule_text):
         """ Formats the schedule that is displayed in the View page """
@@ -157,15 +182,6 @@ class ViewPage(Page):
         self.color = [255,255,255]  # set color to white for fade in
         for i in xrange(len(self.table_labels)):
             self.fade_in(i) # begin fade in animation
-
-    def update(self):
-        text = ''
-        for each_week in globs.mainScheduler.weeks:
-            if each_week.valid:
-                text += each_week.print_concise()
-                text += '\n   =========================================    \n'
-        #self.output_text.set(text + error_messages)
-        self.txt.insert(INSERT, text)
 
     def clear_labels(self, labels):
         """ Clear dynamically created Labels from memory """
@@ -199,11 +215,6 @@ class ViewPage(Page):
             self.table_labels[n].configure(fg = color)
             
         self.table_labels[n].after(animation_speed, self.fade_in, n)
-        
-    def view_constraints(self):
-        """ Display the constraints, that the user has selected, on the view page """
-        # clear up memory
-        self.clear_labels(self.table_labels)
         
                 
 class MiscPage(Page):
@@ -296,4 +307,3 @@ class MainWindow(Frame):
         # DISPLAY VIEW PAGE
         self.view_page.lift()
         return
-
