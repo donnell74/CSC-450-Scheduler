@@ -335,8 +335,8 @@ def get_priority_value(priority):
         priority = 25
     elif priority == "High":
         priority = 50
-    else:  # priority should be mandatory
-        priority = 100
+    else:  # mandatory, include a boolean in args
+        priority = 0
     return priority
 
 
@@ -362,6 +362,10 @@ def check_constraint_exists(name):
 def create_course_time_constraint(course, start_time, when, priority, added_constraints):
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
+    is_mandatory = False
+    if priority == 0:
+        is_mandatory = True
+
     constraint_name = "{0}_{1}_{2}".format(course, when, start_time)
 
     if check_constraint_exists(constraint_name) == 0:
@@ -381,21 +385,21 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
         if when == "Before":
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.course_before_time,
-                                                 [course, time_obj]) 
+                                                 [course, time_obj, is_mandatory]) 
         else:  # one course AFTER a time
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                         constraint.course_after_time,
-                                         [course, time_obj]) 
+                                         [course, time_obj, is_mandatory]) 
     else: # applies to all courses
         course = globs.mainScheduler.courses
         if when == "Before":
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_before_time,
-                                                 [course, time_obj]) 
+                                                 [course, time_obj, is_mandatory]) 
         else: # all courses AFTER
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_after_time,
-                                                 [course, time_obj]) 
+                                                 [course, time_obj, is_mandatory]) 
     
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
@@ -404,6 +408,10 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
 
 def create_time_pref_constraint(instructor, before_after, timeslot, priority, added_constraints):
     priority = get_priority_value(priority)
+    is_mandatory = False
+    if priority == 0:
+        is_mandatory = True
+    
     instructor = pull_instructor_obj(instructor)
     hour, minute = timeslot.split(":")
     time_obj = time( int(hour), int(minute) )
@@ -416,11 +424,13 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     
     if before_after == "Before":
         globs.mainScheduler.add_constraint(constraint_name, priority,  \
-                                           constraint.instructor_time_pref_before, [instructor, time_obj])
+                                           constraint.instructor_time_pref_before, \
+                                           [instructor, time_obj, is_mandatory])
         
     else:  # after a time
         globs.mainScheduler.add_constraint(constraint_name, priority, \
-                                           constraint.instructor_time_pref_after, [instructor, time_obj])
+                                           constraint.instructor_time_pref_after, \
+                                           [instructor, time_obj, is_mandatory])
         pass
     
     # update scrollbox with this created constraint
@@ -430,6 +440,10 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
 
 def create_day_pref_constraint(instructor, day_code, priority, added_constraints):
     priority = get_priority_value(priority)
+    is_mandatory = False
+    if priority == 0:
+        is_mandatory = True
+
     instructor = pull_instructor_obj(instructor)
     if len(day_code) > 4:  # can't select every day of the week, bad constraint
         error_message = "Error, a day preference can't be all days of the week, try again."
@@ -447,7 +461,9 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
         return
         
     day_code = day_code.lower()    
-    globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_day, [instructor, day_code])
+    globs.mainScheduler.add_constraint(constraint_name, priority, \
+                                       constraint.instructor_preference_day, \
+                                       [instructor, day_code, is_mandatory])
 
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
