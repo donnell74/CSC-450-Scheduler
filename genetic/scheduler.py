@@ -157,7 +157,9 @@ class Scheduler:
         return matching_slots
 
     def replace_time_slots(self, slotsA, slotsB):
-        """Change all courses for matching time slots"""
+        """Change all courses for matching time slots ("swaps")
+        IN: two lists of time slots (cuts) for 2 weeks
+        OUT: two lists have been 'swapped'"""
         for i in slotsA:
             for j in slotsB:
                 if i.start_time == j.start_time and i.room.number == j.room.number and \
