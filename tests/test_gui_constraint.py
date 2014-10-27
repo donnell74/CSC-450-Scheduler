@@ -13,6 +13,8 @@ class TestGuiConstraint(unittest.TestCase):
 
     def test_get_priority_value(self):
         self.assertEqual(guiConstraints.get_priority_value("Low"), 10)
+        self.assertEqual(guiConstraints.get_priority_value("Medium"), 25)
+        self.assertEqual(guiConstraints.get_priority_value("High"), 50)
 
 
 if __name__ == "__main__":
