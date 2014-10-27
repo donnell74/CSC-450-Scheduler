@@ -4,7 +4,7 @@ class Course:
         self.code = code
         self.credit = credit
         self.instructor = instructor
-        self.is_presheduled = is_prescheduled
+        self.is_prescheduled = is_prescheduled
         self.prescheduled_time = prescheduled_time
         self.absolute_course = self.determine_absolute_course_code()
 
