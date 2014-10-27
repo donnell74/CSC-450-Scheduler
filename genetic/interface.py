@@ -6,33 +6,36 @@ from scheduler import *
 from time import strftime, gmtime
 
 def create_scheduler_from_file(path_to_xml):
-    """Reads in an xml file and schedules all courses found in it"""
-#try:
+    """Reads in an xml file and schedules all courses found in it
+    IN: path to xml file as string
+    OUT: scheduler object with one week based on the xml input"""
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
     instructors = create_instructors_from_courses(path_to_xml)
-    instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
+    instructors_dict = dict(zip([inst.name for inst in instructors], 
+                           [inst for inst in instructors]))
     courses = create_course_list_from_file(path_to_xml, instructors_dict)
     rooms = create_room_list_from_file(path_to_xml)
     time_slots_mwf, time_slots_tr = create_time_slot_list_from_file(path_to_xml)
     time_slot_divide = root.find("schedule").find("timeSlotDivide").text
     course_titles = [course.code for course in courses]
     setCourses = [i.attrib for i in root.findall("course")]
-    return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr, int(time_slot_divide), True)
+    return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr,
+                                int(time_slot_divide), test = True)
     return_schedule.weeks[0].fill_week(setCourses)
     return return_schedule
-#    except Exception as inst:
-#        print(inst)
-#        return None
 
 
 def create_course_list_from_file_test(path_to_xml):
-    """Same as create_course_list_from_file, but creates its own instructors_dict"""
+    """For testing purposes.  Creates a list of course objects without an instructors_dict
+    IN: path to xml file as string
+    OUT: list of course objects based on xml"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
         instructors = create_instructors_from_courses(path_to_xml)
-        instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
+        instructors_dict = dict(zip([inst.name for inst in instructors],
+                                    [inst for inst in instructors]))
         courses = create_course_list_from_file(path_to_xml, instructors_dict)
         return courses
     except Exception as inst:
@@ -42,12 +45,13 @@ def create_course_list_from_file_test(path_to_xml):
 
 def create_course_list_from_file(path_to_xml, instructors_dict):
     """Reads an xml file and creates a list of course objects from it
-    IN: xml path and the list of unique instructors in a dict
-    OUT: list of course objects; courses are added to instructors"""
+    IN: xml path and an instructors_dict (instructor name, instructor object)
+    OUT: list of course objects; courses are assigned to instructors"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
-        instructor_strings = [c.attrib["instructor"] for c in root.find("schedule").find("courseList").getchildren()]
+        instructor_strings = [c.attrib["instructor"] for c in
+                              root.find("schedule").find("courseList").getchildren()]
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
@@ -61,7 +65,9 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
 
 
 def create_room_list_from_file(path_to_xml):
-    """Reads an xml file and creates a list of rooms (strings) from it"""
+    """Reads an xml file and creates a list of rooms (strings) from it
+    IN: path to xml file
+    OUT: list of rooms as strings"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
@@ -73,7 +79,9 @@ def create_room_list_from_file(path_to_xml):
 
 
 def create_time_slot_list_from_file(path_to_xml):
-    """Reads an xml file and creates a list of time slots (strings) from it"""
+    """Reads an xml file and creates lists of time slots (strings) from it for mwf and tr
+    IN: path to xml file
+    OUT: tuple of 2 lists of time slots as strings (mwf and tr)"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
@@ -86,6 +94,9 @@ def create_time_slot_list_from_file(path_to_xml):
 
 
 def create_extras_list_from_file(path_to_xml):
+    """Reads an xml file and creates a dictionary of extras
+    IN: path to xml file
+    OUT: dictionary of extras"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
@@ -98,13 +109,16 @@ def create_extras_list_from_file(path_to_xml):
 
 
 def create_instructors_from_courses(path_to_xml):
-    """Reads an xml file and creates a list of unique instructor objects"""
+    """Reads an xml file and creates a list of unique instructor objects
+    IN: path to xml file
+    OUT: list of instructor objects"""
     instructors = []
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
         instructors_unique = []
-        instructors_raw = [course.attrib["instructor"] for course in root.find("schedule").find("courseList").getchildren()]
+        instructors_raw = [course.attrib["instructor"] for course in 
+                           root.find("schedule").find("courseList").getchildren()]
         for each_instructor in instructors_raw:
             if each_instructor not in instructors_unique:
                 instructors_unique.append(each_instructor)
@@ -116,6 +130,9 @@ def create_instructors_from_courses(path_to_xml):
 
 
 def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"):
+    """Exports given week as xml for testing purposes
+    IN: week object, extras string, prefix string, export directory
+    OUT: creates an xml file for the given input"""
     timestr = strftime("%Y%m%d-%H%M%S", gmtime())
     filename = os.path.join(export_dir, prefix + timestr + ".xml")
     with open(filename, 'w') as out:
@@ -153,10 +170,11 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
                 if courses_dyct.has_key(each_slot.course.code):
                     courses_dyct[each_slot.course.code][3] += each_slot.day
                 else:
-                    courses_dyct[each_slot.course.code] =  [each_slot.course.credit, \
-                                                            each_slot.start_time, each_slot.end_time, \
-                                                            each_slot.day, each_slot.room.building + " " + each_slot.room.number, \
-                                                            each_slot.instructor]
+                    courses_dyct[each_slot.course.code] = \
+                        [each_slot.course.credit, \
+                         each_slot.start_time, each_slot.end_time, \
+                         each_slot.day, each_slot.room.building + " " + each_slot.room.number, \
+                         each_slot.instructor]
                     if each_slot.instructor not in instructors:
                         instructors.append(each_slot.instructor)
 
@@ -179,7 +197,10 @@ instructor="%s">
         out.write("</data>")
 
 
-def export_schedules(weeks, export_dir="./", debug=False):
+def export_schedules(weeks, export_dir="./"):
+    """Exports top 5 valid schedules to csv
+    IN: list of week objects, export directory
+    OUT: up to 5 csv files for top 5 valid schedules"""
     counter = 0
     num_to_export = len(weeks)
     for each_week in weeks:
@@ -202,7 +223,9 @@ def export_schedules(weeks, export_dir="./", debug=False):
 
 
 def get_prereqs(path_to_xml, courses):
-    """Determine first-level prereqs from xml and list of all courses"""
+    """Determine first-level prereqs from xml and list of all courses
+    IN: path to xml file, list of course objects
+    OUT: list of prereq objects"""
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
@@ -228,7 +251,8 @@ def get_prereqs(path_to_xml, courses):
 
 
 def get_extended_prereqs(prereqs, courses):
-    """IN: list of prereq objects, list of all course objects
+    """Extends prereqs for prereq of each prereq
+    IN: list of prereq objects, list of all course objects
     OUT: list of prereq objects with extended prereqs accounted for"""
     def find_prereq(prereq_absolute_course, prereqs):
         for p in prereqs:

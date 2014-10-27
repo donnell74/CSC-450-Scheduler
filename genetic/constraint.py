@@ -2,11 +2,10 @@ from structures import *
 from datetime import time, timedelta
 
 def all_before_time(this_week, args):
-    """ iterates through courses in the schedule to make sure
+    """Iterates through courses in the schedule to make sure
      none are before a specific time
      args should be [list of courses, timeslot]   
-     Timeslot should be a time object:  time(12, 0) """
-
+     Timeslot should be a time object:  time(12, 0)"""
     hold = False
 
     for c in args[0]:  # access list of courses
@@ -19,7 +18,7 @@ def all_before_time(this_week, args):
 
 
 def all_after_time(this_week, args):
-    """ iterates through courses in the schedule to make sure
+    """Iterates through courses in the schedule to make sure
      none are after a specific time
      args should be [list of courses, timeslot]   
      Timeslot should be a time object:  time(12, 0)
@@ -34,22 +33,22 @@ def all_after_time(this_week, args):
 
 
 def course_before_time(this_week, args):
-    # find the course and check that its time is before the constraining slot
-    # args should be [<course>, <timeslot>]
+    """Find the course and check that its time is before the constraining slot
+    args should be [<course>, <timeslot>]"""
     hold = this_week.find_course(args[0])[0].start_time < args[1]
     return 1 if hold else 0
 
 
 def course_after_time(this_week, args):
-    # find the course and check that its time is after the constraining slot
-    # args should be [<course>, <timeslot>]
+    """Find the course and check that its time is after the constraining slot
+    args should be [<course>, <timeslot>]"""
     hold = this_week.find_course(args[0])[0].start_time > args[1]
     return 1 if hold else 0
 
 
 def morning_class(this_week, args):
-    # Find course returns a list of time slots, but they should all be at the
-    # same time
+    """Checks if the given course starts before 12
+    args should be [<course>]"""
     holds = False
     if isinstance(args[0], Course):
         holds = this_week.find_course(args[0])[0].start_time < time(12, 0)
@@ -58,9 +57,9 @@ def morning_class(this_week, args):
 
 
 def instructor_time_pref_before(this_week, args):
-	#args should be a list containing this_instructor, courses, and before_time;
-	#this will have to be passed to you from the constraint generator
-        #args looks like this [chosen_instructor, list_of_all_courses, chosen_before_or_after_time]
+	"""Args should be a list containing this_instructor, courses, and before_time;
+	this will have to be passed from the constraint generator
+    args should be [chosen_instructor, chosen_before_time]"""
 	this_instructor = args[0]
 	time_slot = args[1]
 	for each_course in this_instructor.courses:
@@ -74,8 +73,9 @@ def instructor_time_pref_before(this_week, args):
 
 
 def instructor_time_pref_after(this_week, args):
-	#args should be a list containing this_instructor, courses, and after_time;
-	#this will have to be passed to you from the constraint generator
+	"""Args should be a list containing this_instructor, courses, and after_time;
+	this will have to be passed from the constraint generator
+    args should be [chosen_instructor, chosen_after_time]"""
 	this_instructor = args[0]
 	time_slot = args[1]
 	for each_course in this_instructor.courses:
@@ -94,7 +94,6 @@ def instructor_conflict(this_week, args):
     Checks for instructors teaching multiple courses at once.  If none are found,
     passes; else, fails.
     Note: Currently based purely off start time due to MWF-only timeslot system.
-    Todo: Check type of args
     IN: list of all instructor objects
     OUT: 0/1 for "holds"
     """
@@ -149,10 +148,10 @@ def sequential_time_different_building_conflict(this_week, args):
         for section in this_week.sections:
             if section.instructor == instructor:
                 instructor_slots.append(section)
-        for i in range(len(instructor_slots) - 1):
+        for i in range(len(instructor_slots) - 1): #each section
             section1 = instructor_slots[i]
             days1 = [day.day_code for day in section1.days]
-            for j in range(i + 1, len(instructor_slots)):
+            for j in range(i + 1, len(instructor_slots)): #each other section
                 section2 = instructor_slots[j]
                 days2 = [day.day_code for day in section2.days]
                 if len(set(days1).intersection(days2)) > 0: #if sections days overlap
@@ -165,6 +164,8 @@ def sequential_time_different_building_conflict(this_week, args):
 
 
 def instructor_preference_day(this_week, args):
+    """Check if instructor's day preference holds or not
+    Args should be [instructor, list_of_day_codes]"""
     instructor = args[0]
     day_code = args[1]
     
@@ -178,7 +179,8 @@ def instructor_preference_day(this_week, args):
 
 
 def num_subsequent_courses(this_week, args):
-    """An instructor may not have more than 2 courses back-to-back"""
+    """An instructor may not have more than 2 courses back-to-back
+    Args should be [list_of_instructors]"""
     instructors = args[0]
     for instructor in instructors:
         instructor_slots = []
@@ -186,22 +188,25 @@ def num_subsequent_courses(this_week, args):
         for section in this_week.sections:
             if section.instructor == instructor:
                 instructor_slots.append(section)
-        for i in range(len(instructor_slots) - 2):
+        for i in range(len(instructor_slots) - 2): #first in combination
             section1 = instructor_slots[i]
             days1 = [day.day_code for day in section1.days]
-            for j in range(i + 1, len(instructor_slots) - 1):
+            for j in range(i + 1, len(instructor_slots) - 1): #second in combination
                 section2 = instructor_slots[j]
                 days2 = [day.day_code for day in section2.days]
-                for k in range(j + 1, len(instructor_slots)):
+                for k in range(j + 1, len(instructor_slots)): #third in combination
                     section3 = instructor_slots[k]
                     days3 = [day.day_code for day in section3.days]
                     all_days = [days1, days2, days3]
-                    if len(set(all_days[0]).intersection(*all_days[1:])) > 0: #if sections days overlap
-                        compare_1_2 = times_are_sequential(section1.time_slots[0], section2.time_slots[0])
-                        compare_2_3 = times_are_sequential(section2.time_slots[0], section3.time_slots[0])
-                        compare_1_3 = times_are_sequential(section1.time_slots[0], section3.time_slots[0])
+                    if len(set(all_days[0]).intersection(*all_days[1:])) > 0: #sections day overlap
+                        compare_1_2 = times_are_sequential(section1.time_slots[0],
+                                                           section2.time_slots[0])
+                        compare_2_3 = times_are_sequential(section2.time_slots[0],
+                                                           section3.time_slots[0])
+                        compare_1_3 = times_are_sequential(section1.time_slots[0],
+                                                           section3.time_slots[0])
                         if (compare_1_2 and compare_2_3) or (compare_1_3 and compare_2_3) or \
-                           (compare_1_3 and compare_1_2):
+                           (compare_1_3 and compare_1_2): #if have 3 subsequent courses
                             count += 1
         if count > 0:
             this_week.valid = False
