@@ -619,8 +619,8 @@ class Scheduler:
     def randomly_fill_schedule(self, week_to_fill, courses_list, list_of_slots_to_fill):
         """Fills in random schedule for given week, courses, and time slots"""
         filtered = self.filter_for_generator(courses_list, list_of_slots_to_fill)
-        tr_slots = filtered['tr']
-        mwf_slots = filtered['mwf']
+        #tr_slots = filtered['tr']
+        #mwf_slots = filtered['mwf']
         prescheduled = filtered['prescheduled']
         regular = filtered['regular'] #regular courses...not prescheduled
 
@@ -629,7 +629,6 @@ class Scheduler:
                 self.manually_fill_schedule(week_to_fill, each_course)
             except: #specifically for error from above
                 week_to_fill.valid = False
-                #anything else to handle?
         for each_course in regular:
             if each_course.credit == 5:
                 success = self.schedule_5_hour_course(each_course,
