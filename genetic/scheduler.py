@@ -32,34 +32,60 @@ class Scheduler:
     """Schedules all courses for a week"""
 
     def __init__(self, courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide, test = False):
-        try:
-            courses[0].code
-        except:
-            raise SchedulerInitError("Courses")
+        if type(courses) == list:
+            if len(courses) != 0:
+                if not all(isinstance(each_course, Course) for \
+                        each_course in courses):
+                   raise SchedulerInitError("Courses - Not all of type Course") 
+            else:
+                raise SchedulerInitError("Courses - List has no elements")
+        else:
+            raise SchedulerInitError("Courses - Not a list")
 
-        try:
-            assert type(rooms[0]) == str
-        except:
-            raise SchedulerInitError("Rooms")
+        if type(rooms) == list:
+            if len(rooms) != 0:
+                if not all(isinstance(each_room, str) for \
+                        each_room in rooms):
+                    raise SchedulerInitError("Rooms - Not all string type")
+            else:
+                 raise SchedulerInitError("Rooms - List has no elements")
+        else:
+            raise SchedulerInitError("Rooms - Not a list")
 
-        try:
-            assert type(time_slots_mwf[0]) == str
-        except:
-            raise SchedulerInitError("Time Slots")
+        if type(time_slots_mwf) == list:
+            if len(time_slots_mwf) != 0:
+                if not all(isinstance(each_slot, str) for \
+                        each_slot in time_slots_mwf):
+                    raise SchedulerInitError("Time Slot MWF - \
+                            Not all string type")
+            else:
+                 raise SchedulerInitError("Time Slot MWF -\
+                         List has no elements")
+        else:
+            raise SchedulerInitError("Time Slot MWF - Not a list")
 
-        try:
-            assert type(time_slots_tr[0]) == str
-        except:
-            raise SchedulerInitError("Time Slots")
+        if type(time_slots_tr) == list:
+            if len(time_slots_tr) != 0:
+                if not all(isinstance(each_slot, str) for \
+                        each_slot in time_slots_tr):
+                    raise SchedulerInitError("Time Slot TR - \
+                            Not all string type")
+            else:
+                 raise SchedulerInitError("Time Slot TR -\
+                         List has no elements")
+        else:
+            raise SchedulerInitError("Time Slot TR - Not a list")
 
         self.time_slots_mwf = time_slots_mwf
         self.time_slots_tr = time_slots_tr
         self.time_slots = time_slots_mwf + time_slots_tr
-        try:
-            assert type(time_slot_divide) == int
-            assert 0 < time_slot_divide and time_slot_divide <= min(len(self.time_slots_mwf), len(self.time_slots_tr))
-        except:
-            raise SchedulerInitError("Time Slot Divide")
+        if type(time_slot_divide) == int:
+            if time_slot_divide < 0 and \
+                time_slot_divide >= min(len(self.time_slots_mwf), 
+                                        len(self.time_slots_tr)):
+                raise SchedulerInitError("Time Slot Divide - Not valid number")
+        else:
+            raise SchedulerInitError("Time Slot Divide - Not valid number")
 
         self.slot_divide = time_slot_divide
         self.courses = courses
