@@ -4,19 +4,30 @@ from datetime import time, timedelta
 def all_before_time(this_week, args):
     """ iterates through courses in the schedule to make sure
      none are before a specific time
-     args should be [list of courses, timeslot]   
+     args should be [list of courses, timeslot, is_mandatory]   
      Timeslot should be a time object:  time(12, 0) """
 
-    hold = False
+    holds = []
+    is_mandatory = args[2]
 
     for c in args[0]:  # access list of courses
-        hold = course_before_time(this_week, [c, args[1]])
-        if hold == False:
+        holds.append(course_before_time(this_week, [c, args[1]]))
+        #if hold == False:
+        #    return 0
+
+    if is_mandatory:
+        if False in holds:
+            this_week.valid = False
             return 0
-
-    # if it made it through the loop, then there were no conflicts
-    return 1
-
+        else:
+            this_week.valid = True
+            return 0 
+    else:  # not mandatory
+        if False in holds:  # can be modified for partial credit?
+            return 0
+        else:  # no conflicts
+            return 1  
+    
 
 def all_after_time(this_week, args):
     """ iterates through courses in the schedule to make sure
@@ -35,15 +46,35 @@ def all_after_time(this_week, args):
 
 def course_before_time(this_week, args):
     # find the course and check that its time is before the constraining slot
-    # args should be [<course>, <timeslot>]
+    # args should be [<course>, <timeslot>, is_mandatory]
+    is_mandatory = args[2]
     hold = this_week.find_course(args[0])[0].start_time < args[1]
+
+    if is_mandatory:
+        if hold == 0:  # hold fails
+            this_week.valid = False
+            return 0
+        else:
+            this_week.valid = True
+            return 0
+
     return 1 if hold else 0
 
 
 def course_after_time(this_week, args):
     # find the course and check that its time is after the constraining slot
-    # args should be [<course>, <timeslot>]
+    # args should be [<course>, <timeslot>, is_mandatory]
+    is_mandatory = args[2]
     hold = this_week.find_course(args[0])[0].start_time > args[1]
+
+    if is_mandatory:
+        if hold == 0:  # hold fails
+            this_week.valid = False
+            return 0
+        else:
+            this_week.valid = True
+            return 0
+    
     return 1 if hold else 0
 
 
