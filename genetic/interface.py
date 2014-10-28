@@ -100,8 +100,13 @@ def create_extras_list_from_file(path_to_xml):
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
-        extras = dict([(parent.tag, [child.text for child in parent.getchildren()])\
-                for parent in root.find("extra").getchildren()])
+        extras = {}
+        extras["input"] = dict([(parent.tag, [child.text for child in parent\
+                    .getchildren()]) for parent in \
+                    root.find("extra").find("input").getchildren()])
+        extras["expected"] = dict([(parent.tag, [child.text for child in\
+                    parent.getchildren()]) for parent in \
+                    root.find("extra").getchildren()])["expected"]
         return extras
     except Exception as inst:
         print(inst)

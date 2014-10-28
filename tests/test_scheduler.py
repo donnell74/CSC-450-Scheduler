@@ -4,8 +4,9 @@ import random
 from genetic import *
 import genetic.interface
 
-sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
-sample_courses = interface.create_course_list_from_file_test("tests/schedules/morning_class_test.xml")
+filename = "tests/schedules/morning_class_test.xml"
+sample_scheduler = interface.create_scheduler_from_file(filename)
+sample_courses = interface.create_course_list_from_file_test(filename)
 
 class TestScheduler(unittest.TestCase):
 
@@ -21,21 +22,27 @@ class TestScheduler(unittest.TestCase):
     def test_clear_constraints(self):
         self.assertEquals(len(sample_scheduler.constraints), 0)
         self.assertEquals(sample_scheduler.max_fitness, 0)
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[0]]) 
         sample_scheduler.clear_constraints()
         self.assertEquals(len(sample_scheduler.constraints), 0)
         self.assertEquals(sample_scheduler.max_fitness, 0)
 
     def test_add_contsraint(self):
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[1]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[1]]) 
         self.assertEquals(len(sample_scheduler.constraints), 2)
         self.assertEquals(sample_scheduler.max_fitness, 60)
 
     def test_calc_fitness(self):
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[1]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[2]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[1]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[2]]) 
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 60)
 
@@ -62,22 +69,26 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
 
     def test_find_time_slots_from_cuts_mwf(self):
-        pass
-        """this_scheduler = interface.create_scheduler_from_file("tests/schedules/find_time_slots_from_cuts_mwf.xml")
-        this_courses = interface.create_course_list_from_file_test("tests/schedules/find_time_slots_from_cuts_mwf.xml")
-        extras = interface.create_extras_list_from_file("tests/schedules/find_time_slots_from_cuts_mwf.xml")
-        converted = [s.day + " - " + s.room.building + " - " + s.room.number + " - "\
-                + str(s.start_time)[:-3] for s in this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], extras["slots_list"])]
-        self.assertEquals(converted, extras["matching_slots"])"""
+        filename = "tests/schedules/find_time_slots_from_cuts_mwf.xml"
+        this_scheduler = interface.create_scheduler_from_file(filename)
+        this_courses = interface.create_course_list_from_file_test(filename)
+        extras = interface.create_extras_list_from_file(filename)
+        converted = [s.day + " - " + s.room.building + " - " + s.room.number\
+            + " - " + str(s.start_time)[:-3] for s in \
+            this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0],
+                                            extras["input"]["slots_list"])]
+        self.assertEquals(converted, extras["expected"])
 
     def test_find_time_slots_from_cuts_tr(self):
-        pass
-        """this_scheduler = interface.create_scheduler_from_file("tests/schedules/find_time_slots_from_cuts_tr.xml")
-        this_courses = interface.create_course_list_from_file_test("tests/schedules/find_time_slots_from_cuts_tr.xml")
-        extras = interface.create_extras_list_from_file("tests/schedules/find_time_slots_from_cuts_tr.xml")
-        converted = [s.day + " - " + s.room.building + " - " + s.room.number + " - "\
-                + str(s.start_time)[:-3] for s in this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], extras["slots_list"])]
-        self.assertEquals(converted, extras["matching_slots"])"""
+        filename = "tests/schedules/find_time_slots_from_cuts_tr.xml"
+        this_scheduler = interface.create_scheduler_from_file(filename)
+        this_courses = interface.create_course_list_from_file_test(filename)
+        extras = interface.create_extras_list_from_file(filename)
+        converted = [s.day + " - " + s.room.building + " - " + s.room.number \
+            + " - " + str(s.start_time)[:-3] for s in \
+            this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], 
+                                            extras["input"]["slots_list"])]
+        self.assertEquals(converted, extras["expected"])
 
     def test_replace_time_slots(self):
         pass

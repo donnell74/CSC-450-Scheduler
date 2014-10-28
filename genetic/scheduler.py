@@ -161,24 +161,25 @@ class Scheduler:
         matching_slots = []
 
         # form times from slots_list
-        times = []
+        start_times = []
+        end_times = []
         for each_slot in slots_list:
             start, end = each_slot.split('-')
             start = start.split(':')
             start = list(map(int, start))
             start = time(start[0], start[1])
-            times.append(start)  # only care about start times
+            start_times.append(start)  
+
+            end = end.split(':')
+            end = list(map(int, end))
+            end = time(end[0], end[1])
+            end_times.append(end) 
 
         full_list = this_week.list_time_slots()
         for each_slot in full_list:
-            if each_slot.start_time in times:
+            if each_slot.start_time in start_times and\
+               each_slot.end_time in end_times:
                 matching_slots.append(each_slot)
-
-#        extras = "<slots_list>\n<item>%s</item></slots_list>\n<matching_slots>\n<item>%s</item></matching_slots>\n" %\
-#                  ("</item>\n<item>".join(slots_list), \
-#                   "</item>\n<item>".join([s.day + " - " + s.room.building + " - " + s.room.number + " - " \
-#                       + str(s.start_time)[:-3] for s in matching_slots]))
-#        interface.export_schedule_xml(this_week, extras, "find_time_slots_from_cuts_")
 
         return matching_slots
 
