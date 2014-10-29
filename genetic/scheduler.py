@@ -90,9 +90,7 @@ class Scheduler:
         self.slot_divide = time_slot_divide
         self.courses = courses
         self.rooms = rooms
-        self.weeks = [Week(rooms, self, test), Week(rooms, self, test),
-                      Week(rooms, self, test), Week(rooms, self, test),
-                      Week(rooms, self, test)]
+        self.weeks = []
 
         self.constraints = []
         self.max_fitness = 0
@@ -225,13 +223,13 @@ class Scheduler:
              in order by day"""
         helper = {'occupied': 0, 'unoccupied': [], 'in_order': [None, None, None, None, None],
                   'occupation': [0, 0, 0, 0, 0]}
-        # Only need start time, not end time, because time slots on the same
-        # day don't overlap
         marker = False  # marker for whether open or not for current
-        this_time = time_slot.start_time
+        this_start_time = time_slot.start_time
+        this_end_time = time_slot.end_time
         this_room = time_slot.room.number
         for each_slot in time_slot_list:
-            if each_slot.start_time == this_time and each_slot.room.number == this_room:
+            if each_slot.start_time == this_start_time and each_slot.end_time == this_end_time and \
+               each_slot.room.number == this_room:
                 # occupation status
                 if each_slot.course is None:
                     marker = True
@@ -435,6 +433,7 @@ class Scheduler:
         for each_slot in time_slot_list:
             if each_slot.room.number == time_slot.room.number and \
                each_slot.start_time == time_slot.start_time and \
+               each_slot.end_time == each_slot.end_time and \
                each_slot.room.day.day_code == time_slot.room.day.day_code:
                 return counter
             counter += 1
@@ -442,15 +441,14 @@ class Scheduler:
         return
 
 
-    def assign_and_remove(self, course, time_slot, slots_list, week):
+    def assign_and_remove(self, course, time_slot, tr_slots, mwf_slots, slots_list, week):
         """Assigns course to time slot and removes time slot from list of time slots"""
-        temp_room_index = time_slot.room_index
-        temp_day_index = time_slot.day_index
-        temp_slot_index = time_slot.slot_index
+        #temp_room_index = time_slot.room_index
+        #temp_day_index = time_slot.day_index
+        #temp_slot_index = time_slot.slot_index
 
         i = self.find_index(time_slot, slots_list)
-        week.days[temp_day_index].rooms[temp_room_index].schedule[
-            temp_slot_index].set_course(course)
+        time_slot.set_course(course)
         del(slots_list[i])
 
 
@@ -482,13 +480,13 @@ class Scheduler:
                 each_time_slot.set_course(course)
 
 
-    def schedule_5_hour_course(self, course, list_of_time_slots, this_week):
+    def schedule_5_hour_course(self, course, tr_slots, mwf_slots, list_of_slots, this_week):
         """Randomly schedule a 5 hour course"""
         if course.credit != 5:
             #error
             return
-        random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        random_slot = choice(mwf_slots)
+        current_pool = deepcopy(mwf_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = self.week_helper(random_slot, current_pool)
@@ -496,7 +494,7 @@ class Scheduler:
             if len(possibilities['unoccupied']) == 5:
                 for each_assignee in possibilities['in_order']:
                     self.assign_and_remove(
-                        course, each_assignee, list_of_time_slots, this_week)
+                        course, each_assignee, tr_slots, mwf_slots, list_of_time_slots, this_week)
                 done = True
             # case that cannot schedule for this time and room
             else:
@@ -511,7 +509,7 @@ class Scheduler:
         return len(current_pool) == 0 and not done
 
 
-    def schedule_4_hour_course(self, course, list_of_time_slots, this_week):
+    def schedule_4_hour_course(self, course, tr_slots, mwf_slots, list_of_time_slots, this_week):
         """Randomly schedule a 4 hour course"""
         if course.credit != 4:
             #error
@@ -526,15 +524,18 @@ class Scheduler:
                 for d in (0, 2, 4):
                     # MWF
                     self.assign_and_remove(
-                        course, possibilities['in_order'][d], list_of_time_slots, this_week)
+                        course, possibilities['in_order'][d], tr_slots, mwf_slots,
+                        list_of_time_slots, this_week)
                 #T or R
                 j = randint(0, 1)
                 if j:
                     self.assign_and_remove(
-                        course, possibilities['in_order'][1], list_of_time_slots, this_week)  # T
+                        course, possibilities['in_order'][1], tr_slots, mwf_slots,
+                        list_of_time_slots, this_week)  # T
                 else:
                     self.assign_and_remove(
-                        course, possibilities['in_order'][3], list_of_time_slots, this_week)  # R
+                        course, possibilities['in_order'][3], tr_slots, mwf_slots,
+                        list_of_time_slots, this_week)  # R
                 done = True
             # case that mwf and either t or r are open
             elif possibilities['occupation'][0] and possibilities['occupation'][2] and \
@@ -543,13 +544,16 @@ class Scheduler:
                 for d in (0, 2, 4):
                     # MWF
                     self.assign_and_remove(
-                        course, possibilities['in_order'][d], list_of_time_slots, this_week)
+                        course, possibilities['in_order'][d], tr_slots, mwf_slots,
+                        list_of_time_slots, this_week)
                 if possibilities['occupation'][1]:
                     self.assign_and_remove(
-                        course, possibilities['in_order'][1], list_of_time_slots, this_week)
+                        course, possibilities['in_order'][1], tr_slots, mwf_slots,
+                        list_of_time_slots, this_week)
                 else:
                     self.assign_and_remove(
-                        course, possibilities['in_order'][3], list_of_time_slots, this_week)
+                        course, possibilities['in_order'][3], tr_slots, mwf_slots,
+                        list_of_time_slots, this_week)
                 done = True
             # case that cannot schedule for this time and room
             else:
@@ -564,7 +568,7 @@ class Scheduler:
         return len(current_pool) == 0 and not done
 
 
-    def schedule_3_hour_course(self, course, list_of_time_slots, this_week):
+    def schedule_3_hour_course(self, course, tr_slots, mwf_slots, list_of_time_slots, this_week):
         """Randomly schedule a 3 hour course"""
         if course.credit != 3:
             #error
@@ -576,30 +580,35 @@ class Scheduler:
             possibilities = self.week_helper(random_slot, current_pool)
             # each day open for that time and room
             if len(possibilities['unoccupied']) == 5:
-                j = randint(0, 1)
                 # MWF
-                if j:
+                if not random_slot.isTR:
                     for d in (0, 2, 4):
                         self.assign_and_remove(
-                            course, possibilities['in_order'][d], list_of_time_slots, this_week)
+                            course, possibilities['in_order'][d], tr_slots, mwf_slots,
+                            list_of_time_slots, this_week)
+                        print(possibilities['in_order'][d])
                 # TR
                 else:
                     for d in (1, 3):
                         self.assign_and_remove(
-                            course, possibilities['in_order'][d], list_of_time_slots, this_week)
+                            course, possibilities['in_order'][d], tr_slots, mwf_slots,
+                            list_of_time_slots, this_week)
                 done = True
             # case that mwf is open, but not tr
             elif possibilities['occupation'][0] and possibilities['occupation'][2] and \
                     possibilities['occupation'][4]:
                 for d in (0, 2, 4):
                     self.assign_and_remove(
-                        course, possibilities['in_order'][d], list_of_time_slots, this_week)
+                        course, possibilities['in_order'][d],
+                        tr_slots, mwf_slots, list_of_time_slots, this_week)
                 done = True
             # case that tr is open, but not mwf
-            elif possibilities['occupation'][1] and possibilities['occupation'][3]:
+            elif possibilities['occupation'][1] and possibilities['occupation'][3] and \
+                 possibilities['in_order'][1].isTR and possibilities['in_order'][3].isTR:
                 for d in (1, 3):
                     self.assign_and_remove(
-                        course, possibilities['in_order'][d], list_of_time_slots, this_week)
+                        course, possibilities['in_order'][d],
+                        tr_slots, mwf_slots, list_of_time_slots, this_week)
                 done = True
             # case that cannot schedule for this time and room
             else:
@@ -611,11 +620,20 @@ class Scheduler:
                 # get a new random time slot
                 random_slot = choice(current_pool)
         #status
+        printed = False
+        for time_slot in this_week.list_time_slots():
+                if time_slot.course is not None:
+                    print(time_slot)
+                    printed = True
+                    print("Not empty!")
+        if not printed:
+            print("Empty!")
         return len(current_pool) == 0 and not done
 
 
-    def schedule_1_hour_course(self, course, list_of_time_slots, this_week):
+    def schedule_1_hour_course(self, course, tr_slots, mwf_slots, list_of_slots, this_week):
         """Randomly schedule a 1 hour course"""
+        #COME BACK TO
         if course.credit != 1:
             #error
             return
@@ -628,7 +646,7 @@ class Scheduler:
             if len(possibilities['unoccupied']) > 0:
                 for each_assignee in possibilities['in_order']:
                     assign_and_remove(
-                        course, each_assignee, list_of_time_slots, this_week)
+                        course, each_assignee, tr_slots, mwf_slots, list_of_time_slots, this_week)
                 done = True
             # case that cannot schedule for this time and room
             else:
@@ -646,8 +664,8 @@ class Scheduler:
     def randomly_fill_schedule(self, week_to_fill, courses_list, list_of_slots_to_fill):
         """Fills in random schedule for given week, courses, and time slots"""
         filtered = self.filter_for_generator(courses_list, list_of_slots_to_fill)
-        #tr_slots = filtered['tr']
-        #mwf_slots = filtered['mwf']
+        tr_slots = filtered['tr']
+        mwf_slots = filtered['mwf']
         prescheduled = filtered['prescheduled']
         regular = filtered['regular'] #regular courses...not prescheduled
 
@@ -658,36 +676,44 @@ class Scheduler:
                 week_to_fill.valid = False
         for each_course in regular:
             if each_course.credit == 5:
-                success = self.schedule_5_hour_course(each_course,
-                                                 list_of_slots_to_fill, week_to_fill)
+                success = self.schedule_5_hour_course(each_course, tr_slots, mwf_slots,
+                                                      list_of_slots_to_fill, week_to_fill)
             elif each_course.credit == 4:
-                success = self.schedule_4_hour_course(each_course,
-                                                 list_of_slots_to_fill, week_to_fill)
+                success = self.schedule_4_hour_course(each_course, tr_slots, mwf_slots,
+                                                      list_of_slots_to_fill, week_to_fill)
             elif each_course.credit == 3:
-                success = self.schedule_3_hour_course(each_course,
-                                                 list_of_slots_to_fill, week_to_fill)
+                success = self.schedule_3_hour_course(each_course, tr_slots, mwf_slots,
+                                                      list_of_slots_to_fill, week_to_fill)
             elif each_course.credit == 1:
-                success = self.schedule_1_hour_course(each_course,
-                                                 list_of_slots_to_fill, week_to_fill)
+                success = self.schedule_1_hour_course(each_course, tr_slots, mwf_slots,
+                                                      list_of_slots_to_fill, week_to_fill)
             else:
                 #error
                 return
             if not success:
                 #cannot schedule in present situation
                 week_to_fill.valid = False
+        printed = False
+        print("Final schedule:")
+        for time_slot in week_to_fill.list_time_slots():
+                if time_slot.course is not None:
+                    print(time_slot)
+                    printed = True
+        if not printed:
+            print("***Final schedule is empty!***")
 
 
     def generate_starting_population(self):
         """Generates starting population"""
-        for x in range(10):
+        for x in range(1):
             self.weeks.append(Week(self.rooms, self))
 
         for each_week in self.weeks:
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
             # if impossible to generate (incomplete week)
-            if not each_week.valid:
-                del self.weeks[self.weeks.index(each_week)]
+            #if not each_week.valid:
+            #    del self.weeks[self.weeks.index(each_week)]
         if len(self.weeks) == 0:
             print("Could not schedule")
             return

@@ -21,8 +21,11 @@ def init(): # call globals.init() from main
     except:
         mainScheduler = scheduler.Scheduler(courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide)
         mainScheduler.generate_starting_population()
-        for week in mainScheduler.weeks:
-            week.print_concise()
+        ''' week in mainScheduler.weeks:
+            for time_slot in week.list_time_slots():
+                if time_slot.course is not None:
+                    print(time_slot)'''
+            
         #prereqs computation and display
         prereqs = interface.get_prereqs(input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
