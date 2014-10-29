@@ -45,7 +45,7 @@ class AddedConstraintsScreen(Page):
             output += 'Medium'
         elif constraint[1] == 50:
             output += 'High'
-        elif constraint[1] == 100:
+        elif constraint[1] == 0: # mandatory has a 0 priority
             output += 'Mandatory'
             
         output += '\n'
