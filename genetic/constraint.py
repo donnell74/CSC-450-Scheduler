@@ -10,10 +10,8 @@ def all_before_time(this_week, args):
     holds = []
     is_mandatory = args[2]
 
-    for c in args[0]:  # access list of courses
+    for c in args[0]:  # access list of courses, don't pass is_mandatory 
         holds.append(course_before_time(this_week, [c, args[1]]))
-        #if hold == False:
-        #    return 0
 
     if is_mandatory:
         if False in holds:
@@ -35,19 +33,32 @@ def all_after_time(this_week, args):
      args should be [list of courses, timeslot]   
      Timeslot should be a time object:  time(12, 0)
      """
-    hold = False
-    for c in args[0]:
-        hold = course_after_time(this_week, [c, args[1]])
-        if hold == False:
+    holds = []
+    is_mandatory = args[2]
+
+    for c in args[0]:  # access list of courses, don't pass is_mandatory 
+        holds.append(course_after_time(this_week, [c, args[1]]))
+
+    if is_mandatory:
+        if False in holds:
+            this_week.valid = False
             return 0
-    # if it made it through the loop, then there were no conflicts
-    return 1
+        else:
+            this_week.valid = True
+            return 0 
+    else:  # not mandatory
+        if False in holds:  # can be modified for partial credit?
+            return 0
+        else:  # no conflicts
+            return 1  
 
 
 def course_before_time(this_week, args):
     # find the course and check that its time is before the constraining slot
-    # args should be [<course>, <timeslot>, is_mandatory]
-    is_mandatory = args[2]
+    # args should be [<course>, <timeslot> [, is_mandatory] ]
+    if len(args) > 2:  # includes the mandatory boolean
+        is_mandatory = args[2]
+    
     hold = this_week.find_course(args[0])[0].start_time < args[1]
 
     if is_mandatory:
@@ -63,8 +74,10 @@ def course_before_time(this_week, args):
 
 def course_after_time(this_week, args):
     # find the course and check that its time is after the constraining slot
-    # args should be [<course>, <timeslot>, is_mandatory]
-    is_mandatory = args[2]
+    # args should be [<course>, <timeslot> [, is_mandatory] ]
+    if len(args) > 2: #includes mandatory boolean
+        is_mandatory = args[2]
+        
     hold = this_week.find_course(args[0])[0].start_time > args[1]
 
     if is_mandatory:
@@ -89,35 +102,65 @@ def morning_class(this_week, args):
 
 
 def instructor_time_pref_before(this_week, args):
-	#args should be a list containing this_instructor, courses, and before_time;
+	#args should be a list containing this_instructor, courses, and
+        # before_time;
 	#this will have to be passed to you from the constraint generator
-        #args looks like this [chosen_instructor, list_of_all_courses, chosen_before_or_after_time]
+        #args looks like this [chosen_instructor, timeslot, is_mandatory]
 	this_instructor = args[0]
 	time_slot = args[1]
+	is_mandatory = args[2]
+	holds = [] # will contain 0's for all courses that fail constraint
+
 	for each_course in this_instructor.courses:
 		#section object for course
 		each_section = this_week.find_section( each_course.code )
                 if each_section.time_slots[0].start_time > time_slot:
                     #case 1: a course fails
-                    return 0
-	#case 2: all courses for instructor pass
-	return 1
+                    holds.append(0)
+	
+        if is_mandatory:
+            if len(holds) >= 1: # at least one failure
+                this_week.valid = False
+                return 0
+            else:
+                this_week.valid = True
+                return 0
+        else: # not mandatory, treat it like normal
+            if len(holds) >= 1:
+                   return 0
+            else: # no failures, add the weight to the fitness score
+                   return 1
 
 
 def instructor_time_pref_after(this_week, args):
-	#args should be a list containing this_instructor, courses, and after_time;
+	#args should be a list containing this_instructor, courses,
+        # and after_time
 	#this will have to be passed to you from the constraint generator
 	this_instructor = args[0]
 	time_slot = args[1]
+	is_mandatory = args[2]
+	holds = [] # will contain 0's for all courses that fail constraint
+	
 	for each_course in this_instructor.courses:
 		#section object for course
 		each_section = this_week.find_section( each_course.code )
 		#only want section obujects for this_instructor
                 if each_section.time_slots[0].start_time < time_slot:
                         #case 1: a course fails
-                        return 0
-	#case 2: all courses for instructor pass
-	return 1
+                        holds.append(0)
+                   
+        if is_mandatory:
+            if len(holds) >= 1: # at least one failure
+                this_week.valid = False
+                return 0
+            else:
+                this_week.valid = True
+                return 0
+        else: # not mandatory, treat it like normal
+            if len(holds) >= 1:
+                   return 0
+            else: # no failures, add the weight to the fitness score
+                   return 1
 
 
 def instructor_conflict(this_week, args):
