@@ -448,7 +448,8 @@ class Scheduler:
         #temp_slot_index = time_slot.slot_index
 
         i = self.find_index(time_slot, slots_list)
-        time_slot.set_course(course)
+        schedule_slot = self.find_respective_time_slot(time_slot, week)
+        schedule_slot.set_course(course)
         del(slots_list[i])
 
 
@@ -586,7 +587,7 @@ class Scheduler:
                         self.assign_and_remove(
                             course, possibilities['in_order'][d], tr_slots, mwf_slots,
                             list_of_time_slots, this_week)
-                        print(possibilities['in_order'][d])
+                        #print(possibilities['in_order'][d])
                 # TR
                 else:
                     for d in (1, 3):
@@ -620,14 +621,15 @@ class Scheduler:
                 # get a new random time slot
                 random_slot = choice(current_pool)
         #status
-        printed = False
+        '''printed = False
         for time_slot in this_week.list_time_slots():
                 if time_slot.course is not None:
                     print(time_slot)
                     printed = True
-                    print("Not empty!")
+                    print("??????????????NOT EMPTY??????????????????")
+        print("length of time slots", str(len(this_week.list_time_slots())))
         if not printed:
-            print("Empty!")
+            print("Empty!")'''
         return len(current_pool) == 0 and not done
 
 
@@ -693,14 +695,14 @@ class Scheduler:
             if not success:
                 #cannot schedule in present situation
                 week_to_fill.valid = False
-        printed = False
+        '''printed = False
         print("Final schedule:")
         for time_slot in week_to_fill.list_time_slots():
                 if time_slot.course is not None:
                     print(time_slot)
                     printed = True
         if not printed:
-            print("***Final schedule is empty!***")
+            print("***Final schedule is empty!***")'''
 
 
     def generate_starting_population(self):
