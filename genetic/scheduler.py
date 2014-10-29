@@ -44,9 +44,12 @@ class Scheduler:
 
         if type(rooms) == list:
             if len(rooms) != 0:
-                if not all(isinstance(each_room, str) for \
-                        each_room in rooms):
-                    raise SchedulerInitError("Rooms - Not all string type")
+                if not all(isinstance(each_room, tuple) for each_room in rooms):
+                    raise SchedulerInitError("Rooms - Not all tuple type")
+                else:
+                    for each_room in rooms:
+                        if not all(isinstance(part, str) for part in each_room):
+                            raise SchedulerInitError("Rooms - Not all parts are str type")
             else:
                  raise SchedulerInitError("Rooms - List has no elements")
         else:

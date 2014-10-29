@@ -71,7 +71,12 @@ def create_room_list_from_file(path_to_xml):
     try:
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
-        rooms = [r.text for r in root.find("schedule").find("roomList").getchildren()]
+        # rooms will be list of tuples
+        rooms = []
+        for r in root.find("schedule").find("roomList").getchildren():
+            # Make tuple with (building, number, capacity)
+            room = (r.attrib["building"], r.attrib["number"], r.attrib["capacity"])
+            rooms.append(room)
         return rooms
     except Exception as inst:
         print(inst)

@@ -6,7 +6,7 @@ from copy import copy
 class Room:
 
     """A particular room, consisting of a room number and a list of time slot objects"""
-    def __init__(self, building, number, this_day, test = False):
+    def __init__(self, building, number, capacity, this_day, test = False):
         if test:
             self.day = this_day
         else:
@@ -14,6 +14,8 @@ class Room:
         
         self.building = building
         self.number = number
+        # not sure if capacity is int or str when passed. Ensure it stores as int
+        self.capacity = int(capacity)
 
         time_slots_mwf = self.info("Schedule").time_slots_mwf
 
@@ -30,7 +32,7 @@ class Room:
         Possible queries: Day, week, schedule
         IN: query string
         OUT: object of query's type for given room"""
-        if query not in ["Day", "Week", "Schedule"]:
+        if query not in ["Day", "Week", "Schedule", "Capacity"]:
             print("Invalid query for Room")
             return
         elif query == "Day":
@@ -39,6 +41,8 @@ class Room:
             return self.day.week
         elif query == "Schedule":
             return self.day.week.schedule
+        elif query == "Capacity":
+            return self.capacity
 
     def generate_time_slots(self, time_slots_mwf, time_slots_tr):
         this_schedule = []
