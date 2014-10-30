@@ -678,21 +678,21 @@ class Scheduler:
                 week_to_fill.valid = False
         for each_course in regular:
             if each_course.credit == 5:
-                success = self.schedule_5_hour_course(each_course, tr_slots, mwf_slots,
+                failure = self.schedule_5_hour_course(each_course, tr_slots, mwf_slots,
                                                       list_of_slots_to_fill, week_to_fill)
             elif each_course.credit == 4:
-                success = self.schedule_4_hour_course(each_course, tr_slots, mwf_slots,
+                failure = self.schedule_4_hour_course(each_course, tr_slots, mwf_slots,
                                                       list_of_slots_to_fill, week_to_fill)
             elif each_course.credit == 3:
-                success = self.schedule_3_hour_course(each_course, tr_slots, mwf_slots,
+                failure = self.schedule_3_hour_course(each_course, tr_slots, mwf_slots,
                                                       list_of_slots_to_fill, week_to_fill)
             elif each_course.credit == 1:
-                success = self.schedule_1_hour_course(each_course, tr_slots, mwf_slots,
+                failure = self.schedule_1_hour_course(each_course, tr_slots, mwf_slots,
                                                       list_of_slots_to_fill, week_to_fill)
             else:
                 #error
                 return
-            if not success:
+            if failure:
                 #cannot schedule in present situation
                 week_to_fill.valid = False
         '''printed = False
@@ -707,7 +707,7 @@ class Scheduler:
 
     def generate_starting_population(self):
         """Generates starting population"""
-        for x in range(1):
+        for x in range(15):
             self.weeks.append(Week(self.rooms, self))
 
         for each_week in self.weeks:
