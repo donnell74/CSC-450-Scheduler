@@ -10,6 +10,10 @@ import tkMessageBox
 
 
 class Page(Frame):
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root):
         Frame.__init__(self, root)
  
@@ -17,6 +21,10 @@ class Page(Frame):
         self.lift()
 
 class AddedConstraintsScreen(Page):
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root, width = 30, height = 50)
         
@@ -34,7 +42,11 @@ class AddedConstraintsScreen(Page):
         self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
         self.scroll['font'] = ('Courier New', '11')
         self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
-        
+
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #     
     def view_constraints(self, constraint):
         output = constraint[0]
         #output = output.strip("Constraint Conflict")
@@ -59,7 +71,10 @@ class AddedConstraintsScreen(Page):
             self.scroll.insert(INSERT, constraint)
         
 class HomeConstraintPage(Page):
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root):
         Frame.__init__(self, root)
         
@@ -68,7 +83,10 @@ class HomeConstraintPage(Page):
         self.description_label.pack()
 
 class InstructorConstraint(Page):
- 
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
 
@@ -159,7 +177,10 @@ class InstructorConstraint(Page):
 
 
         
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def add_instr_time(self):
         instructor = self.str_instr_name_default.get()       
         before_after = self.when_default.get()
@@ -168,7 +189,10 @@ class InstructorConstraint(Page):
         create_time_pref_constraint(instructor, before_after, timeslot, priority, self.constraints)
         pass
     
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def add_instr_day(self):
         instructor = self.str_instr_name_default.get()
         checkboxes = self.boxes
@@ -183,7 +207,10 @@ class InstructorConstraint(Page):
         create_day_pref_constraint(instructor, day_code, priority, self.constraints)
         pass
 
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def callbackWhen(self, *args):
         when = self.when_default.get()
         menu = self.time_slot_menu["menu"]
@@ -197,6 +224,10 @@ class InstructorConstraint(Page):
         self.time_default.set(t[0])        
         
 
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def time_day_toggle(self, *args):
         time_day = self.time_day_default.get()
         if time_day == "Day":
@@ -210,7 +241,10 @@ class InstructorConstraint(Page):
     
 
 class CourseConstraint(Page):
- 
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
         
@@ -255,14 +289,22 @@ class CourseConstraint(Page):
         
         self.button_go = Button(self, text="Add Constraint", command=self.go)
         self.button_go.pack(side = RIGHT, pady = 25)
-        
+
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #      
     def go(self):
         course = self.str_course_default.get()
         time =  self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.course_time_priority_default.get()
         create_course_time_constraint(course, time, when, priority, self.constraints)
-    
+
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def callbackWhen(self, *args):
         when = self.str_when_default.get()
         menu = self.option_time["menu"]
@@ -276,7 +318,10 @@ class CourseConstraint(Page):
         self.str_time_default.set(t[0])   
         
 class ConstraintPage(Page):
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
         self.head_label = Label(self, text="Constraint Page", \
@@ -310,15 +355,27 @@ class ConstraintPage(Page):
         
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
-        
+
+    ## Adding a instructor constraint 
+    #  @param self
+    #  @param add_instructor A instructor object 
+    #       
     def add_instructor_constraint(self):
         self.instructor_page.pack(side = LEFT, padx = 50)
         self.course_page.pack_forget()
-        
+
+    ## Adding a course constraint 
+    #  @param self
+    #  @param add_instructor A course object 
+    #           
     def add_course_constraint(self):
         self.course_page.pack(side = LEFT, padx = 50)
         self.instructor_page.pack_forget()
-        
+
+    ## Creating a widget  
+    #  @param self
+    #  @param create_widget Adding a widget 
+    #           
     def create_widgets(self):
         
         self.button_course = Button(self, text="Add Course Constraint", command=self.add_course_constraint)
@@ -327,7 +384,10 @@ class ConstraintPage(Page):
         self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
         self.button_instructor.pack(anchor = NW, padx = 50)
         
-
+## Looking for a priority value
+#  
+#  @param get_priority_object A priority object 
+#  @return get_priority_value Priority levels
 def get_priority_value(priority):
     if priority == "Low":
         priority = 10
@@ -340,6 +400,10 @@ def get_priority_value(priority):
     return priority
 
 
+## Looking for a particular instructor
+#  
+#  @param pull_instructor_object A instructor object 
+#  @return pull_instructor Instructors 
 def pull_instructor_obj(instructor):
     for i in range(len(globs.instructors)):
         if instructor == globs.instructors[i].name:  # look for appropriate instructor object
@@ -347,6 +411,10 @@ def pull_instructor_obj(instructor):
             break
     return instructor
 
+## Creates a course_time constraint
+#  
+#  @param create_course_time_constrainst A course is set to be taught at specific times
+#  @return List_of_course_times A list of times in a day a course is taught  
 def create_course_time_constraint(course, start_time, when, priority, added_constraints):
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
@@ -385,6 +453,10 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
     return 
     
 
+## Creates a time preference constraint
+#  
+#  @param create_time_preference A instructor will have the option on what times to lecture
+#  @return List_of_times A list of times in a day  
 def create_time_pref_constraint(instructor, before_after, timeslot, priority, added_constraints):
     priority = get_priority_value(priority)
     instructor = pull_instructor_obj(instructor)
@@ -406,7 +478,11 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
 
-
+## Creates a day preference constraint
+#  
+#
+@param create_day_preference A instructor will have the option on what days to lecture
+#  @return List_of_days A list of days in a week  
 def create_day_pref_constraint(instructor, day_code, priority, added_constraints):
     priority = get_priority_value(priority)
     instructor = pull_instructor_obj(instructor)
