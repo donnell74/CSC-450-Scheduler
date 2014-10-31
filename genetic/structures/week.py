@@ -130,16 +130,19 @@ class Week:
         These time slots form a "row"
         IN: time slot object
         OUT: matching time slot objects from this week"""
+        matching_time_slots = []
         for each_day in self.days:
             for each_room in each_day.rooms:
-                if each_room.number == room.number:
+                if each_room.number == time_slot.room.number:
                     for each_time_slot in each_room.schedule:
                         if each_time_slot.start_time == time_slot.start_time and \
                            each_time_slot.end_time == time_slot.end_time:
-                            return each_time_slot
+                            matching_time_slots.append(each_time_slot)
         #todo: log error; this should only ever happen
         #if weeks are malformed
-        return None
+        if len(matching_time_slots) == 0:
+            return None
+        return matching_time_slots
 
 
     def find_matching_time_slot(self, time_slot):
@@ -148,9 +151,9 @@ class Week:
         IN: time slot object
         OUT: matching time slot object from this week"""
         for each_day in self.days:
-            if each_day.day_code == day.day_code:
+            if each_day.day_code == time_slot.room.day.day_code:
                 for each_room in each_day.rooms:
-                    if each_room.number == room.number:
+                    if each_room.number == time_slot.room.number:
                         for each_time_slot in each_room.schedule:
                             if each_time_slot.start_time == time_slot.start_time and \
                                each_time_slot.end_time == time_slot.end_time:

@@ -9,7 +9,7 @@
           <item code="CSC 232" credit="3" instructor="Vollmar" prereq="CSC131"></item>
           <item code="CSC 320" credit="3" instructor="Liu" prereq="CSC131"></item>
           <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232"></item>
-          <item code="CSC 333" credit="4" instructor="Shade" prereq="CSC232 CSC320"></item>
+          <!--<item code="CSC 333" credit="4" instructor="Shade" prereq="CSC232 CSC320"></item>-->
           <item code="CSC 365" credit="3" instructor="Saquer" prereq=""></item>
           <item code="CSC 450" credit="3" instructor="Shade" prereq="CSC325 CSC365"></item>
           <item code="CSC 460" credit="3" instructor="Wang" prereq="CSC320 CSC325"></item>
