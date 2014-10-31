@@ -357,6 +357,43 @@ def check_constraint_exists(name):
         if constraint.name == name:
             return 0
     return 1
+
+
+def constraint_adding_conflict(constraint_name, constraint_list):
+	""" Checks a constraint about to be added and determines if it will
+	conflict with another constraint already added.
+	Example:  CSC 232_before_9, CSC 232_after_9 is pointless, so we don't add
+	the new constraint.
+	IN:  new constraint name, list of added constraints
+	OUT: 0 or 1 if the constraint is bad/good
+	"""
+
+	new_constraint = constraint_name.split('_')
+	if ' ' in new_constraint[0]: # courses have a space ("CSC 111"), instructors don't
+	    # course constraint
+            for constraint in constraint_list:
+                old_constraint = constraint.name.split('_')
+		if new_constraint[0] == old_constraint[0]: # same course code
+                    if new_constraint[2] == old_constraint[2]: # same time slot
+			return 0  # can't be duplicate, so the before/after must vary, error
+							
+	else:
+	    # instructor constraint
+	    for constraint in constraint_list:
+		old_constraint = constraint.name.split('_')
+                if new_constraint[0] == old_constraint[0]: # same instructor
+                    if len(new_constraint) == len(old_constraint): 
+                        # day pref is len = 3, time pref is len = 4
+                        if len(new_constraint) == 3:  
+                            if new_constraint[2] != old_constraint[2]: # different day codes
+                                return 0
+                        else:  # time pref
+                            if new_constraint[3] == old_constraint[3]: # same time slot
+                                # only thing that varies is before/after, error
+                                return 0
+	# if no return 0/error by now, the constraint is fine and doesn't conflict
+	return 1 
+
             
 
 def create_course_time_constraint(course, start_time, when, priority, added_constraints):
@@ -371,6 +408,13 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
     if check_constraint_exists(constraint_name) == 0:
         tkMessageBox.showerror("Duplicate Constraint", \
                                "This constraint already exists.")
+        return
+
+    if constraint_adding_conflict(constraint_name, \
+                                  globs.mainScheduler.constraints) == 0:
+        tkMessageBox.showerror("Constraint Conflict", \
+                               "This constraint conflicts with a previously" \
+                               "added constraint.")
         return
     
     hour, minute = start_time.split(":")
@@ -421,6 +465,13 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
         tkMessageBox.showerror("Duplicate Constraint", \
                                "This constraint already exists.")
         return
+
+    if constraint_adding_conflict(constraint_name, \
+                                  globs.mainScheduler.constraints) == 0:
+        tkMessageBox.showerror("Constraint Conflict", \
+                               "This constraint conflicts with a previously" + \
+                                "added constraint.")
+        return
     
     if before_after == "Before":
         globs.mainScheduler.add_constraint(constraint_name, priority,  \
@@ -458,6 +509,13 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     if check_constraint_exists(constraint_name) == 0:
         tkMessageBox.showerror("Duplicate Constraint", \
                                "This constraint already exists.")
+        return
+
+    if constraint_adding_conflict(constraint_name, \
+                                  globs.mainScheduler.constraints) == 0:
+        tkMessageBox.showerror("Constraint Conflict", \
+                               "This constraint conflicts with a previously" + \
+                                "added constraint.")
         return
         
     day_code = day_code.lower()    
