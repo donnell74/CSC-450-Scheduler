@@ -5,10 +5,18 @@ from copy import deepcopy
 from datetime import time
 
 
+    ## Documentation for a class.
+    #  
+    #  
+    #  A particular week of courses, consisting of 5 day objects
 class Week:
 
     """A particular week of courses, consisting of 5 day objects"""
 
+    ## Initialize week objects with room objects 
+    #  @param self
+    #  @param info A week object with list of room objects
+    #  
     def __init__(self, rooms, this_scheduler, test = False):
         """Initialize week object with list of room objects"""
         if test:
@@ -22,6 +30,10 @@ class Week:
         #Week's copy of courses
         self.sections = []
 
+    ## Finds objects for a given week
+    #  @param self
+    #  @param info A find object which locates possible schedule queries
+    #  @return self.schedule A object of query's for a geive week
     def info(self, query):
         """Goes up the object hierarchy to find object for given week
         Possible queries: schedule
@@ -33,6 +45,10 @@ class Week:
         elif query == "Schedule":
             return self.schedule
 
+    ## Updates a list of sections
+    #  @param self
+    #  @param updatesection Updates a list of sections with all details
+    #  @return none
     def update_sections(self, courses):
         """Updates list of sections with all details
         IN: list of courses
@@ -44,6 +60,10 @@ class Week:
             each_section = structures.Section(each_course, each_slots)
             self.sections.append(each_section)
 
+    ## Finds sections for a given course
+    #  @param self
+    #  @param section A section object
+    #  @return each_section None is returned if not found. returns list of sections if found
     def find_section(self, course_code):
         """IN: course_code as string
         OUT: section object; note that its attr's are shallow copies of structure objects
@@ -55,10 +75,18 @@ class Week:
         #not found
         return None
 
+    ## Finds copies of weeks
+    #  @param self
+    #  @param deep_copy A copy object
+    #  @return deepcopy(self)
     def deep_copy(self):
         """Returns a deep copy of week"""
         return deepcopy(self)
 
+    ## Find given timeslot for a given time
+    #  @param self
+    #  @param time_slot A time slot object
+    #  @return each_time_slot A time slot for a given time
     def find_time_slot(self, day, room, time_slot):
         """Returns the time slot for the given time
         IN: day, room, time objects
@@ -76,10 +104,15 @@ class Week:
         print("Time slot not found")
         return
 
+    ## Find given courses timeslots in week
+    #  @param self
+    #  @param course A course object
+    #  @return time_slots A list of timeslot objects for course
     def find_course(self, course):
         """Returns list of time slot objects for given course object in week
         IN: course object
         OUT: list of time slot objects"""
+        
         time_slots = []
         for each_day in self.days:
             for each_room in each_day.rooms:
@@ -91,6 +124,10 @@ class Week:
                             time_slots.append(each_slot)
         return time_slots
 
+    ## Finds objects for a given week
+    #  @param self
+    #  @param info A get object 
+    #  @return day A get object that returns the day 
     def __getitem__(self, k):
         if k not in "mtwrf":
             raise ValueError
@@ -99,6 +136,10 @@ class Week:
             if day.day_code == k:
                 return day
 
+    ## Provides lists of timeslot objects
+    #  @param self
+    #  @param time_slot A time_slot object
+    #  @return List_of_slots A list of time slot objects in a week
     def list_time_slots(self):
         """Gives list of all time slot objects in week while indexing them"""
         list_of_slots = []
@@ -119,6 +160,10 @@ class Week:
             room = 0
         return list_of_slots
 
+    ## Provides lists of empty timeslot objects
+    #  @param self
+    #  @param empty_time_slot A empty_time_slot object
+    #  @return empty_List_of_slots A list of empty time slot objects in a week
     def find_empty_time_slots(self):
         """Returns a list of empty (no course) time slot objects"""
         empty_slots = []
@@ -129,7 +174,10 @@ class Week:
                         empty_slots.append(each_slot)
         return empty_slots
 
-
+    ## Confirms with a true if a list of courses is empty or false otherwise 
+    #  @param self
+    #  @param is_empty A  object
+    #  @return true or false It returns a bool if empty or not
     def is_empty(self):
         """Returns true is empty; else, false"""
         for each_day in self.days:
@@ -139,6 +187,10 @@ class Week:
                         return False
         return True
 
+    ## Updates and fills the week based on the criteria listed in courses
+    #  @param self
+    #  @param fill_week A fill_week object
+    #  @return confirmation, if week is filled or not Prints not able to fill if bad input is entered
     def fill_week(self, courses):
         """Fills the week based on the criteria listed in courses"""
         # check that courses has the correct structure
@@ -169,6 +221,10 @@ class Week:
             # error stuff
             print("Unable to fill week because bad input")
 
+    ## Provides lists of courses for weeks in the structure
+    #  @param self
+    #  @param print_concise A print_concise object
+    #  @return List_of_courses A list of courses for week in the structure slot objects 
     def print_concise(self):
         """Returns a concise list of courses for week in the structure:
             course_code day_code room_number start_time-end_time"""
