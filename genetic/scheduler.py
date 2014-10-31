@@ -413,22 +413,25 @@ class Scheduler:
              and open days
         Type: 0 for undefined, 1 for mwf, 2 for tr, 3 for both"""
         row_dict = {'days': '', 'time_slots': [], 'type': 0}
-
         for each_time_slot in time_slots:
-            row_dict['days'] += each_time_slot.day
+            if each_time_slot.course is None:
+                row_dict['time_slots'].append(each_time_slot)
+                row_dict['days'] += each_time_slot.day
 
-            if each_time_slot.isTR and row_dict['type'] == 0:
-                row_dict['type'] = 2
-            elif not each_time_slot.isTR and row_dict['type'] == 0:
-                row_dict['type'] = 1
-            elif (each_time_slot.isTR and row_dict['type'] == 1) or \
-                 (not each_time_slot.isTR and row_dict['type'] == 2):
-                row_dict['type'] = 3
-            else:
-                raise MalformedTimeSlotError("Timeslot does not have a isTR attribute")
-
-        if each_time_slot.course is None:
-            row_dict['time_slots'].append(each_time_slot)
+                if each_time_slot.isTR and row_dict['type'] == 0:
+                    row_dict['type'] = 2
+                elif not each_time_slot.isTR and row_dict['type'] == 0:
+                    row_dict['type'] = 1
+                elif (each_time_slot.isTR and row_dict['type'] == 1) or \
+                     (not each_time_slot.isTR and row_dict['type'] == 2):
+                    row_dict['type'] = 3
+                elif (not each_time_slot.isTR and row_dict['type'] == 1) or \
+                     (each_time_slot.isTR and row_dict['type'] == 2):
+                    pass
+                else:
+                    print(each_time_slot.isTR)
+                    print(row_dict['type'])
+                    raise MalformedTimeslotError("Timeslot does not have a isTR attribute")
 
         return row_dict
 
