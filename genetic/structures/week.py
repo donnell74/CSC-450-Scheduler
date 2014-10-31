@@ -5,6 +5,14 @@ from copy import deepcopy
 from datetime import time
 
 
+class MalformedWeekError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class Week:
 
     """A particular week of courses, consisting of 5 day objects"""
@@ -37,12 +45,16 @@ class Week:
         """Updates list of sections with all details
         IN: list of courses
         OUT: updated section attribute"""
-        if len(self.sections) > 0:
-            self.sections = []
-        for each_course in courses:
-            each_slots = self.find_course(each_course)
-            each_section = structures.Section(each_course, each_slots)
-            self.sections.append(each_section)
+        try:
+            if len(self.sections) > 0:
+                self.sections = []
+            for each_course in courses:
+                each_slots = self.find_course(each_course)
+                each_section = structures.Section(each_course, each_slots)
+                self.sections.append(each_section)
+        except:
+            print(each_course)
+            print(self)
 
     def find_section(self, course_code):
         """IN: course_code as string
@@ -141,7 +153,7 @@ class Week:
         #todo: log error; this should only ever happen
         #if weeks are malformed
         if len(matching_time_slots) == 0:
-            return None
+            raise MalformedWeekError("Find Matching Time Slot Row")
         return matching_time_slots
 
 
@@ -158,9 +170,8 @@ class Week:
                             if each_time_slot.start_time == time_slot.start_time and \
                                each_time_slot.end_time == time_slot.end_time:
                                 return each_time_slot
-        #todo: log error; this should only ever happen
-        #if weeks are malformed
-        return None
+
+        raise MalformedWeekError("Find Matching Time Slot")
 
 
     def fill_week(self, courses):
@@ -196,29 +207,33 @@ class Week:
     def print_concise(self):
         """Returns a concise list of courses for week in the structure:
             course_code day_code room_number start_time-end_time"""
-        courses_dyct = {
-        }  # structure of {course_code : (day_code, room_number, start_time, end_time)}
-        instructors = []
-        for each_slot in self.list_time_slots():
-            if each_slot.course != None:
-                if courses_dyct.has_key(each_slot.course.code):
-                    courses_dyct[each_slot.course.code][0] += each_slot.day
-                else:
-                    courses_dyct[each_slot.course.code] =  [each_slot.day, each_slot.room.building, \
-                                                            each_slot.room.number, each_slot.start_time, \
-                                                            each_slot.end_time, each_slot.instructor]
-                    if each_slot.instructor not in instructors:
-                        instructors.append(each_slot.instructor)
+        try:
+            courses_dyct = {
+            }  # structure of {course_code : (day_code, room_number, start_time, end_time)}
+            instructors = []
+            for each_slot in self.list_time_slots():
+                if each_slot.course != None:
+                    if courses_dyct.has_key(each_slot.course.code):
+                        courses_dyct[each_slot.course.code][0] += each_slot.day
+                    else:
+                        courses_dyct[each_slot.course.code] =  [each_slot.day, each_slot.room.building, \
+                                                                each_slot.room.number, each_slot.start_time, \
+                                                                each_slot.end_time, each_slot.instructor]
+                        if each_slot.instructor not in instructors:
+                            instructors.append(each_slot.instructor)
 
-        concise_schedule_str = ""
-        for instructor in instructors:
-            concise_schedule_str += instructor.name + "\n"
-            for key in instructor.courses:
-                # course / days / building / room number / start time / - / end time 
-                concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
-                    str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
-                    str(courses_dyct[key.code][3])[:-3] + '-' + str(courses_dyct[key.code][4])[:-3] + '\n'
-                    #format start and end time to remove seconds value
+            concise_schedule_str = ""
+            for instructor in instructors:
+                concise_schedule_str += instructor.name + "\n"
+                for key in instructor.courses:
+                    # course / days / building / room number / start time / - / end time 
+                    concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
+                        str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
+                        str(courses_dyct[key.code][3])[:-3] + '-' + str(courses_dyct[key.code][4])[:-3] + '\n'
+                        #format start and end time to remove seconds value
+        except:
+            print(key)
+            print(self)
 
         print ("=" * 25)
         print ("Fitness score: ", self.fitness)

@@ -27,6 +27,23 @@ class BreedError(Exception):
         return repr(self.value)
 
 
+class FilterError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class MalformedTimeslotError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+
 class Scheduler:
 
     """Schedules all courses for a week"""
@@ -267,11 +284,13 @@ class Scheduler:
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
-        try:
-            assert len(self.weeks) > 1
-            assert isinstance(self.weeks[0], Week)
-        except:
-            raise BreedError("Weeks")
+        if len(self.weeks) < 2:
+            raise BreedError("Weeks is not the correct length")
+
+        if not all(isinstance(each_week, Week) for \
+                each_week in self.weeks):
+            raise BreedError("An element in weeks is not a Week object")
+
 
         # combinations...(ex) 5 choose 2
         for each_week in range(0, len(self.weeks) - 1, 2):
@@ -334,7 +353,6 @@ class Scheduler:
             #print([i.fitness for i in self.weeks])
 
             valid_weeks = week_slice_helper()
-            week_slice_helper()
             if counter == MAX_TRIES - 1:
                 print('Max tries reached; final output found')
                 break
@@ -407,9 +425,7 @@ class Scheduler:
                  (not each_time_slot.isTR and row_dict['type'] == 2):
                 row_dict['type'] = 3
             else:
-                #error: should not be possible
-                print("Something went wrong with structure creation")
-                pass
+                raise MalformedTimeSlotError("Timeslot does not have a isTR attribute")
 
         if each_time_slot.course is None:
             row_dict['time_slots'].append(each_time_slot)
@@ -456,8 +472,8 @@ class Scheduler:
     def schedule_5_hour_course(self, course, tr_slots, mwf_slots, list_of_slots, this_week):
         """Randomly schedule a 5 hour course"""
         if course.credit != 5:
-            #error
-            return
+            raise FilterError("Schedule 5 hour course")
+
         random_slot = choice(mwf_slots)
         current_pool = deepcopy(mwf_slots)
         done = False
@@ -486,8 +502,8 @@ class Scheduler:
     def schedule_4_hour_course(self, course, tr_slots, mwf_slots, list_of_time_slots, this_week):
         """Randomly schedule a 4 hour course"""
         if course.credit != 4:
-            #error
-            return
+            raise FilterError("Schedule 4 hour course")
+
         random_slot = choice(mwf_slots)
         current_pool = deepcopy(mwf_slots)
         done = False
@@ -551,8 +567,8 @@ class Scheduler:
     def schedule_3_hour_course(self, course, tr_slots, mwf_slots, list_of_time_slots, this_week):
         """Randomly schedule a 3 hour course"""
         if course.credit != 3:
-            #error
-            return
+            raise FilterError("Schedule 3 hour course")
+
         random_slot = choice(list_of_time_slots)
         current_pool = deepcopy(list_of_time_slots)
         done = False
@@ -610,8 +626,8 @@ class Scheduler:
         """Randomly schedule a 1 hour course"""
         #COME BACK TO
         if course.credit != 1:
-            #error
-            return
+            raise FilterError("Schedule 1 hour course")
+
         random_slot = choice(list_of_time_slots)
         current_pool = deepcopy(list_of_time_slots)
         done = False
