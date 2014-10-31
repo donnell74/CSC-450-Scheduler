@@ -238,7 +238,7 @@ class Week:
         print ("=" * 25)
         print ("Fitness score: ", self.fitness)
         print ("Is Valid: ", self.valid)
-        #print (concise_schedule_str)
+        print (concise_schedule_str)
         print ("=" * 25)
         return concise_schedule_str
 
