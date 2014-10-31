@@ -59,22 +59,6 @@ class Week:
         """Returns a deep copy of week"""
         return deepcopy(self)
 
-    def find_time_slot(self, day, room, time_slot):
-        """Returns the time slot for the given time
-        IN: day, room, time objects
-        OUT: corresponding time slot object"""
-        for each_day in self.days:
-            # todo: write __eq__ for all classes and change these comparisons
-            # accordingly
-            if each_day.day_code == day.day_code:
-                for each_room in each_day.rooms:
-                    if each_room.number == room.number:
-                        for each_time_slot in each_room.schedule:
-                            if each_time_slot.start_time == time_slot.start_time:
-                                return each_time_slot
-        # todo: specificity on error; fail fast/gracefully
-        print("Time slot not found")
-        return
 
     def find_course(self, course):
         """Returns list of time slot objects for given course object in week
@@ -139,6 +123,42 @@ class Week:
                         return False
         return True
 
+
+    def find_matching_time_slot_row(self, time_slot):
+        """Returns the time slots in week that match in every time category except day
+        This means same start time, end time, and room
+        These time slots form a "row"
+        IN: time slot object
+        OUT: matching time slot objects from this week"""
+        for each_day in self.days:
+            for each_room in each_day.rooms:
+                if each_room.number == room.number:
+                    for each_time_slot in each_room.schedule:
+                        if each_time_slot.start_time == time_slot.start_time:
+                            return each_time_slot
+        #todo: log error; this should only ever happen
+        #if weeks are malformed
+        return None
+
+
+    def find_matching_time_slot(self, time_slot):
+        """Returns the single matching time slot in week
+        This means same start time, end time, room, and day
+        IN: time slot object
+        OUT: matching time slot object from this week"""
+        for each_day in self.days:
+            if each_day.day_code == day.day_code:
+                for each_room in each_day.rooms:
+                    if each_room.number == room.number:
+                        for each_time_slot in each_room.schedule:
+                            if each_time_slot.start_time == time_slot.start_time and \
+                               each_time_slot.end_time == time_slot.end_time:
+                                return each_time_slot
+        #todo: log error; this should only ever happen
+        #if weeks are malformed
+        return None
+
+
     def fill_week(self, courses):
         """Fills the week based on the criteria listed in courses"""
         # check that courses has the correct structure
@@ -199,7 +219,7 @@ class Week:
         print ("=" * 25)
         print ("Fitness score: ", self.fitness)
         print ("Is Valid: ", self.valid)
-        print (concise_schedule_str)
+        #print (concise_schedule_str)
         print ("=" * 25)
         return concise_schedule_str
 

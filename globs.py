@@ -27,9 +27,9 @@ def init(): # call globals.init() from main
         #prereqs computation and display
         prereqs = interface.get_prereqs(input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
-        for prereq in prereqs:
+        '''for prereq in prereqs:
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
-                  " ".join([c.absolute_course for c in prereq.prereqs])
+                  " ".join([c.absolute_course for c in prereq.prereqs])'''
     
     # used for gui strings
     # must be in military time

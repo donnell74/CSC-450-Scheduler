@@ -148,11 +148,6 @@ class Scheduler:
         # Reassign
         self.randomly_fill_schedule(this_week, [random_course], empty_slots)
 
-    def find_respective_time_slot(self, time_slot, week):
-        """Finds the given time slot object in given week and returns it"""
-        day = time_slot.info("Day")
-        room = time_slot.info("Room")
-        return week.find_time_slot(day, room, time_slot)
 
     def find_time_slots_from_cuts(self, this_week, slots_list):
         """For a given week, returns all time slots matching the slots list"""
@@ -214,54 +209,6 @@ class Scheduler:
 
         return inconsistencies
 
-    def week_helper(self, time_slot, time_slot_list):
-        """Gives the 5 timeslot objects and occupied status for each day in the same room,
-        at the same time, with the same schedule/week as the given time slot object
-        IN: list of time slot objects *for a schedule/week*, time slot object
-        OUT: dictionary with occupied counter and unoccupied keys, with values being time slots
-             for the week; also gives the objects in order by day and their occupation status
-             in order by day"""
-        helper = {'occupied': 0, 'unoccupied': [], 'in_order': [None, None, None, None, None],
-                  'occupation': [0, 0, 0, 0, 0]}
-        marker = False  # marker for whether open or not for current
-        this_start_time = time_slot.start_time
-        this_end_time = time_slot.end_time
-        this_room = time_slot.room.number
-        for each_slot in time_slot_list:
-            if each_slot.start_time == this_start_time and each_slot.end_time == this_end_time and \
-               each_slot.room.number == this_room:
-                # occupation status
-                if each_slot.course is None:
-                    marker = True
-                    helper['unoccupied'].append(each_slot)
-                else:
-                    # occupied counter
-                    helper['occupied'] += 1
-
-                # day
-                temp_day = each_slot.room.day.day_code
-                if temp_day == 'm':
-                    helper['in_order'][0] = each_slot
-                    helper['occupation'][0] = 1 if marker else 0
-                elif temp_day == 't':
-                    helper['in_order'][1] = each_slot
-                    helper['occupation'][1] = 1 if marker else 0
-                elif temp_day == 'w':
-                    helper['in_order'][2] = each_slot
-                    helper['occupation'][2] = 1 if marker else 0
-                elif temp_day == 'r':
-                    helper['in_order'][3] = each_slot
-                    helper['occupation'][3] = 1 if marker else 0
-                else:
-                    helper['in_order'][4] = each_slot
-                    helper['occupation'][4] = 1 if marker else 0
-                marker = False  # reset it
-        # cleanup...take care of cases where time slot has been removed
-        for entry in helper['in_order']:
-            if entry is None:
-                # occupied counter
-                helper['occupied'] += 1
-        return helper
 
     def resolve_inconsistencies(self, this_week, inconsistencies):
         """Removes excess courses and adds lacking courses to week.
@@ -630,7 +577,7 @@ class Scheduler:
         print("length of time slots", str(len(this_week.list_time_slots())))
         if not printed:
             print("Empty!")'''
-        return len(current_pool) == 0 and not done
+        return not done
 
 
     def schedule_1_hour_course(self, course, tr_slots, mwf_slots, list_of_slots, this_week):
@@ -694,6 +641,7 @@ class Scheduler:
                 return
             if failure:
                 #cannot schedule in present situation
+                print("failure")
                 week_to_fill.valid = False
         '''printed = False
         print("Final schedule:")
