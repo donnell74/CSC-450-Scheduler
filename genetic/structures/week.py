@@ -134,7 +134,8 @@ class Week:
             for each_room in each_day.rooms:
                 if each_room.number == room.number:
                     for each_time_slot in each_room.schedule:
-                        if each_time_slot.start_time == time_slot.start_time:
+                        if each_time_slot.start_time == time_slot.start_time and \
+                           each_time_slot.end_time == time_slot.end_time:
                             return each_time_slot
         #todo: log error; this should only ever happen
         #if weeks are malformed

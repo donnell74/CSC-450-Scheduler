@@ -388,12 +388,36 @@ class Scheduler:
         return
 
 
+    def assess_time_slot_row_for_open_slots(self, time_slots):
+        """Generates a dictionary describing the trends of the list of time slots
+        IN: list of time slot objects
+        OUT: dictionary describing type of time slots, list of time slot objects,
+             and open days
+        Type: 0 for undefined, 1 for mwf, 2 for tr, 3 for both"""
+        row_dict = {'days': [], 'time_slots': [], 'type': 0}
+
+        for each_time_slot in time_slots:
+            row_dict['time_slots'].append(each_time_slot)
+
+            if each_time_slot.isTR and row_dict['type'] == 0:
+                row_dict['type'] = 2
+            elif not each_time_slot.isTR and row_dict['type'] == 0:
+                row_dict['type'] = 1
+            elif (each_time_slot.isTR and row_dict['type'] == 1) or \
+                 (not each_time_slot.isTR and row_dict['type']):
+                row_dict['type'] = 3
+            else:
+                #error: should not be possible
+                pass
+
+        if each_time_slot.course is None:
+            row_dict['time_slots'].append(each_time_slot)
+
+        return row_dict
+
+
     def assign_and_remove(self, course, time_slot, tr_slots, mwf_slots, slots_list, week):
         """Assigns course to time slot and removes time slot from list of time slots"""
-        #temp_room_index = time_slot.room_index
-        #temp_day_index = time_slot.day_index
-        #temp_slot_index = time_slot.slot_index
-
         i = self.find_index(time_slot, slots_list)
         schedule_slot = self.find_respective_time_slot(time_slot, week)
         schedule_slot.set_course(course)
@@ -437,7 +461,8 @@ class Scheduler:
         current_pool = deepcopy(mwf_slots)
         done = False
         while len(current_pool) > 0 and not done:
-            possibilities = self.week_helper(random_slot, current_pool)
+            possibilities = this_week.find_matching_time_slot_row(random_slot)
+            possibilties = self.assess_timeslot_row_for_open_slots(possibilties)
             # each day open for that time and room
             if len(possibilities['unoccupied']) == 5:
                 for each_assignee in possibilities['in_order']:
