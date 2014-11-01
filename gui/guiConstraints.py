@@ -414,7 +414,7 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
                                   globs.mainScheduler.constraints) == 0:
         tkMessageBox.showerror("Constraint Conflict", \
                                "This constraint conflicts with a previously" \
-                               "added constraint.")
+                               " added constraint.")
         return
     
     hour, minute = start_time.split(":")
@@ -470,7 +470,7 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
                                   globs.mainScheduler.constraints) == 0:
         tkMessageBox.showerror("Constraint Conflict", \
                                "This constraint conflicts with a previously" + \
-                                "added constraint.")
+                                " added constraint.")
         return
     
     if before_after == "Before":
@@ -515,7 +515,7 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
                                   globs.mainScheduler.constraints) == 0:
         tkMessageBox.showerror("Constraint Conflict", \
                                "This constraint conflicts with a previously" + \
-                                "added constraint.")
+                                " added constraint.")
         return
         
     day_code = day_code.lower()    
