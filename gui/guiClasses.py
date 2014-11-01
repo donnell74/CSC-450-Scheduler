@@ -173,7 +173,7 @@ class ViewPage(Page):
         
         # create new canvas to hold the schedules
         self.canv = Canvas(self, bg = 'white')
-        self.canv.config(scrollregion = (0, 0, 740, 1050))    
+        self.canv.config(scrollregion = (0, 0, 600, 1050))    
         self.canv.pack(expand = TRUE,
                        fill = BOTH,
                        padx = 50,
@@ -322,17 +322,17 @@ class ViewPage(Page):
         xpad = xstart + 20
         ypad = ystart + 10
         
-        days = ['Monday',
-                'Tuesday',
-                'Wednesday',
-                'Thursday',
-                'Friday']
+        days = ['Mon.',
+                'Tue.',
+                'Wed.',
+                'Thu.',
+                'Fri.']
 
-        xpos_days = {'Monday' : xpad + 100 + (0 * 125),
-                     'Tuesday' : xpad + 100 + (1 * 125),
-                     'Wednesday' : xpad + 100 + (2 * 125),
-                     'Thursday' : xpad + 100 + (3 * 125),
-                     'Friday' : xpad + 100 + (4 * 125)}
+        xpos_days = {'Monday' : xpad + 80 + (0 * 100),
+                     'Tuesday' : xpad + 80 + (1 * 100),
+                     'Wednesday' : xpad + 80 + (2 * 100),
+                     'Thursday' : xpad + 80 + (3 * 100),
+                     'Friday' : xpad + 80 + (4 * 100)}
 
         times = ['8am', '9am', '10am', '11am',
                  '12pm', '1pm', '2pm', '3pm', '4pm', '5pm']
@@ -399,6 +399,7 @@ class ViewPage(Page):
                 
             else:
                 temp = schedule_text[i].split(' ')
+                course_info = ''
 
                 # len(temp) < 7, then course does not have a section (001, 002, etc.)
                 if len(temp) < 7:
@@ -407,14 +408,28 @@ class ViewPage(Page):
                         schedule_time = temp[5].split('-')[0]
                         start_time = temp[5].split('-')[0]
                         end_time = temp[5].split('-')[1]
+                        
+                        # output string with course info
+                        course_info += temp[0] + \
+                                       ' ' + temp[1] + \
+                                       '\n' + temp[5]
+                        
+                # course has a section number (001, 002, etc.)
                 else:
                     if temp[4] + " " + temp[5] in self.rooms[self.room_selection_option]:
                         schedule_days = temp[3]
                         schedule_time = temp[6].split('-')[0]
                         start_time = temp[6].split('-')[0]
                         end_time = temp[6].split('-')[1]
-                        
-                txt = instructor + '\n' + schedule_text[i]
+
+                        # output string with course info
+                        course_info += temp[0] + \
+                                       ' ' + temp[1] + \
+                                       '\n' + 'Sec. ' + temp[2] + \
+                                       '\n' + temp[6]
+
+                # txt is the text value in canv.create_text       
+                txt = instructor + '\n' + course_info
 
                 for day in schedule_days:
 
@@ -458,16 +473,26 @@ class ViewPage(Page):
         self.canv.create_rectangle(0, 0, 1050, 30, fill = 'cyan', outline = '')
 
         # draw days of the week across the x-axis of the canvas
-        self.canv.create_text(xpad + 80,
+        self.canv.create_text(xpad + 55,
                               ypad,
                               text = days[0],
                               font = (font_style, size_l))
-
-        for i in xrange(1, 5):         
-            self.canv.create_text(xpad + 80 + (i * 125),
-                                  ypad,
-                                  text = days[i],
-                                  font = (font_style, size_l))
+        self.canv.create_text(xpad + 54 + 100,
+                              ypad,
+                              text = days[1],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 57 + 200,
+                              ypad,
+                              text = days[2],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 53 + 300,
+                              ypad,
+                              text = days[3],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 48 + 400,
+                              ypad,
+                              text = days[4],
+                              font = (font_style, size_l))
 
         # draw AM times down the y-axis of the canvas
         for i in xrange(len(times)):
