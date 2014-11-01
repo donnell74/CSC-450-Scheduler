@@ -1,8 +1,5 @@
 from structures import *
 from datetime import time, timedelta
-#import sys
-#sys.path.append("../")
-#import globs
 
 def all_before_time(this_week, args):
     """ iterates through courses in the schedule to make sure
