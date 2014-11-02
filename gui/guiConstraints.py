@@ -22,18 +22,25 @@ class AddedConstraintsScreen(Page):
         
         # list that holds Constraint objects
         self.constraints = constraints
-
+ 
         # holds the scrollbox output text for the added constraints
         self.constraint_output = []
-        
+         
         textL = " Constraints Added: "
         self.text = Label(self, text = textL)
         self.text.pack(anchor = NW, expand = YES)
+
+        self.scrollbar = Scrollbar(self, orient=VERTICAL)
+        self.listbox = Listbox(self, yscrollcommand = self.scrollbar.set, selectmode = MULTIPLE,\
+                                width = 40, height = 15)
+        self.scrollbar.config(command=self.listbox.yview)
+        self.scrollbar.pack(side=RIGHT, fill=Y)
+        self.listbox.pack(side=LEFT, fill=BOTH, expand=1)
         
-        # scrollbox
-        self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
-        self.scroll['font'] = ('Courier New', '11')
-        self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
+#         # scrollbox
+#         self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
+#         self.scroll['font'] = ('Courier New', '11')
+#         self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
         
     def view_constraints(self, constraint):
         output = constraint[0]
@@ -51,12 +58,15 @@ class AddedConstraintsScreen(Page):
         output += '\n'
         self.constraint_output.append(output)
 
-        # clear scrollbox
-        self.scroll.delete('1.0', END)
-
-        # insert constraint output to scrollbox
-        for constraint in self.constraint_output:
-            self.scroll.insert(INSERT, constraint)
+#         # clear scrollbox
+#         self.scroll.delete('1.0', END)
+# 
+#         # insert constraint output to scrollbox
+#         for constraint in self.constraint_output:
+#             self.scroll.insert(INSERT, constraint)
+        self.listbox.delete(0, END)
+        for item in self.constraint_output:
+            self.listbox.insert(END, item)
         
 class HomeConstraintPage(Page):
 
