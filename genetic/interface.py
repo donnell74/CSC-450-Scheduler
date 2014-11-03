@@ -55,7 +55,10 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
-            course = Course(c.attrib["code"], int(c.attrib["credit"]), instructor)
+            course = Course(code=c.attrib["code"],
+                            credit=int(c.attrib["credit"]),
+                            instructor=instructor,
+                            capacity=int(c.attrib["capacity"]))
             instructor.add_course(course)
             courses.append(course)
         return courses

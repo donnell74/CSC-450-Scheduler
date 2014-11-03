@@ -3,23 +3,27 @@
     <schedule name="test">
         <courseList>
           <item code="CSC 111" credit="3" instructor="Scroggins" prereq="" capacity="40"></item>
-          <item code="CSC 130 001" credit="3" instructor="Smith" prereq="" capacity="35"></item>
-          <item code="CSC 130 002" credit="3" instructor="Smith" prereq="" capacity="35"></item>
-          <item code="CSC 131" credit="3" instructor="Saquer" prereq="CSC130" capacity="30"></item>
-          <item code="CSC 232" credit="3" instructor="Vollmar" prereq="CSC131" capacity="30"></item>
-          <item code="CSC 320" credit="3" instructor="Liu" prereq="CSC131" capacity="30"></item>
-          <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232" capacity="30"></item>
-          <item code="CSC 333" credit="4" instructor="Shade" prereq="CSC232 CSC320" capacity="30"></item>
-          <item code="CSC 365" credit="3" instructor="Saquer" prereq="" capacity="70"></item>
-          <item code="CSC 450" credit="3" instructor="Shade" prereq="CSC325 CSC365" capacity="25"></item>
-          <item code="CSC 460" credit="3" instructor="Wang" prereq="CSC320 CSC325" capacity="25"></item>
+          <item code="CSC 130 001" credit="3" instructor="Smith" prereq="" capacity="45"></item>
+          <item code="CSC 130 002" credit="3" instructor="Smith" prereq="" capacity="45"></item>
+          <item code="CSC 131" credit="3" instructor="Saquer" prereq="CSC130" capacity="45"></item>
+          <item code="CSC 232" credit="3" instructor="Vollmar" prereq="CSC131" capacity="40"></item>
+          <item code="CSC 320" credit="3" instructor="Liu" prereq="CSC131" capacity="40"></item>
+          <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232" capacity="40"></item>
+          <item code="CSC 333" credit="4" instructor="Shade" prereq="CSC232 CSC320" capacity="35"></item>
+          <item code="CSC 365" credit="3" instructor="Saquer" prereq="" capacity="80"></item>
+          <item code="CSC 450" credit="3" instructor="Shade" prereq="CSC325 CSC365" capacity="30"></item>
+          <item code="CSC 460" credit="3" instructor="Wang" prereq="CSC320 CSC325" capacity="30"></item>
         </courseList>
         <roomList>
           <item building="CHEK" number="213" capacity="20" has_computers="true"></item>
-          <item building="CHEK" number="105" capacity="70" has_computers="true"></item>
-          <item building="CHEK" number="212" capacity="30" has_computers="false"></item>
-          <item building="GLAS" number="345" capacity="60" has_computers="true"></item>
-          <item building="TEMP" number="001" capacity="100" has_computers="false"></item>
+          <item building="CHEK" number="205" capacity="40" has_computers="true"></item>
+          <item building="CHEK" number="105" capacity="70" has_computers="false"></item>
+          <item building="CHEK" number="210" capacity="35" has_computers="false"></item>
+          <item building="CHEK" number="212" capacity="45" has_computers="true"></item>
+          <item building="CHEK" number="202" capacity="40" has_computers="false"></item>
+          <item building="CHEK" number="204" capacity="40" has_computers="true"></item>
+          <item building="GLAS" number="345" capacity="70" has_computers="false"></item>
+          <item building="TEMP" number="0001" capacity="144" has_computers="true"></item>
         </roomList>
         <timeListMWF>
           <item>09:00-10:00</item>
