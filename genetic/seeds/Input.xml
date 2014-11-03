@@ -15,15 +15,15 @@
           <item code="CSC 460" credit="3" instructor="Wang" prereq="CSC320 CSC325" capacity="30"></item>
         </courseList>
         <roomList>
-          <item building="CHEK" number="213" capacity="20" has_computers="true"></item>
-          <item building="CHEK" number="205" capacity="40" has_computers="true"></item>
-          <item building="CHEK" number="105" capacity="70" has_computers="false"></item>
-          <item building="CHEK" number="210" capacity="35" has_computers="false"></item>
-          <item building="CHEK" number="212" capacity="45" has_computers="true"></item>
-          <item building="CHEK" number="202" capacity="40" has_computers="false"></item>
-          <item building="CHEK" number="204" capacity="40" has_computers="true"></item>
-          <item building="GLAS" number="345" capacity="70" has_computers="false"></item>
-          <item building="TEMP" number="0001" capacity="144" has_computers="true"></item>
+          <item building="CHEK" number="213" capacity="20" has_computers="True"></item>
+          <item building="CHEK" number="205" capacity="40" has_computers="True"></item>
+          <item building="CHEK" number="105" capacity="70" has_computers="False"></item>
+          <item building="CHEK" number="210" capacity="35" has_computers="False"></item>
+          <item building="CHEK" number="212" capacity="45" has_computers="True"></item>
+          <item building="CHEK" number="202" capacity="40" has_computers="False"></item>
+          <item building="CHEK" number="204" capacity="40" has_computers="True"></item>
+          <item building="GLAS" number="345" capacity="70" has_computers="False"></item>
+          <item building="TEMP" number="0001" capacity="144" has_computers="True"></item>
         </roomList>
         <timeListMWF>
           <item>09:00-10:00</item>
