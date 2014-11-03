@@ -441,8 +441,9 @@ class Scheduler:
 
     def assign_and_remove(self, course, time_slot, tr_slots, mwf_slots, slots_list, week):
         """Assigns course to time slot and removes time slot from list of time slots"""
-        i = self.find_index(time_slot, slots_list)
+        #i = self.find_index(time_slot, slots_list)
         schedule_slot = week.find_matching_time_slot(time_slot)
+        i = self.find_index(schedule_slot, slots_list)
         schedule_slot.set_course(course)
         del(slots_list[i])
 
@@ -510,8 +511,8 @@ class Scheduler:
         if course.credit != 4:
             raise FilterError("Schedule 4 hour course")
 
-        random_slot = choice(mwf_slots)
-        current_pool = deepcopy(mwf_slots)
+        random_slot = choice(list_of_time_slots)
+        current_pool = deepcopy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -540,28 +541,32 @@ class Scheduler:
                                 list_of_time_slots, this_week)  # R
                 done = True
             # case that mwf and either t or r are open
-            elif possibilities['occupation'][0] and possibilities['occupation'][2] and \
-                    possibilities['occupation'][4] and \
-                    (possibilities['occupation'][1] or possibilities['occupation'][3]):
-                for d in (0, 2, 4):
-                    # MWF
-                    self.assign_and_remove(
-                        course, possibilities['in_order'][d], tr_slots, mwf_slots,
-                        list_of_time_slots, this_week)
-                if possibilities['occupation'][1]:
-                    self.assign_and_remove(
-                        course, possibilities['in_order'][1], tr_slots, mwf_slots,
-                        list_of_time_slots, this_week)
+            elif all([x in possibilities['days'] for x in 'mwf']) and \
+                    (all([x in possibilities['days'] for x in 't']) or \
+                     all([x in possibilities['days'] for x in 'r'])):
+                for each_slot in possibilities['time_slots']:
+                    if each_slot.day in 'mwf':
+                        self.assign_and_remove(
+                            course, each_slot, tr_slots, mwf_slots,
+                            list_of_time_slots, this_week)
+                if all([x in possibilities['days'] for x in 't']):
+                    for each_slot in possibilities['time_slots']:
+                        if each_slot.day in 't':
+                            self.assign_and_remove(
+                                course, each_slot, tr_slots, mwf_slots,
+                                list_of_time_slots, this_week)
                 else:
-                    self.assign_and_remove(
-                        course, possibilities['in_order'][3], tr_slots, mwf_slots,
-                        list_of_time_slots, this_week)
+                    for each_slot in possibilities['time_slots']:
+                        if each_slot.day in 'r':
+                            self.assign_and_remove(
+                                course, each_slot, tr_slots, mwf_slots,
+                                list_of_time_slots, this_week)
                 done = True
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
                 # week from temp pool
-                for to_remove in possibilities['unoccupied']:
+                for to_remove in possibilities['time_slots']:
                     i = self.find_index(to_remove, current_pool)
                     del(current_pool[i])
                 # get a new random time slot
