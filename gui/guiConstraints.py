@@ -302,7 +302,7 @@ class ConstraintPage(Page):
         #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         self.home_page.pack(anchor = NW, padx = 50)
 
-        self.added_constraints = AddedConstraintsScreen(self.content_container, constraints)
+        self.added_constraints = AddedConstraintsScreen(self.content_container)
         #self.added_constraints.place(in_ = self.instructor_page, anchor = E)
         #self.added_constraints.place(in_ = self.course_page, anchor = E)
         self.added_constraints.pack(side = RIGHT, anchor = NE, padx = 50)
