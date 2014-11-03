@@ -244,36 +244,42 @@ def time_finder(end_t, time_gap):
     return next_start_time
 
 
+class ConstraintCreationError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class ConstraintCalcFitnessError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class Constraint:
 
     def __init__(self, name, weight, func, args=[]):
         if type(name) is not str:
-            logging.error("Name is not a string")
-            print("Name is not a string")
-            return
+            raise ConstraintCreationError("Name is not a string")
 
         if type(weight) is not int:
-            logging.error("Weight is not a string")
-            print("Weight is not a string")
-            return
+            raise ConstraintCreationError("Weight is not a string")
 
         if not hasattr(func, '__call__'):
-            if type(func) is str and not known_funcs.has_key(func):
-                logging.error("Func string passed is not known")
-                print("Func string passed is not known")
-                return
-            else:
-                logging.error("Func passed is not a function")
-                print("Func passed is not a function")
-                return
+            raise ConstraintCreationError("Func passed is not a function")
 
         self.name = name
         self.weight = weight
         self.args = args
-        if type(func) is str:
-            self.func = func
-        else:
-            self.func = func
+        self.func = func
 
     def get_fitness(self, this_week):
-        return self.func(this_week, self.args) * self.weight
+        try:
+            return self.func(this_week, self.args) * self.weight
+        except:
+            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
+                    be scheduled")
