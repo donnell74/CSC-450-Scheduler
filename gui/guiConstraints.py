@@ -17,30 +17,27 @@ class Page(Frame):
         self.lift()
 
 class AddedConstraintsScreen(Page):
-    def __init__(self, root, constraints):
-        Frame.__init__(self, root, width = 30, height = 50)
+    def __init__(self, root):
+        Frame.__init__(self, root, width = 30, height = 100)
         
-        # list that holds Constraint objects
-        self.constraints = constraints
- 
         # holds the scrollbox output text for the added constraints
-        self.constraint_output = []
+        self.constraints_output = []
          
         textL = " Constraints Added: "
         self.text = Label(self, text = textL)
         self.text.pack(anchor = NW, expand = YES)
-
+        
+        self.button_go = Button(self, text="Delete all", command=self.delete_all_constraints)
+        self.button_go.pack(side=BOTTOM)
+        
         self.scrollbar = Scrollbar(self, orient=VERTICAL)
         self.listbox = Listbox(self, yscrollcommand = self.scrollbar.set, selectmode = MULTIPLE,\
                                 width = 40, height = 15)
         self.scrollbar.config(command=self.listbox.yview)
-        self.scrollbar.pack(side=RIGHT, fill=Y)
-        self.listbox.pack(side=LEFT, fill=BOTH, expand=1)
         
-#         # scrollbox
-#         self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
-#         self.scroll['font'] = ('Courier New', '11')
-#         self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
+        self.listbox.pack(side=LEFT, fill=X, expand=1)
+        self.scrollbar.pack(side=LEFT, fill=Y)
+        
         
     def view_constraints(self, constraint):
         output = constraint[0]
@@ -55,18 +52,20 @@ class AddedConstraintsScreen(Page):
         elif constraint[1] == 0: # mandatory has a 0 priority
             output += 'Mandatory'
             
-        output += '\n'
-        self.constraint_output.append(output)
+        self.constraints_output.append(output)
 
-#         # clear scrollbox
-#         self.scroll.delete('1.0', END)
-# 
-#         # insert constraint output to scrollbox
-#         for constraint in self.constraint_output:
-#             self.scroll.insert(INSERT, constraint)
+        # clear listbox
         self.listbox.delete(0, END)
-        for item in self.constraint_output:
+        
+        for item in self.constraints_output:
             self.listbox.insert(END, item)
+
+    def delete_all_constraints(self):
+        #clear all constraints from list box
+        self.listbox.delete(0, END)
+        self.constraints_output = []
+        globs.mainScheduler.clear_constraints()
+        
         
 class HomeConstraintPage(Page):
 
@@ -216,8 +215,6 @@ class InstructorConstraint(Page):
             self.time_frame.pack()
             self.day_frame.pack_forget()
 
-        
-    
 
 class CourseConstraint(Page):
  
