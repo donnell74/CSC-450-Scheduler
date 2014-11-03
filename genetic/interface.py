@@ -74,8 +74,8 @@ def create_room_list_from_file(path_to_xml):
         # rooms will be list of tuples
         rooms = []
         for r in root.find("schedule").find("roomList").getchildren():
-            # Make tuple with (building, number, capacity)
-            room = (r.attrib["building"], r.attrib["number"], r.attrib["capacity"])
+            # Make tuple with (building, number, capacity, has_computers)
+            room = (r.attrib["building"], r.attrib["number"], r.attrib["capacity"], r.attrib["has_computers"])
             rooms.append(room)
         return rooms
     except Exception as inst:
@@ -158,8 +158,9 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
 
         out.write("<roomList>\n")
         for each_room in week.days[0].rooms:
-            out.write("<item>%s %s</item>\n"\
-                  % (each_room.building, each_room.number))
+            out.write("<item building='%s' number='%d' capacity='%d' has_computers='%s'\n" \
+                    % (each_room.building, each_room.number, each_room.capacity, \
+                        each_room.has_computers))
 
         out.write("</roomList>\n")
 

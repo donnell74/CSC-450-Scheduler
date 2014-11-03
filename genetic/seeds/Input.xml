@@ -15,11 +15,11 @@
           <item code="CSC 460" credit="3" instructor="Wang" prereq="CSC320 CSC325" capacity="25"></item>
         </courseList>
         <roomList>
-          <item building="CHEK" number="213" capacity="20"></item>
-          <item building="CHEK" number="105" capacity="70"></item>
-          <item building="CHEK" number="212" capacity="30"></item>
-          <item building="GLAS" number="345" capacity="60"></item>
-          <item building="TEMP" number="001" capacity="100"></item>
+          <item building="CHEK" number="213" capacity="20" has_computers="true"></item>
+          <item building="CHEK" number="105" capacity="70" has_computers="true"></item>
+          <item building="CHEK" number="212" capacity="30" has_computers="false"></item>
+          <item building="GLAS" number="345" capacity="60" has_computers="true"></item>
+          <item building="TEMP" number="001" capacity="100" has_computers="false"></item>
         </roomList>
         <timeListMWF>
           <item>09:00-10:00</item>
