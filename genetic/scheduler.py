@@ -335,7 +335,7 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 10
+        MAX_TRIES = 50
 
         def week_slice_helper():
             valid_weeks = filter(lambda x: x.valid, self.weeks)
