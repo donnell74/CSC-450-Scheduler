@@ -264,6 +264,16 @@ def ensure_course_room_capacity(this_week, args):
 
     return 0
 
+def ensure_computer_requirement(this_week, args):
+    """ If a course is specified as requiring computers, its assigned
+        room must also have computers to make its week valid."""
+    for section in this_week.sections:
+        if section.course.needs_computers == True:
+            if section.room.has_computers == False:
+                this_week.valid = False
+                break
+    return 0
+
 
 def time_finder(end_t, time_gap):
     """ Helper function for num_subsequent_courses.
