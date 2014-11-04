@@ -55,6 +55,10 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
+          # write constraint
+          # if lab add is_lab = true to list arg for course
+          # it should be on T/R
+          # else
             course = Course(c.attrib["code"], int(c.attrib["credit"]), instructor)
             instructor.add_course(course)
             courses.append(course)
@@ -226,6 +230,9 @@ def export_schedules(weeks, export_dir="./"):
             os.remove(filename)
         counter += 1
 
+#parse has_lab
+def has_lab(path_to_xml, courses):
+    pass
 
 def get_prereqs(path_to_xml, courses):
     """Determine first-level prereqs from xml and list of all courses
