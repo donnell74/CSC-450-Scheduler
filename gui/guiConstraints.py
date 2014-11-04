@@ -34,7 +34,7 @@ class AddedConstraintsScreen(Page):
         self.delete_all.pack(side=RIGHT)
         
         self.delete_selection = Button(buttons_frame, text="Delete", command=self.delete_selection)
-        self.delete_selection.pack(side=RIGHT)
+        self.delete_selection.pack(side = RIGHT, padx = 20)
         
         self.scrollbar = Scrollbar(self, orient=VERTICAL)
         self.listbox = Listbox(self, yscrollcommand = self.scrollbar.set, selectmode = MULTIPLE,\
