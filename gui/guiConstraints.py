@@ -1,5 +1,6 @@
 from Tkinter import *
 from guiClasses import *
+from guiConstraintsView import *
 from datetime import time
 import sys
 sys.path.append("../")
@@ -15,81 +16,6 @@ class Page(Frame):
  
     def show(self):
         self.lift()
-
-class AddedConstraintsScreen(Page):
-    def __init__(self, root):
-        Frame.__init__(self, root)
-        
-        # holds the scrollbox output text for the added constraints
-        self.constraints_output = []
-         
-        textL = "Constraints Added:"
-        self.text = Label(self, text = textL)
-        self.text.pack(anchor = NW, expand = YES)
-        
-        buttons_frame = Frame(self)
-        buttons_frame.pack(side = BOTTOM)
-        
-        self.delete_all = Button(buttons_frame, text="Delete all", command=self.delete_all_constraints)
-        self.delete_all.pack(side=RIGHT)
-        
-        self.delete_selection = Button(buttons_frame, text="Delete", command=self.delete_selection)
-        self.delete_selection.pack(side = RIGHT, padx = 20)
-        
-        self.scrollbar = Scrollbar(self, orient=VERTICAL)
-        self.listbox = Listbox(self, yscrollcommand = self.scrollbar.set, selectmode = MULTIPLE,\
-                                width = 40, height = 15)
-        self.scrollbar.config(command=self.listbox.yview)
-        
-        self.listbox.pack(side=LEFT, fill=X, expand=1)
-        self.scrollbar.pack(side=LEFT, fill=Y)
-        
-    def view_constraints(self, constraint):
-        output = constraint[0]
-        #output = output.strip("Constraint Conflict")
-        
-        if constraint[1] == 10:
-            output += 'Low'
-        elif constraint[1] == 25:
-            output += 'Medium'
-        elif constraint[1] == 50:
-            output += 'High'
-        elif constraint[1] == 0: # mandatory has a 0 priority
-            output += 'Mandatory'
-            
-        self.constraints_output.append(output)
-
-        # clear listbox
-        self.listbox.delete(0, END)
-        
-        for item in self.constraints_output:
-            self.listbox.insert(END, item)
-
-    def delete_all_constraints(self):
-        #clear all constraints from list box
-        self.listbox.delete(0, END)
-        # clear constraints from the class
-        self.constraints_output = []
-        # clear all constraints from the scheduler object
-        globs.mainScheduler.clear_constraints()
-        
-    def delete_selection(self) :
-        
-        items = self.listbox.curselection()
-        if len(items) > 0: 
-            #clear constraints selected from list box
-            pos = 0
-            for i in items :
-                idx = int(i) - pos
-                self.listbox.delete( idx,idx )
-                pos = pos + 1
-            
-            # clear constraints from the class
-            for i in sorted(items, reverse=True):
-                del self.constraints_output[i]
-            
-            # clear selected constraints from the scheduler object
-            globs.mainScheduler.delete_list_constraints(items)
         
 class HomeConstraintPage(Page):
 
@@ -326,16 +252,16 @@ class ConstraintPage(Page):
         #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         self.home_page.pack(anchor = NW, padx = 50)
 
-        self.added_constraints = AddedConstraintsScreen(self.content_container)
-        #self.added_constraints.place(in_ = self.instructor_page, anchor = E)
-        #self.added_constraints.place(in_ = self.course_page, anchor = E)
-        self.added_constraints.pack(side = RIGHT, anchor = NE, padx = 50)
+        self.constraints_view = ConstraintsView(self.content_container)
+        #self.constraints_view.place(in_ = self.instructor_page, anchor = E)
+        #self.constraints_view.place(in_ = self.course_page, anchor = E)
+        self.constraints_view.pack(side = RIGHT, anchor = NE, padx = 50)
         
-        self.instructor_page = InstructorConstraint(self.content_container, self.added_constraints)
+        self.instructor_page = InstructorConstraint(self.content_container, self.constraints_view)
         #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.instructor_page.pack(side = LEFT)
         
-        self.course_page = CourseConstraint(self.content_container, self.added_constraints)
+        self.course_page = CourseConstraint(self.content_container, self.constraints_view)
         #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.course_page.pack(side = LEFT)
         
