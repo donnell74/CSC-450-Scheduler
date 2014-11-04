@@ -55,10 +55,11 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
-            course = Course(code=c.attrib["code"],
-                            credit=int(c.attrib["credit"]),
-                            instructor=instructor,
-                            capacity=int(c.attrib["capacity"]))
+            course = Course(code = c.attrib["code"],
+                            credit = int(c.attrib["credit"]),
+                            instructor = instructor,
+                            capacity = int(c.attrib["capacity"]),
+                            needs_computers = bool(c.attrib["needs_computers"]))
             instructor.add_course(course)
             courses.append(course)
         return courses
@@ -142,7 +143,8 @@ def create_instructors_from_courses(path_to_xml):
         return None
 
 
-def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"):
+# should be updated to final object attributes (pr)
+def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"): 
     """Exports given week as xml for testing purposes
     IN: week object, extras string, prefix string, export directory
     OUT: creates an xml file for the given input"""
@@ -154,8 +156,9 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
 
         out.write("<courseList>\n")
         for each_course in week.schedule.courses:
-            out.write("<item code='%s' credit='%d' instructor='%s'></item>\n"\
-                  % (each_course.code, each_course.credit, each_course.instructor))
+            out.write("<item code='%s' credit='%d' instructor='%s' capacity='%d' needs_computers='%s'></item>\n"\
+                  % (each_course.code, each_course.credit, each_course.instructor, \
+                    each_course.capacity, each_course.needs_computers))
 
         out.write("</courseList>\n")
 
