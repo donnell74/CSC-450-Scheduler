@@ -19,9 +19,14 @@ class Day:
             return
         
         room_list = []
+        # 'rooms' is now a list of tuples. [0]: building, [1]: number. [2]: capacity
         for room in rooms:
-            temp_room = structures.Room(room.split(' ')[0], room.split(' ')[1], self, test)
-            room_list.append(temp_room)
+            new_room = structures.Room(building=room[0],
+                                       number=room[1],
+                                       capacity=room[2],
+                                       this_day=self,
+                                       test=test)
+            room_list.append(new_room)
         
         self.rooms = room_list
 

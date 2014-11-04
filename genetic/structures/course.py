@@ -1,9 +1,12 @@
 class Course:
 
-    def __init__(self, code, credit, instructor, prescheduled_time=None, is_prescheduled=False, is_lab =False):
+
+    def __init__(self, code, credit, instructor, capacity, prescheduled_time=None, is_prescheduled=False, is_lab =False):
+
         self.code = code
         self.credit = credit
         self.instructor = instructor
+        self.capacity = capacity
         self.is_prescheduled = is_prescheduled
         self.prescheduled_time = prescheduled_time
         self.absolute_course = self.determine_absolute_course_code()

@@ -61,9 +61,12 @@ class Scheduler:
 
         if type(rooms) == list:
             if len(rooms) != 0:
-                if not all(isinstance(each_room, str) for \
-                        each_room in rooms):
-                    raise SchedulerInitError("Rooms - Not all string type")
+                if not all(isinstance(each_room, tuple) for each_room in rooms):
+                    raise SchedulerInitError("Rooms - Not all tuple type")
+                else:
+                    for each_room in rooms:
+                        if not all(isinstance(part, str) for part in each_room):
+                            raise SchedulerInitError("Rooms - Not all parts are str type")
             else:
                  raise SchedulerInitError("Rooms - List has no elements")
         else:
@@ -332,7 +335,7 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 10
+        MAX_TRIES = 50
 
         def week_slice_helper():
             valid_weeks = filter(lambda x: x.valid, self.weeks)
