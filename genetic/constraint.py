@@ -103,11 +103,11 @@ def instructor_conflict(this_week, args):
         count = 0
         for each_instructors_course in each_instructor.courses:
             times.append(
-                this_week.find_course(each_instructors_course)[0].start_time)
+                this_week.find_course(each_instructors_course)[0])
         while len(times) > 0:
             each_time = times.pop(0)
             for each_other_time in times:
-                if each_time == each_other_time:
+                if is_overlap(each_time, each_other_time):
                     count += 1
         if count > 0:
             this_week.valid = False
@@ -121,12 +121,11 @@ def get_minutes(a_time):
     return a_time.hour * 60 + a_time.minute
 
 
-def times_are_sequential(timeslot1, timeslot2):
+def times_are_sequential(timeslot1, timeslot2, time_threshold = 0):
     """
     return true if timeslots are sequential, else false
     time_threshold can be used to give the max separation between timeslots
     """
-    time_threshold = 0
     start2 = max(timeslot1.start_time, timeslot2.start_time)
     end1 = min(timeslot1.end_time, timeslot2.end_time)
     result = get_minutes(start2) - get_minutes(end1) - time_threshold <= 0
@@ -176,6 +175,48 @@ def instructor_preference_day(this_week, args):
                     return 0
                     
     return 1
+
+
+def is_overlap(timeslot1, timeslot2):
+    """Return true if timeslots overlap else false"""
+    if timeslot1.start_time < timeslot2.start_time:
+        start_1st, start_2nd = timeslot1, timeslot2
+    else:
+        start_1st, start_2nd = timeslot2, timeslot1
+
+    if start_2nd.start_time < start_1st.end_time:
+        return True
+
+    #this check should be done by alot of other constraints
+    #if start_1st.start_time == start_2nd.start_time:
+    #    return True
+
+    return False
+
+def no_overlapping_courses(this_week, args):
+    """Check that all timeslots do not overlap any other
+    timeslots"""
+    times = []
+    count = 0
+
+    all_time_slots = this_week.list_time_slots()
+    for each_timeslot in all_time_slots:
+        if each_timeslot.course != None:
+            times.append(each_timeslot)
+
+    while len(times) > 0:
+        each_time = times.pop(0)
+        for each_other_time in times:
+            if each_time.day != each_other_time.day or\
+               each_time.room != each_other_time.room :
+                continue
+            if is_overlap(each_time, each_other_time):
+                count += 1
+
+    if count > 0:
+        this_week.valid = False
+
+    return 0
 
 
 def num_subsequent_courses(this_week, args):
@@ -231,7 +272,7 @@ def time_finder(end_t, time_gap):
 
     next_start_time = time(t_hr, t_min)
     return next_start_time
-
+    
 
 class ConstraintCreationError(Exception):
     def __init__(self, value):
@@ -267,8 +308,8 @@ class Constraint:
         self.func = func
 
     def get_fitness(self, this_week):
-        try:
+#        try:
             return self.func(this_week, self.args) * self.weight
-        except:
-            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
-                    be scheduled")
+#        except:
+#            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
+#be scheduled.  Caused by: " + self.name)

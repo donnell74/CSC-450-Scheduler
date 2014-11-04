@@ -115,6 +115,7 @@ class Week:
             room = 0
         return list_of_slots
 
+
     def find_empty_time_slots(self):
         """Returns a list of empty (no course) time slot objects"""
         empty_slots = []

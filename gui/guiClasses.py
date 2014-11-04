@@ -289,6 +289,7 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
                                            constraint.sequential_time_different_building_conflict, [instructors])
         globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
+        globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
