@@ -252,6 +252,17 @@ def num_subsequent_courses(this_week, args):
             this_week.valid = False
     return 0
 
+def ensure_course_room_capacity(this_week, args):
+    """A course must be assigned to a room with enough capacity to
+    hold the course's capacity."""
+
+    for section in this_week.sections:
+        if section.course.capacity > section.room.capacity:
+            this_week.valid = False
+            break
+
+    return 0
+
 
 def time_finder(end_t, time_gap):
     """ Helper function for num_subsequent_courses.
@@ -309,6 +320,7 @@ class Constraint:
     def get_fitness(self, this_week):
 #        try:
             return self.func(this_week, self.args) * self.weight
+
 #        except:
 #            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
 #be scheduled.  Caused by: " + self.name)

@@ -21,7 +21,10 @@ class TestWeek(unittest.TestCase):
 
     def test_find_course(self):
         self.assertEqual(len(self.week.find_course(sample_scheduler.courses[0])), 3)
-        self.assertEqual(len(self.week.find_course(Course("BIO123", "4", "Some Guy"))), 0)
+        self.assertEqual(len(self.week.find_course(Course(code="BIO123",
+                                                          credit="4",
+                                                          capacity=60,
+                                                          instructor="Some Guy"))), 0)
 
     def test_list_time_slots(self):
         pass
