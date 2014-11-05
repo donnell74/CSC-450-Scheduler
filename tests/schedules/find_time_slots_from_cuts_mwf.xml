@@ -2,15 +2,15 @@
 <data>
     <schedule name="test">
         <courseList>
-          <item code="CSC 130" credit="3" instructor="Scroggins" capacity="30"></item>
-          <item code="CSC 131" credit="4" instructor="Smith" capacity="30"></item>
-          <item code="CSC 232" credit="5" instructor="Volmar" capacity="30"></item>
+          <item code="CSC 130" credit="3" instructor="Scroggins" capacity="45"></item>
+          <item code="CSC 131" credit="4" instructor="Smith" capacity="40"></item>
+          <item code="CSC 232" credit="5" instructor="Volmar" capacity="40"></item>
         </courseList>
         <roomList>
-          <item building="CHEK" number="209" capacity="30"></item>
+          <item building="CHEK" number="209" capacity="35" has_computers="True"></item>
         </roomList>
         <timeListMWF>
-          <item>10:00-11:00</item>
+          <item>08:00-09:00</item>
           <item>11:00-12:00</item>
           <item>13:00-14:00</item>
         </timeListMWF>
@@ -25,15 +25,15 @@
         credit="3"
         startTime="11:00"
         endTime="12:00"
-        days="MWF"
+        days="TR"
         room="CHEK 209"
         instructor="Scroggins">
     </course>
     <course 
         code="CSC 131"
         credit="4"
-        startTime="10:00"
-        endTime="11:00"
+        startTime="08:00"
+        endTime="09:00"
         days="MWF"
         room="CHEK 209"
         instructor="Smith">
@@ -47,4 +47,19 @@
         room="CHEK 209"
         instructor="Volmar">
     </course>
+    <extra>
+        <input>
+            <slots_list>
+                <item>08:00-09:00</item>
+            </slots_list>
+        </input>
+        <expected>
+            <item>m - CHEK - 209 - 08:00</item>
+            <item>t - CHEK - 209 - 08:00</item>
+            <item>w - CHEK - 209 - 08:00</item>
+            <item>r - CHEK - 209 - 08:00</item>
+            <item>f - CHEK - 209 - 08:00</item>
+        </expected>
+    </extra>
 </data>
+
