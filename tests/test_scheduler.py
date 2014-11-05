@@ -4,8 +4,9 @@ import random
 from genetic import *
 import genetic.interface
 
-sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
-sample_courses = interface.create_course_list_from_file_test("tests/schedules/morning_class_test.xml")
+filename = "tests/schedules/morning_class_test.xml"
+sample_scheduler = interface.create_scheduler_from_file(filename)
+sample_courses = interface.create_course_list_from_file_test(filename)
 
 class TestScheduler(unittest.TestCase):
 
@@ -21,26 +22,33 @@ class TestScheduler(unittest.TestCase):
     def test_clear_constraints(self):
         self.assertEquals(len(sample_scheduler.constraints), 0)
         self.assertEquals(sample_scheduler.max_fitness, 0)
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[0]]) 
         sample_scheduler.clear_constraints()
         self.assertEquals(len(sample_scheduler.constraints), 0)
         self.assertEquals(sample_scheduler.max_fitness, 0)
 
     def test_add_contsraint(self):
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[1]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[1]]) 
         self.assertEquals(len(sample_scheduler.constraints), 2)
         self.assertEquals(sample_scheduler.max_fitness, 60)
 
     def test_calc_fitness(self):
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[1]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, constraint.morning_class, [sample_scheduler.courses[2]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[1]]) 
+        sample_scheduler.add_constraint("morning_classes", 30, 
+                constraint.morning_class, [sample_scheduler.courses[2]]) 
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 60)
 
     def test_find_respective_time_slot(self):
-        week = sample_scheduler.weeks[0]
+        pass
+        """week = sample_scheduler.weeks[0]
         room = week.days[0].rooms[0]
         new_time_slot = scheduler.TimeSlot((10, 00), (11, 00), room)
         time_slot = sample_scheduler.find_respective_time_slot(new_time_slot, week)
@@ -49,10 +57,10 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(new_time_slot.end_time, time_slot.end_time)
         self.assertEquals(new_time_slot.day, time_slot.day)
         self.assertEquals(new_time_slot.room, time_slot.room)
-        #Make sure not exact same time slot obj
+        #Make sure not exact same time slot obj"""
 
     def test_separate_by_credit(self):
-#self.assertEquals(len(sample_scheduler.separated[1]), 0)
+       #self.assertEquals(len(sample_scheduler.separated[1]), 0)
         self.assertEquals(len(sample_scheduler.separated[3]), 1)
         self.assertEquals(len(sample_scheduler.separated[4]), 1)
         self.assertEquals(len(sample_scheduler.separated[5]), 1)
@@ -60,6 +68,66 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 131")
         self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
 
+    def test_find_time_slots_from_cuts_mwf(self):
+        filename = "tests/schedules/find_time_slots_from_cuts_mwf.xml"
+        this_scheduler = interface.create_scheduler_from_file(filename)
+        this_courses = interface.create_course_list_from_file_test(filename)
+        extras = interface.create_extras_list_from_file(filename)
+        converted = [s.day + " - " + s.room.building + " - " + s.room.number\
+            + " - " + str(s.start_time)[:-3] for s in \
+            this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0],
+                                            extras["input"]["slots_list"])]
+        self.assertEquals(converted, extras["expected"])
+
+    def test_find_time_slots_from_cuts_tr(self):
+        filename = "tests/schedules/find_time_slots_from_cuts_tr.xml"
+        this_scheduler = interface.create_scheduler_from_file(filename)
+        this_courses = interface.create_course_list_from_file_test(filename)
+        extras = interface.create_extras_list_from_file(filename)
+        converted = [s.day + " - " + s.room.building + " - " + s.room.number \
+            + " - " + str(s.start_time)[:-3] for s in \
+            this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], 
+                                            extras["input"]["slots_list"])]
+        self.assertEquals(converted, extras["expected"])
+
+    def test_replace_time_slots(self):
+        pass
+
+    def test_assess_inconsistences(self):
+        #generic unit tests based on pre defined seeds
+        pass
+
+    def test_resolve_inconsistences(self):
+        #generic unit tests based on pre defined seeds
+        pass
+
+    def test_crossover(self):
+        #make sure it produces two schedules
+        #everything else is tested in other unit tests
+        pass
+
+    def test_inconsistences_integration(self):
+        #test that both work together
+        pass
+    
+"""
+    def test_generator(self):
+        generated = sample_scheduler.generator(sample_scheduler.weeks[0], sample_courses, sample_scheduler.weeks[0].find_empty_time_slots()) 
+        if generated.valid == True:
+            for each_course in sample_courses:
+                check if each_course in generated
+                if each_course.pre_schedule:
+                    check if each_course.start_time is correct
+
+        if generated.valid == False:
+            check that there is at least one course missing or a course is schedule twice or ...
+        
+    def test_breed(self):
+        output size == input + (n choose 2)
+
+    def test_mutate(self):
+        given week with no empty slots returns week
+"""
 
 if __name__ == "__main__":
     unittest.main()
