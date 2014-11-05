@@ -6,6 +6,7 @@ from random import choice
 from datetime import time, timedelta
 from structures import *
 from constraint import *
+
 #import interface # uncomment to use export_schedule_xml 
 import xml.etree.ElementTree as ET
 import os.path
@@ -335,7 +336,9 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 50
+
+        MAX_TRIES = 20
+
 
         def week_slice_helper():
             valid_weeks = filter(lambda x: x.valid, self.weeks)
@@ -365,6 +368,7 @@ class Scheduler:
             print("Number of valid weeks for the generation:", str(len(valid_weeks)))
 
             #insufficient valid weeks
+            """
             if len(valid_weeks) == 0:
                 print("Generating a new population")
                 self.weeks = []
@@ -372,6 +376,7 @@ class Scheduler:
                 total_iterations += 1
                 counter += 1
                 continue
+                """
 
             if min(i.fitness for i in self.weeks) == self.max_fitness and \
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:

@@ -17,7 +17,7 @@ def create_scheduler_from_file(path_to_xml):
     courses = create_course_list_from_file(path_to_xml, instructors_dict)
     rooms = create_room_list_from_file(path_to_xml)
     time_slots_mwf, time_slots_tr = create_time_slot_list_from_file(path_to_xml)
-    time_slot_divide = root.find("schedule").find("timeSlotDivide").text
+    time_slot_divide = 2
     course_titles = [course.code for course in courses]
     setCourses = [i.attrib for i in root.findall("course")]
     return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr,

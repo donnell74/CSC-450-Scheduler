@@ -65,3 +65,7 @@ class Room:
     def __iter__(self):
         for t_slot in self.schedule:
             yield t_slot
+
+    def __eq__(self, other):
+        return self.building == other.building and\
+               self.number == other.number

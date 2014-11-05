@@ -26,15 +26,22 @@
           <item building="TEMP" number="0001" capacity="144"></item>
         </roomList>
         <timeListMWF>
-          <item>09:00-10:00</item>
-          <item>10:00-11:00</item>
-          <item>11:00-12:00</item>
-          <item>12:00-13:00</item>
+          <item>08:00-08:50</item>
+          <item>09:05-09:55</item>
+          <item>10:10-11:00</item>
+          <item>11:15-12:05</item>
+          <item>12:20-13:10</item>
+          <item>13:25-14:15</item>
+          <item>14:30-15:20</item>
+          <item>15:35-16:25</item>
         </timeListMWF>
         <timeListTR>
-          <item>09:15-10:30</item>
+          <item>08:00-09:15</item>
+          <item>09:30-10:45</item>
           <item>11:00-12:15</item>
-        </timeListTR>
-        <timeSlotDivide>2</timeSlotDivide>
+          <item>12:30-13:45</item>
+          <item>14:00-15:15</item>
+          <item>15:30-16:45</item>
+       </timeListTR>
     </schedule>
 </data>

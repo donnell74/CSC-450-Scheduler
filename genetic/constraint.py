@@ -57,36 +57,36 @@ def morning_class(this_week, args):
 
 
 def instructor_time_pref_before(this_week, args):
-	"""Args should be a list containing this_instructor, courses, and before_time;
-	this will have to be passed from the constraint generator
+    """Args should be a list containing this_instructor, courses, and before_time;
+    this will have to be passed from the constraint generator
     args should be [chosen_instructor, chosen_before_time]"""
-	this_instructor = args[0]
-	time_slot = args[1]
-	for each_course in this_instructor.courses:
-		#section object for course
-		each_section = this_week.find_section( each_course.code )
-                if each_section.time_slots[0].start_time > time_slot:
-                    #case 1: a course fails
-                    return 0
-	#case 2: all courses for instructor pass
-	return 1
+    this_instructor = args[0]
+    time_slot = args[1]
+    for each_course in this_instructor.courses:
+        #section object for course
+        each_section = this_week.find_section( each_course.code )
+        if each_section.time_slots[0].start_time > time_slot:
+            #case 1: a course fails
+            return 0
+    #case 2: all courses for instructor pass
+    return 1
 
 
 def instructor_time_pref_after(this_week, args):
-	"""Args should be a list containing this_instructor, courses, and after_time;
-	this will have to be passed from the constraint generator
+    """Args should be a list containing this_instructor, courses, and after_time;
+    this will have to be passed from the constraint generator
     args should be [chosen_instructor, chosen_after_time]"""
-	this_instructor = args[0]
-	time_slot = args[1]
-	for each_course in this_instructor.courses:
-		#section object for course
-		each_section = this_week.find_section( each_course.code )
-		#only want section obujects for this_instructor
-                if each_section.time_slots[0].start_time < time_slot:
-                        #case 1: a course fails
-                        return 0
-	#case 2: all courses for instructor pass
-	return 1
+    this_instructor = args[0]
+    time_slot = args[1]
+    for each_course in this_instructor.courses:
+        #section object for course
+        each_section = this_week.find_section( each_course.code )
+        #only want section obujects for this_instructor
+        if each_section.time_slots[0].start_time < time_slot:
+                #case 1: a course fails
+                return 0
+    #case 2: all courses for instructor pass
+    return 1
 
 
 def instructor_conflict(this_week, args):
@@ -103,11 +103,11 @@ def instructor_conflict(this_week, args):
         count = 0
         for each_instructors_course in each_instructor.courses:
             times.append(
-                this_week.find_course(each_instructors_course)[0].start_time)
+                this_week.find_course(each_instructors_course)[0])
         while len(times) > 0:
             each_time = times.pop(0)
             for each_other_time in times:
-                if each_time == each_other_time:
+                if is_overlap(each_time, each_other_time):
                     count += 1
         if count > 0:
             this_week.valid = False
@@ -121,15 +121,14 @@ def get_minutes(a_time):
     return a_time.hour * 60 + a_time.minute
 
 
-def times_are_sequential(timeslot1, timeslot2):
+def times_are_sequential(timeslot1, timeslot2, time_threshold = 15):
     """
     return true if timeslots are sequential, else false
     time_threshold can be used to give the max separation between timeslots
     """
-    time_threshold = 0
-    start2 = max(timeslot1.start_time, timeslot2.start_time)
-    end1 = min(timeslot1.end_time, timeslot2.end_time)
-    result = get_minutes(start2) - get_minutes(end1) - time_threshold <= 0
+    later_start_time = max(timeslot1.start_time, timeslot2.start_time)
+    earlier_end_time = min(timeslot1.end_time, timeslot2.end_time)
+    result = get_minutes(later_start_time) - get_minutes(earlier_end_time) - time_threshold <= 0
     return result
 
 
@@ -176,6 +175,47 @@ def instructor_preference_day(this_week, args):
                     return 0
                     
     return 1
+
+
+def is_overlap(timeslot1, timeslot2):
+    """Return true if timeslots overlap else false"""
+    if timeslot1.start_time < timeslot2.start_time:
+        start_1st, start_2nd = timeslot1, timeslot2
+    else:
+        start_1st, start_2nd = timeslot2, timeslot1
+
+    if start_2nd.start_time < start_1st.end_time:
+        return True
+
+    if start_1st.start_time == start_2nd.start_time:
+        return True
+
+    return False
+
+def no_overlapping_courses(this_week, args):
+    """Check that all timeslots do not overlap any other
+    timeslots"""
+    times = []
+    count = 0
+
+    all_time_slots = this_week.list_time_slots()
+    for each_timeslot in all_time_slots:
+        if each_timeslot.course != None:
+            times.append(each_timeslot)
+
+    while len(times) > 0:
+        each_time = times.pop(0)
+        for each_other_time in times:
+            if each_time.day != each_other_time.day or\
+               each_time.room != each_other_time.room :
+                continue
+            if is_overlap(each_time, each_other_time):
+                count += 1
+
+    if count > 0:
+        this_week.valid = False
+
+    return 0
 
 
 def num_subsequent_courses(this_week, args):
@@ -242,7 +282,7 @@ def time_finder(end_t, time_gap):
 
     next_start_time = time(t_hr, t_min)
     return next_start_time
-
+    
 
 class ConstraintCreationError(Exception):
     def __init__(self, value):
@@ -280,6 +320,7 @@ class Constraint:
     def get_fitness(self, this_week):
         try:
             return self.func(this_week, self.args) * self.weight
+
         except:
             raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
                                              be scheduled: " + self.name)
