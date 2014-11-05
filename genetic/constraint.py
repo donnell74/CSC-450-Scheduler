@@ -57,36 +57,36 @@ def morning_class(this_week, args):
 
 
 def instructor_time_pref_before(this_week, args):
-	"""Args should be a list containing this_instructor, courses, and before_time;
-	this will have to be passed from the constraint generator
+    """Args should be a list containing this_instructor, courses, and before_time;
+    this will have to be passed from the constraint generator
     args should be [chosen_instructor, chosen_before_time]"""
-	this_instructor = args[0]
-	time_slot = args[1]
-	for each_course in this_instructor.courses:
-		#section object for course
-		each_section = this_week.find_section( each_course.code )
-                if each_section.time_slots[0].start_time > time_slot:
-                    #case 1: a course fails
-                    return 0
-	#case 2: all courses for instructor pass
-	return 1
+    this_instructor = args[0]
+    time_slot = args[1]
+    for each_course in this_instructor.courses:
+        #section object for course
+        each_section = this_week.find_section( each_course.code )
+        if each_section.time_slots[0].start_time > time_slot:
+            #case 1: a course fails
+            return 0
+    #case 2: all courses for instructor pass
+    return 1
 
 
 def instructor_time_pref_after(this_week, args):
-	"""Args should be a list containing this_instructor, courses, and after_time;
-	this will have to be passed from the constraint generator
+    """Args should be a list containing this_instructor, courses, and after_time;
+    this will have to be passed from the constraint generator
     args should be [chosen_instructor, chosen_after_time]"""
-	this_instructor = args[0]
-	time_slot = args[1]
-	for each_course in this_instructor.courses:
-		#section object for course
-		each_section = this_week.find_section( each_course.code )
-		#only want section obujects for this_instructor
-                if each_section.time_slots[0].start_time < time_slot:
-                        #case 1: a course fails
-                        return 0
-	#case 2: all courses for instructor pass
-	return 1
+    this_instructor = args[0]
+    time_slot = args[1]
+    for each_course in this_instructor.courses:
+        #section object for course
+        each_section = this_week.find_section( each_course.code )
+        #only want section obujects for this_instructor
+        if each_section.time_slots[0].start_time < time_slot:
+                #case 1: a course fails
+                return 0
+    #case 2: all courses for instructor pass
+    return 1
 
 
 def instructor_conflict(this_week, args):
@@ -121,14 +121,14 @@ def get_minutes(a_time):
     return a_time.hour * 60 + a_time.minute
 
 
-def times_are_sequential(timeslot1, timeslot2, time_threshold = 0):
+def times_are_sequential(timeslot1, timeslot2, time_threshold = 15):
     """
     return true if timeslots are sequential, else false
     time_threshold can be used to give the max separation between timeslots
     """
-    start2 = max(timeslot1.start_time, timeslot2.start_time)
-    end1 = min(timeslot1.end_time, timeslot2.end_time)
-    result = get_minutes(start2) - get_minutes(end1) - time_threshold <= 0
+    later_start_time = max(timeslot1.start_time, timeslot2.start_time)
+    earlier_end_time = min(timeslot1.end_time, timeslot2.end_time)
+    result = get_minutes(later_start_time) - get_minutes(earlier_end_time) - time_threshold <= 0
     return result
 
 
@@ -187,9 +187,8 @@ def is_overlap(timeslot1, timeslot2):
     if start_2nd.start_time < start_1st.end_time:
         return True
 
-    #this check should be done by alot of other constraints
-    #if start_1st.start_time == start_2nd.start_time:
-    #    return True
+    if start_1st.start_time == start_2nd.start_time:
+        return True
 
     return False
 
