@@ -289,6 +289,10 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
         globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
         globs.mainScheduler.add_constraint("capacity checking", 0, constraint.ensure_course_room_capacity, [])
+        globs.mainScheduler.add_constraint("course sections at different times", \
+                                           0, constraint.course_sections_at_different_times, \
+                                           [globs.courses[:-1]])  # the last item is "All", ignore it
+
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
@@ -296,4 +300,3 @@ class MainWindow(Frame):
         # DISPLAY VIEW PAGE
         self.view_page.lift()
         return
-
