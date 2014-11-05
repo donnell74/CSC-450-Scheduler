@@ -176,6 +176,27 @@ def instructor_preference_day(this_week, args):
                     
     return 1
 
+def instructor_preference_computer(this_week, args):
+    """If an instructor prefers to teach in a class with
+    or without computers, validate the week on this criteria.
+    Args should be [instructor, computer_preference]"""
+    instructor = args[0]
+    computer_preference = args[1]
+    for section_week in this_week.sections:
+        if section_week.instructor.name == instructor.name:
+            if computer_preference == True: 
+                #instructor prefers computers
+                if section_week.room.has_computers == True:
+                    return 1
+                else:
+                    return 0
+            else: 
+                #instructor doesn't prefer computers
+                if section_week.room.has_computers == False:
+                    return 1
+                else:
+                    return 0
+
 
 def is_overlap(timeslot1, timeslot2):
     """Return true if timeslots overlap else false"""
@@ -252,6 +273,7 @@ def num_subsequent_courses(this_week, args):
             this_week.valid = False
     return 0
 
+
 def ensure_course_room_capacity(this_week, args):
     """A course must be assigned to a room with enough capacity to
     hold the course's capacity."""
@@ -262,6 +284,7 @@ def ensure_course_room_capacity(this_week, args):
             break
 
     return 0
+
 
 def ensure_computer_requirement(this_week, args):
     """ If a course is specified as requiring computers, its assigned
@@ -330,6 +353,7 @@ class Constraint:
     def get_fitness(self, this_week):
 #        try:
             return self.func(this_week, self.args) * self.weight
+
 #        except:
 #            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
 #be scheduled.  Caused by: " + self.name)

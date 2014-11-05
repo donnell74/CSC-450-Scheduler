@@ -90,7 +90,7 @@ class InstructorConstraint(Page):
         self.time_day_default = StringVar(self)
         self.time_day_default.set("Time")
         self.time_day_default.trace("w", self.time_day_toggle)
-        self.time_day_list = ["Time", "Day"]
+        self.time_day_list = ["Time", "Day", "Computer Preference"]
         self.option_time_day = OptionMenu(self, self.time_day_default, \
                                           *self.time_day_list)
         self.option_time_day.pack(side = TOP)
@@ -156,8 +156,31 @@ class InstructorConstraint(Page):
         self.submit_day = Button(self.day_frame, text = "Add Constraint", command = self.add_instr_day)
         self.submit_day.pack(side = TOP, pady = 25)
 
+        # computer preference
+        self.computer_frame = Frame(self, width = 100)  # don't pack this because Time is the default option so computers shouldn't be visible
 
+        self.label_computer = Label(self.computer_frame, \
+            text = "Instructor would prefer to teach lecture classes in a classroom with computers:", wraplength = 100)
+        self.label_computer.pack(side = TOP)
 
+        self.computer_options = ["True", "False"]
+        self.computer_radiobutton = StringVar()
+        for i in range(len(self.computer_options)):
+            box = Radiobutton(self.computer_frame, text = self.computer_options[i], \
+                value = self.computer_options[i], variable = self.computer_radiobutton)
+            box.pack(side = TOP, anchor = CENTER)
+            
+        self.priority_label = Label(self.computer_frame, text = "Priority: ")
+        self.priority_label.pack()
+
+        self.instr_computer_priority_default = StringVar(self)
+        self.instr_computer_priority_default.set("Low") # initial value
+
+        self.option_priority = OptionMenu(self.computer_frame, self.instr_computer_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.option_priority.pack(side = TOP)
+
+        self.submit_computer = Button(self.computer_frame, text = "Add Constraint", command = self.add_instr_computer)
+        self.submit_computer.pack(side = TOP, pady = 25)
         
 
     def add_instr_time(self):
@@ -184,6 +207,15 @@ class InstructorConstraint(Page):
         pass
 
 
+    def add_instr_computer(self):
+        instructor = self.str_instr_name_default.get()
+        radiobutton = self.computer_radiobutton
+        prefers_computers = bool(radiobutton.get())
+        priority = self.instr_computer_priority_default.get()
+        create_computer_pref_constraint(instructor, prefers_computers, priority, self.constraints)
+        pass
+
+
     def callbackWhen(self, *args):
         when = self.when_default.get()
         menu = self.time_slot_menu["menu"]
@@ -201,10 +233,16 @@ class InstructorConstraint(Page):
         time_day = self.time_day_default.get()
         if time_day == "Day":
             self.time_frame.pack_forget()
+            self.computer_frame.pack_forget()
             self.day_frame.pack()
+        elif time_day == "Computer Preference":
+            self.time_frame.pack_forget()
+            self.day_frame.pack_forget()
+            self.computer_frame.pack()
         else:
             self.time_frame.pack()
             self.day_frame.pack_forget()
+            self.computer_frame.pack_forget()
 
         
     
@@ -422,6 +460,18 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     
     day_code = day_code.lower()    
     globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_day, [instructor, day_code])
+
+    # update scrollbox with this created constraint
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    return
+
+
+def create_computer_pref_constraint(instructor, prefers_computers, priority, added_constraints):
+    priority = get_priority_value(priority)
+    instructor = pull_instructor_obj(instructor)
+    constraint_name = "{0}_prefers_computers_{1}".format(instructor.name, prefers_computers)
+    
+    globs.mainScheduler.add_constraint(constraint_name, priority, constraint.instructor_preference_computer, [instructor, prefers_computers])
 
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
