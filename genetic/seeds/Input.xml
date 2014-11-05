@@ -13,16 +13,15 @@
           <item code="CSC 365" credit="3" instructor="Saquer" prereq="" capacity="80" needs_computers="False"></item>
           <item code="CSC 450" credit="3" instructor="Shade" prereq="CSC325 CSC365" capacity="10" needs_computers="False"></item>
           <item code="CSC 460" credit="3" instructor="Wang" prereq="CSC320 CSC325" capacity="10" needs_computers="True"></item>
-          <item code="CSC 545" credit="3" instructor="Smith" prereq="CSC232" capacity="30" needs_computers="True"></item>
         </courseList>
         <roomList>
           <item building="CHEK" number="213" capacity="20" has_computers="True"></item>
-          <item building="CHEK" number="205" capacity="40" has_computers="True"></item>
+          <item building="CHEK" number="205" capacity="40" has_computers="False"></item>
           <item building="CHEK" number="105" capacity="70" has_computers="False"></item>
           <item building="CHEK" number="210" capacity="35" has_computers="False"></item>
-          <item building="CHEK" number="212" capacity="45" has_computers="True"></item>
+          <item building="CHEK" number="212" capacity="45" has_computers="False"></item>
           <item building="CHEK" number="202" capacity="40" has_computers="False"></item>
-          <item building="CHEK" number="204" capacity="40" has_computers="True"></item>
+          <item building="CHEK" number="204" capacity="40" has_computers="False"></item>
           <item building="GLAS" number="345" capacity="70" has_computers="False"></item>
           <item building="TEMP" number="0001" capacity="144" has_computers="True"></item>
         </roomList>

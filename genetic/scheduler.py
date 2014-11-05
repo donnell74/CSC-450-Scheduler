@@ -144,6 +144,12 @@ class Scheduler:
         """Removes all constraints from list"""
         self.constraints = []
         self.max_fitness = 0
+        
+    def delete_list_constraints(self, items):
+        """Removes some constraints from list"""
+        for i in range(len(sorted(items, reverse=True))):
+            self.max_fitness -= self.constraints[i].weight
+            del self.constraints[i]
 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
@@ -680,6 +686,9 @@ class Scheduler:
             except: #specifically for error from above
                 week_to_fill.valid = False
         for each_course in regular:
+            if each_course.capacity > 70:
+                list_of_slots_to_fill = filter(lambda x: x.room.capacity > 70, list_of_slots_to_fill)
+
             if each_course.credit == 5:
                 failure = self.schedule_5_hour_course(each_course, tr_slots, mwf_slots,
                                                       list_of_slots_to_fill, week_to_fill)
