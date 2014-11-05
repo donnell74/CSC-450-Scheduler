@@ -18,8 +18,7 @@ def all_before_time(this_week, args):
             this_week.valid = False
             return 0
         else:
-            this_week.valid = True
-            return 0 
+            return 1
     else:  # not mandatory
         if False in holds:  # can be modified for partial credit?
             return 0
@@ -44,8 +43,7 @@ def all_after_time(this_week, args):
             this_week.valid = False
             return 0
         else:
-            this_week.valid = True
-            return 0 
+            return 1
     else:  # not mandatory
         if False in holds:  # can be modified for partial credit?
             return 0
@@ -66,8 +64,7 @@ def course_before_time(this_week, args):
             this_week.valid = False
             return 0
         else:
-            this_week.valid = True
-            return 0
+            return 1
 
     return 1 if hold else 0
 
@@ -85,8 +82,7 @@ def course_after_time(this_week, args):
             this_week.valid = False
             return 0
         else:
-            this_week.valid = True
-            return 0
+            return 1
     
     return 1 if hold else 0
 
@@ -123,8 +119,7 @@ def instructor_time_pref_before(this_week, args):
                 this_week.valid = False
                 return 0
             else:
-                this_week.valid = True
-                return 0
+                return 1
         else: # not mandatory, treat it like normal
             if len(holds) >= 1:
                    return 0
@@ -155,8 +150,7 @@ def instructor_time_pref_after(this_week, args):
                 this_week.valid = False
                 return 0
             else:
-                this_week.valid = True
-                return 0
+                return 1
         else: # not mandatory, treat it like normal
             if len(holds) >= 1:
                    return 0
@@ -183,10 +177,9 @@ def instructor_conflict(this_week, args):
             each_time = times.pop(0)
             for each_other_time in times:
                 if is_overlap(each_time, each_other_time):
-                    count += 1
-        if count > 0:
-            this_week.valid = False
-    return 0
+                    this_week.valid = False
+                    return 0
+    return 1
 
 
 def get_minutes(a_time):
@@ -231,10 +224,9 @@ def sequential_time_different_building_conflict(this_week, args):
                 if len(set(days1).intersection(days2)) > 0: #if sections days overlap
                     if times_are_sequential(section1.time_slots[0], section2.time_slots[0]):
                         if section1.room.building != section2.room.building:
-                            count += 1
-        if count > 0:
-            this_week.valid = False
-    return 0
+                            this_week.valid = False
+                            return 0
+    return 1
 
 
 def instructor_preference_day(this_week, args):
@@ -276,10 +268,7 @@ def instructor_preference_computer(this_week, args):
                         this_week.valid = False
                     return 0
     #passes
-    if is_mandatory:
-        return 0
-    else:
-        return 1
+    return 1
 
 
 def is_overlap(timeslot1, timeslot2):
@@ -311,16 +300,14 @@ def no_overlapping_courses(this_week, args):
     while len(times) > 0:
         each_time = times.pop(0)
         for each_other_time in times:
-            if each_time.day != each_other_time.day or\
+            if each_time.day != each_other_time.day or \
                each_time.room != each_other_time.room :
                 continue
             if is_overlap(each_time, each_other_time):
-                count += 1
+                this_week.valid = False
+                return 0
 
-    if count > 0:
-        this_week.valid = False
-
-    return 0
+    return 1
 
 
 def num_subsequent_courses(this_week, args):
@@ -352,10 +339,9 @@ def num_subsequent_courses(this_week, args):
                                                            section3.time_slots[0])
                         if (compare_1_2 and compare_2_3) or (compare_1_3 and compare_2_3) or \
                            (compare_1_3 and compare_1_2): #if have 3 subsequent courses
-                            count += 1
-        if count > 0:
-            this_week.valid = False
-    return 0
+                            this_week.valid = False
+                            return 0
+    return 1
 
 
 def ensure_course_room_capacity(this_week, args):
@@ -365,9 +351,9 @@ def ensure_course_room_capacity(this_week, args):
     for section in this_week.sections:
         if section.course.capacity > section.room.capacity:
             this_week.valid = False
-            break
+            return 0
 
-    return 0
+    return 1
 
 
 def ensure_computer_requirement(this_week, args):
@@ -377,8 +363,9 @@ def ensure_computer_requirement(this_week, args):
         if section.course.needs_computers == True:
             if section.room.has_computers == False:
                 this_week.valid = False
-                break
-    return 0
+                return 0
+
+    return 1
 
 
 def time_finder(end_t, time_gap):
@@ -466,9 +453,9 @@ class Constraint:
         self.func = func
 
     def get_fitness(self, this_week):
-#        try:
+        #fitness score
+        if self.weight != 0:
             return self.func(this_week, self.args) * self.weight
-
-#        except:
-#            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
-#be scheduled.  Caused by: " + self.name)
+        #is_valid (from this constraint)
+        else:
+            return self.func(this_week, self.args) * 1

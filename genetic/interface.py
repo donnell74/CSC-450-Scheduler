@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from scheduler import *
 from time import strftime, gmtime
 
-def create_scheduler_from_file(path_to_xml):
+def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     """Reads in an xml file and schedules all courses found in it
     IN: path to xml file as string
     OUT: scheduler object with one week based on the xml input"""
@@ -17,13 +17,27 @@ def create_scheduler_from_file(path_to_xml):
     courses = create_course_list_from_file(path_to_xml, instructors_dict)
     rooms = create_room_list_from_file(path_to_xml)
     time_slots_mwf, time_slots_tr = create_time_slot_list_from_file(path_to_xml)
-    time_slot_divide = 2
+    time_slot_divide = slot_divide
     course_titles = [course.code for course in courses]
     setCourses = [i.attrib for i in root.findall("course")]
     return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr,
                                 int(time_slot_divide), test = True)
     return_schedule.weeks[0].fill_week(setCourses)
     return return_schedule
+
+
+def create_weeks_from_seeds(list_of_weeks_to_schedule_on, path_to_seeds):
+    """Reads 5 XML files and creates week objects for these seeds
+    path_to_seeds should look like directory/seed
+    Seed number and .xml will be appended to it"""
+    counter = 0
+    for each_week in list_of_weeks_to_schedule_on[:5]:
+        counter += 1
+        tree = ET.parse(path_to_seeds + str(counter) + '.xml')
+        root = tree.getroot()
+        setCourses = [i.attrib for i in root.findall("course")]
+        each_week.fill_week(setCourses)
+    return list_of_weeks_to_schedule_on
 
 
 def create_course_list_from_file_test(path_to_xml):
