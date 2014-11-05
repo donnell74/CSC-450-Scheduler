@@ -265,20 +265,21 @@ def instructor_preference_computer(this_week, args):
         if section_week.instructor.name == instructor.name:
             if computer_preference == True: 
                 #instructor prefers computers
-                if section_week.room.has_computers == True:
-                    return 1
-                else:
+                if section_week.room.has_computers == False:
                     if is_mandatory:
                         this_week.valid = False
                     return 0
             else: 
                 #instructor doesn't prefer computers
-                if section_week.room.has_computers == False:
-                    return 1
-                else:
+                if section_week.room.has_computers == True:
                     if is_mandatory:
                         this_week.valid = False
                     return 0
+    #passes
+    if is_mandatory:
+        return 0
+    else:
+        return 1
 
 
 def is_overlap(timeslot1, timeslot2):

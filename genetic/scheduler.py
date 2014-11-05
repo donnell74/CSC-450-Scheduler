@@ -116,9 +116,7 @@ class Scheduler:
         self.constraints = []
         self.max_fitness = 0
 
-        # Number of courses
-        self.num_courses = len(courses)
-        # Courses grouped by credit hours
+        #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
 
     def separate_by_credit(self, courses_list):
