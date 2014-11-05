@@ -147,7 +147,7 @@ class Scheduler:
         
     def delete_list_constraints(self, items):
         """Removes some constraints from list"""
-        for i in sorted(items, reverse=True):
+        for i in range(len(sorted(items, reverse=True))):
             self.max_fitness -= self.constraints[i].weight
             del self.constraints[i]
 

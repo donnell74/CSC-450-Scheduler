@@ -71,8 +71,8 @@ class ConstraintsView(Frame):
                 pos = pos + 1
             
             # clear constraints from the class
-            for i in sorted(items, reverse=True):
-                del self.constraints_output[i]
+            for j in range(len(sorted(items, reverse=True))):
+                del self.constraints_output[j]
             
             # clear selected constraints from the scheduler object
             globs.mainScheduler.delete_list_constraints(items)
