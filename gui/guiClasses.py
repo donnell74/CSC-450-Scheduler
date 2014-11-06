@@ -662,7 +662,7 @@ class MainWindow(Frame):
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
         globs.mainScheduler.generate_starting_population()
-        globs.mainScheduler.evolution_loop()
+        globs.mainScheduler.evolution_loop(10)
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()
