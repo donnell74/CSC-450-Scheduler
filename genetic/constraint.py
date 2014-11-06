@@ -4,18 +4,27 @@ from datetime import time, timedelta
 def all_before_time(this_week, args):
     """Iterates through courses in the schedule to make sure
      none are before a specific time
-     args should be [list of courses, timeslot]   
-     Timeslot should be a time object:  time(12, 0)"""
-    hold = False
+     args should be [list of courses, timeslot, is_mandatory]   
+     Timeslot should be a time object:  time(12, 0) """
 
-    for c in args[0]:  # access list of courses
-        hold = course_before_time(this_week, [c, args[1]])
-        if hold == False:
+    holds = []
+    is_mandatory = args[2]
+
+    for c in args[0]:  # access list of courses, don't pass is_mandatory 
+        holds.append(course_before_time(this_week, [c, args[1]]))
+
+    if is_mandatory:
+        if False in holds:
+            this_week.valid = False
             return 0
-
-    # if it made it through the loop, then there were no conflicts
-    return 1
-
+        else:
+            return 1
+    else:  # not mandatory
+        if False in holds:  # can be modified for partial credit?
+            return 0
+        else:  # no conflicts
+            return 1  
+    
 
 def all_after_time(this_week, args):
     """Iterates through courses in the schedule to make sure
@@ -23,26 +32,58 @@ def all_after_time(this_week, args):
      args should be [list of courses, timeslot]   
      Timeslot should be a time object:  time(12, 0)
      """
-    hold = False
-    for c in args[0]:
-        hold = course_after_time(this_week, [c, args[1]])
-        if hold == False:
+    holds = []
+    is_mandatory = args[2]
+
+    for c in args[0]:  # access list of courses, don't pass is_mandatory 
+        holds.append(course_after_time(this_week, [c, args[1]]))
+
+    if is_mandatory:
+        if False in holds:
+            this_week.valid = False
             return 0
-    # if it made it through the loop, then there were no conflicts
-    return 1
+        else:
+            return 1
+    else:  # not mandatory
+        if False in holds:  # can be modified for partial credit?
+            return 0
+        else:  # no conflicts
+            return 1  
 
 
 def course_before_time(this_week, args):
-    """Find the course and check that its time is before the constraining slot
-    args should be [<course>, <timeslot>]"""
+    """find the course and check that its time is before the constraining slot
+    args should be [<course>, <timeslot> [, is_mandatory] ]"""
+    if len(args) > 2:  # includes the mandatory boolean
+        is_mandatory = args[2]
+    
     hold = this_week.find_course(args[0])[0].start_time < args[1]
+
+    if is_mandatory:
+        if hold == 0:  # hold fails
+            this_week.valid = False
+            return 0
+        else:
+            return 1
+
     return 1 if hold else 0
 
 
 def course_after_time(this_week, args):
-    """Find the course and check that its time is after the constraining slot
-    args should be [<course>, <timeslot>]"""
+    """find the course and check that its time is after the constraining slot
+    args should be [<course>, <timeslot> [, is_mandatory] ]"""
+    if len(args) > 2: #includes mandatory boolean
+        is_mandatory = args[2]
+
     hold = this_week.find_course(args[0])[0].start_time > args[1]
+
+    if is_mandatory:
+        if hold == 0:  # hold fails
+            this_week.valid = False
+            return 0
+        else:
+            return 1
+    
     return 1 if hold else 0
 
 
@@ -57,36 +98,64 @@ def morning_class(this_week, args):
 
 
 def instructor_time_pref_before(this_week, args):
-    """Args should be a list containing this_instructor, courses, and before_time;
-    this will have to be passed from the constraint generator
-    args should be [chosen_instructor, chosen_before_time]"""
+    """args should be a list containing this_instructor, courses, and
+    before_time;
+    this will have to be passed to you from the constraint generator
+    args looks like this [chosen_instructor, timeslot, is_mandatory]"""
     this_instructor = args[0]
     time_slot = args[1]
+    is_mandatory = args[2]
+    holds = [] # will contain 0's for all courses that fail constraint
+
     for each_course in this_instructor.courses:
         #section object for course
         each_section = this_week.find_section( each_course.code )
         if each_section.time_slots[0].start_time > time_slot:
             #case 1: a course fails
-            return 0
-    #case 2: all courses for instructor pass
-    return 1
+            holds.append(0)
+                    
+        if is_mandatory:
+            if len(holds) >= 1: # at least one failure
+                this_week.valid = False
+                return 0
+            else:
+                return 1
+        else: # not mandatory, treat it like normal
+            if len(holds) >= 1:
+                   return 0
+            else: # no failures, add the weight to the fitness score
+                   return 1
 
 
 def instructor_time_pref_after(this_week, args):
-    """Args should be a list containing this_instructor, courses, and after_time;
-    this will have to be passed from the constraint generator
-    args should be [chosen_instructor, chosen_after_time]"""
+    """args should be a list containing this_instructor, courses,
+    and after_time
+    this will have to be passed to you from the constraint generator"""
     this_instructor = args[0]
     time_slot = args[1]
+    is_mandatory = args[2]
+    #print(this_week.schedule.instructors[0])
+    holds = [] # will contain 0's for all courses that fail constraint
+    
     for each_course in this_instructor.courses:
         #section object for course
         each_section = this_week.find_section( each_course.code )
         #only want section obujects for this_instructor
         if each_section.time_slots[0].start_time < time_slot:
-                #case 1: a course fails
+            #case 1: a course fails
+            holds.append(0)
+
+        if is_mandatory:
+            if len(holds) >= 1: # at least one failure
+                this_week.valid = False
                 return 0
-    #case 2: all courses for instructor pass
-    return 1
+            else:
+                return 1
+        else: # not mandatory, treat it like normal
+            if len(holds) >= 1:
+                   return 0
+            else: # no failures, add the weight to the fitness score
+                   return 1
 
 
 def instructor_conflict(this_week, args):
@@ -108,10 +177,9 @@ def instructor_conflict(this_week, args):
             each_time = times.pop(0)
             for each_other_time in times:
                 if is_overlap(each_time, each_other_time):
-                    count += 1
-        if count > 0:
-            this_week.valid = False
-    return 0
+                    this_week.valid = False
+                    return 0
+    return 1
 
 
 def get_minutes(a_time):
@@ -156,10 +224,9 @@ def sequential_time_different_building_conflict(this_week, args):
                 if len(set(days1).intersection(days2)) > 0: #if sections days overlap
                     if times_are_sequential(section1.time_slots[0], section2.time_slots[0]):
                         if section1.room.building != section2.room.building:
-                            count += 1
-        if count > 0:
-            this_week.valid = False
-    return 0
+                            this_week.valid = False
+                            return 0
+    return 1
 
 
 def instructor_preference_day(this_week, args):
@@ -167,13 +234,40 @@ def instructor_preference_day(this_week, args):
     Args should be [instructor, list_of_day_codes]"""
     instructor = args[0]
     day_code = args[1]
+    is_mandatory = args[2]
     
     for section_week in this_week.sections:
         if instructor.name == section_week.instructor.name:
             for day in section_week.days:
                 if not day.day_code in day_code:
+                    if is_mandatory:
+                        this_week.valid = False
                     return 0
                     
+    return 1
+
+def instructor_preference_computer(this_week, args):
+    """If an instructor prefers to teach in a class with
+    or without computers, validate the week on this criteria.
+    Args should be [instructor, computer_preference]"""
+    instructor = args[0]
+    computer_preference = args[1]
+    is_mandatory = args[2]
+    for section_week in this_week.sections:
+        if section_week.instructor.name == instructor.name:
+            if computer_preference == True: 
+                #instructor prefers computers
+                if section_week.room.has_computers == False:
+                    if is_mandatory:
+                        this_week.valid = False
+                    return 0
+            else: 
+                #instructor doesn't prefer computers
+                if section_week.room.has_computers == True:
+                    if is_mandatory:
+                        this_week.valid = False
+                    return 0
+    #passes
     return 1
 
 
@@ -206,16 +300,14 @@ def no_overlapping_courses(this_week, args):
     while len(times) > 0:
         each_time = times.pop(0)
         for each_other_time in times:
-            if each_time.day != each_other_time.day or\
+            if each_time.day != each_other_time.day or \
                each_time.room != each_other_time.room :
                 continue
             if is_overlap(each_time, each_other_time):
-                count += 1
+                this_week.valid = False
+                return 0
 
-    if count > 0:
-        this_week.valid = False
-
-    return 0
+    return 1
 
 
 def num_subsequent_courses(this_week, args):
@@ -247,10 +339,10 @@ def num_subsequent_courses(this_week, args):
                                                            section3.time_slots[0])
                         if (compare_1_2 and compare_2_3) or (compare_1_3 and compare_2_3) or \
                            (compare_1_3 and compare_1_2): #if have 3 subsequent courses
-                            count += 1
-        if count > 0:
-            this_week.valid = False
-    return 0
+                            this_week.valid = False
+                            return 0
+    return 1
+
 
 def ensure_course_room_capacity(this_week, args):
     """A course must be assigned to a room with enough capacity to
@@ -259,9 +351,21 @@ def ensure_course_room_capacity(this_week, args):
     for section in this_week.sections:
         if section.course.capacity > section.room.capacity:
             this_week.valid = False
-            break
+            return 0
 
-    return 0
+    return 1
+
+
+def ensure_computer_requirement(this_week, args):
+    """ If a course is specified as requiring computers, its assigned
+        room must also have computers to make its week valid."""
+    for section in this_week.sections:
+        if section.course.needs_computers == True:
+            if section.room.has_computers == False:
+                this_week.valid = False
+                return 0
+
+    return 1
 
 
 def time_finder(end_t, time_gap):
@@ -300,6 +404,37 @@ class ConstraintCalcFitnessError(Exception):
         return repr(self.value)
 
 
+def course_sections_at_different_times(this_week, arg):
+	""" Ensures that different sections of a course with the same absolute name
+	such as CSC 130 001 or 002, are not scheduled at the same time.
+	NOTE: this should work for both section numbers and lab sections denoted by
+	letters.
+	IN: the list of all courses 
+	OUT: Returns 0 and adjusts week.valid as necessary
+	"""
+        course_list = arg[0]
+	for i in range(len(course_list)):
+		i_code = course_list[i].code.split(' ')  # ['csc', '130', '001']
+		course_i_base_code = i_code[0] + i_code[1] # 'csc130'
+		for j in range(i + 1, len(course_list)):
+			j_code = course_list[j].code.split(' ')
+			course_j_base_code = j_code[0] + j_code[1]
+			if course_i_base_code == course_j_base_code:  
+				# same base course, different sections, so pull time slots
+				course_i_time = this_week.find_course(course_list[i])[0].start_time
+				course_j_time = this_week.find_course(course_list[j])[0].start_time
+				if course_i_time == course_j_time:
+					# check the day codes to be sure it's not MWF at 9 and TR at 9
+					course_i_days = this_week.find_section(course_list[i].code).days
+					course_j_days = this_week.find_section(course_list[j].code).days
+					days_in_common = list(set(course_i_days) & set(course_j_days)) # intersection of lists
+					if len(days_in_common) > 0:  # at least one day in common
+						this_week.valid = False
+						return 0
+	
+	# no same course/different section at the same time - week is valid
+	return 0
+
 class Constraint:
 
     def __init__(self, name, weight, func, args=[]):
@@ -318,9 +453,10 @@ class Constraint:
         self.func = func
 
     def get_fitness(self, this_week):
-        try:
+        #fitness score
+        if self.weight != 0:
             return self.func(this_week, self.args) * self.weight
+        #is_valid (from this constraint)
+        else:
+            return self.func(this_week, self.args) * 1
 
-        except:
-            raise ConstraintCalcFitnessError("Most likely a bigger problem causing courses to not\
-                                             be scheduled: " + self.name)
