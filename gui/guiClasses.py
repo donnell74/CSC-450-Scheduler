@@ -6,6 +6,7 @@ import sys
 sys.path.append("../")
 import globs
 from genetic import constraint, interface
+import tkMessageBox
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -50,19 +51,21 @@ class HomePage(Page):
         self.runtime_selected_var = IntVar()
         self.runtime_selected_var.set(1)
         self.runtime_selected_var.trace("w", self.check_if_custom)
-        
-        self.runtime_custom_input = DoubleVar() #will be converted to int later, prevents type errors
-        self.runtime_custom_input.set(0)
 
         for mode, val in runtime_modes:
             b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
                             value = val, font = (font_style, size_l))
             b.pack(anchor = W, padx = 225)
 
+
         self.custom_input = Frame(self, width = 50, height = 20)
         self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
                                  font = (font_style, size_l))
         self.input_label.pack()
+
+        self.runtime_custom_input = StringVar() #will be converted to int later, prevents type errors
+        self.runtime_custom_input.set(0)
+        self.runtime_custom_input.trace("w", self.check_if_string_val)
         
         self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)
         self.input_box.pack()
@@ -70,6 +73,22 @@ class HomePage(Page):
 
         self.version_label = Label(self, text="<versions info>")
         self.version_label.pack(side=BOTTOM, pady=5)
+
+    def check_if_string_val(self, *args):
+        entered_value = self.runtime_custom_input.get()
+        if len(entered_value) == 0: # user erased the default 0, will write new value
+            return 1
+        else:            
+            try:
+                int(entered_value)
+                return 1
+            except ValueError:
+                print(entered_value)
+                tkMessageBox.showerror(title = "Error", message = "Time must only contain numbers.")
+                self.runtime_custom_input.set(entered_value[:-1]) # remove the non-digit character
+                return 0
+            #return 1
+        
 
     def check_if_custom(self, *args):
         runtime_var_value = self.runtime_selected_var.get()
@@ -701,7 +720,7 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
-        globs.mainScheduler.generate_starting_population()
+        #globs.mainScheduler.generate_starting_population()
 
         runtime_var = self.home_page.runtime_selected_var.get()
         if runtime_var == 1:
@@ -716,12 +735,13 @@ class MainWindow(Frame):
             runtime_var = int(self.home_page.runtime_custom_input.get()) # convert from DoubleVar
             if runtime_var < 1:
                 runtime_var = 1
-            globs.mainScheduler.evolution_loop(runtime_var)
+            print(runtime_var)
+            #globs.mainScheduler.evolution_loop(runtime_var)
         
-        interface.export_schedules(globs.mainScheduler.weeks)
+        #interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()
         self.view_page.insert_schedule(0)  # show the first schedule in the view page
         # DISPLAY VIEW PAGE
-        self.view_page.lift()
+        #self.view_page.lift()
         return
