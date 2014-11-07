@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from scheduler import *
 from time import strftime, gmtime
 
-def create_scheduler_from_file(path_to_xml):
+def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     """Reads in an xml file and schedules all courses found in it
     IN: path to xml file as string
     OUT: scheduler object with one week based on the xml input"""
@@ -17,13 +17,27 @@ def create_scheduler_from_file(path_to_xml):
     courses = create_course_list_from_file(path_to_xml, instructors_dict)
     rooms = create_room_list_from_file(path_to_xml)
     time_slots_mwf, time_slots_tr = create_time_slot_list_from_file(path_to_xml)
-    time_slot_divide = root.find("schedule").find("timeSlotDivide").text
+    time_slot_divide = slot_divide
     course_titles = [course.code for course in courses]
     setCourses = [i.attrib for i in root.findall("course")]
     return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr,
                                 int(time_slot_divide), test = True)
     return_schedule.weeks[0].fill_week(setCourses)
     return return_schedule
+
+
+def create_weeks_from_seeds(list_of_weeks_to_schedule_on, path_to_seeds):
+    """Reads 5 XML files and creates week objects for these seeds
+    path_to_seeds should look like directory/seed
+    Seed number and .xml will be appended to it"""
+    counter = 0
+    for each_week in list_of_weeks_to_schedule_on[:5]:
+        counter += 1
+        tree = ET.parse(path_to_seeds + str(counter) + '.xml')
+        root = tree.getroot()
+        setCourses = [i.attrib for i in root.findall("course")]
+        each_week.fill_week(setCourses)
+    return list_of_weeks_to_schedule_on
 
 
 def create_course_list_from_file_test(path_to_xml):
@@ -55,17 +69,12 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
-
-          # write constraint
-          # if lab add is_lab = true to list arg for course
-          # it should be on T/R
-          # else
-            
-            course = Course(code=c.attrib["code"],
-                            credit=int(c.attrib["credit"]),
-                            instructor=instructor,
-                            capacity=int(c.attrib["capacity"]))
-
+            course = Course(code = c.attrib["code"],
+                            credit = int(c.attrib["credit"]),
+                            instructor = instructor,
+                            capacity = int(c.attrib["capacity"]),
+                            needs_computers = bool(int(c.attrib["needs_computers"])),
+                            is_lab = bool(int(c.attrib["is_lab"])))
             instructor.add_course(course)
             courses.append(course)
         return courses
@@ -84,8 +93,8 @@ def create_room_list_from_file(path_to_xml):
         # rooms will be list of tuples
         rooms = []
         for r in root.find("schedule").find("roomList").getchildren():
-            # Make tuple with (building, number, capacity)
-            room = (r.attrib["building"], r.attrib["number"], r.attrib["capacity"])
+            # Make tuple with (building, number, capacity, has_computers)
+            room = (r.attrib["building"], r.attrib["number"], r.attrib["capacity"], r.attrib["has_computers"])
             rooms.append(room)
         return rooms
     except Exception as inst:
@@ -149,7 +158,8 @@ def create_instructors_from_courses(path_to_xml):
         return None
 
 
-def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"):
+# should be updated to final object attributes (pr)
+def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"): 
     """Exports given week as xml for testing purposes
     IN: week object, extras string, prefix string, export directory
     OUT: creates an xml file for the given input"""
@@ -161,15 +171,17 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
 
         out.write("<courseList>\n")
         for each_course in week.schedule.courses:
-            out.write("<item code='%s' credit='%d' instructor='%s'></item>\n"\
-                  % (each_course.code, each_course.credit, each_course.instructor))
+            out.write("<item code='%s' credit='%d' instructor='%s' capacity='%d' needs_computers='%s'></item>\n"\
+                  % (each_course.code, each_course.credit, each_course.instructor, \
+                    each_course.capacity, each_course.needs_computers))
 
         out.write("</courseList>\n")
 
         out.write("<roomList>\n")
         for each_room in week.days[0].rooms:
-            out.write("<item>%s %s</item>\n"\
-                  % (each_room.building, each_room.number))
+            out.write("<item building='%s' number='%d' capacity='%d' has_computers='%s'\n" \
+                    % (each_room.building, each_room.number, each_room.capacity, \
+                        each_room.has_computers))
 
         out.write("</roomList>\n")
 

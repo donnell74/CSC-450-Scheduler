@@ -35,6 +35,8 @@ class Week:
                      for day_code in 'mtwrf']
         self.fitness = 0
         self.valid = True
+        self.num_invalid = 0
+        self.complete = True
         #Week's copy of courses
         self.sections = []
 

@@ -7,7 +7,7 @@
           <item code="CSC 232" credit="5" instructor="Volmar" capacity="40"></item>
         </courseList>
         <roomList>
-          <item building="CHEK" number="209" capacity="35"></item>
+          <item building="CHEK" number="209" capacity="35" has_computers="True"></item>
         </roomList>
         <timeListMWF>
           <item>08:00-09:00</item>
