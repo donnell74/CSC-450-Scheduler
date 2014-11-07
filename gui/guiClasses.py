@@ -655,12 +655,17 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
                                            constraint.sequential_time_different_building_conflict, [instructors])
         globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
+
         globs.mainScheduler.add_constraint("capacity checking", 0, constraint.ensure_course_room_capacity, [])
         globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
         globs.mainScheduler.add_constraint("computer requirement", 0, constraint.ensure_computer_requirement, [])
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
+
+        for each_course in globs.mainScheduler.courses:
+            globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
+                                               constraint.lab_on_tr, [each_course])
 
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)

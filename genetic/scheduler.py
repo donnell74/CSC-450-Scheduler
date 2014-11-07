@@ -337,7 +337,9 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
+
         MAX_TRIES = 5
+
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
