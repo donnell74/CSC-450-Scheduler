@@ -717,7 +717,7 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
-        #globs.mainScheduler.generate_starting_population()
+        globs.mainScheduler.generate_starting_population()
 
         runtime_var = self.home_page.runtime_selected_var.get()
         if runtime_var == 1:
@@ -733,12 +733,12 @@ class MainWindow(Frame):
             if runtime_var < 1:
                 runtime_var = 1
             print(runtime_var)
-            #globs.mainScheduler.evolution_loop(runtime_var)
+            globs.mainScheduler.evolution_loop(runtime_var)
         
-        #interface.export_schedules(globs.mainScheduler.weeks)
+        interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()
         self.view_page.insert_schedule(0)  # show the first schedule in the view page
         # DISPLAY VIEW PAGE
-        #self.view_page.lift()
+        self.view_page.lift()
         return
