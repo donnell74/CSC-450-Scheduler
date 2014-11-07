@@ -1,6 +1,6 @@
 class Course:
 
-    def __init__(self, code, credit, instructor, capacity, needs_computers, prescheduled_time=None, is_prescheduled=False):
+    def __init__(self, code, credit, instructor, capacity, needs_computers, prescheduled_time=None, is_prescheduled=False, is_lab=False):
         self.code = code
         self.credit = credit
         self.instructor = instructor
@@ -9,6 +9,7 @@ class Course:
         self.is_prescheduled = is_prescheduled
         self.prescheduled_time = prescheduled_time
         self.absolute_course = self.determine_absolute_course_code()
+        self.is_lab = is_lab
 
     def determine_absolute_course_code(self):
         """Examples: CSC 130 001 -> CSC130; CSC 450 -> CSC450"""
