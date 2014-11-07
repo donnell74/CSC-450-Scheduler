@@ -38,7 +38,11 @@ class HomePage(Page):
 
         runtime_option_text = "Choose a run speed:"
         self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
-        self.runtime_label.pack(pady = 30)
+        self.runtime_label.pack()
+        self.runtime_disclaimer = Label(self, text = "The scheduler may finish earlier"\
+                                        " if it finds 5 valid schedules.", font = (font_style, 10))
+        self.runtime_disclaimer.pack(pady = 5)
+                                        
 
         runtime_modes = [
             ("Quick ~ 1 minute", 1),
@@ -71,8 +75,6 @@ class HomePage(Page):
         self.input_box.pack()
         # self.custom_input.pack() # uncomment to show this by default
 
-        self.version_label = Label(self, text="<versions info>")
-        self.version_label.pack(side=BOTTOM, pady=5)
 
     def check_if_digit(self, *args):
         self.input_box.config(state = DISABLED) # disabled so tkMessageBox doesn't corrupt input field
