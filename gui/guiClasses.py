@@ -24,7 +24,7 @@ class HomePage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="CSC-450-Scheduler", font=(font_style, size_h1))
+        self.head_label = Label(self, text="CSC Department Scheduler", font=(font_style, size_h1))
         self.head_label.pack(pady=10)
 
         paragraph_text = "User Guide: step-by-step\n\n" +\
@@ -35,8 +35,48 @@ class HomePage(Page):
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
-        self.version_label = Label(self, text="<version info?>")
+        runtime_option_text = "Choose a run speed:"
+        self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
+        self.runtime_label.pack(pady = 30)
+
+        runtime_modes = [
+            ("Quick - 1 minute", 1),
+            ("Moderate - 10 minutes", 10),
+            ("High - 1 hour", 60),
+            ("Overnight - 8 hours", 480),
+            ("Custom", 0)
+            ]
+
+        self.runtime_selected_var = IntVar()
+        self.runtime_selected_var.set(1)
+        self.runtime_selected_var.trace("w", self.check_if_custom)
+        
+        self.runtime_custom_input = IntVar()
+        self.runtime_custom_input.set(0)
+
+        for mode, val in runtime_modes:
+            b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
+                            value = val, font = (font_style, size_l))
+            b.pack(anchor = W, padx = 225)
+
+        self.custom_input = Frame(self, width = 50, height = 20)
+        self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
+                                 font = (font_style, size_l))
+        self.input_label.pack()
+        
+        self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)
+        self.input_box.pack()
+        # self.custom_input.pack() # uncomment to show this by default
+
+        self.version_label = Label(self, text="<versions info>")
         self.version_label.pack(side=BOTTOM, pady=5)
+
+    def check_if_custom(self, *args):
+        runtime_var_value = self.runtime_selected_var.get()
+        if runtime_var_value == 0: # custom is selected
+            self.custom_input.pack()
+        else:
+            self.custom_input.pack_forget()
 
 # Constraint page is located in guiConstraints.py
 
@@ -662,7 +702,20 @@ class MainWindow(Frame):
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
         globs.mainScheduler.generate_starting_population()
-        globs.mainScheduler.evolution_loop(10)
+
+        runtime_var = self.home_page.runtime_selected_var.get()
+        if runtime_var == 1:
+            globs.mainScheduler.evolution_loop(runtime_var)
+        elif runtime_var == 10:
+            globs.mainScheduler.evolution_loop(runtime_var)
+        elif runtime_var == 60:
+            globs.mainScheduler.evolution_loop(runtime_var)
+        elif runtime_var == 480:
+            globs.mainScheduler.evolution_loop(runtime_var)
+        else: # runtime_var = 0, custom var
+            runtime_var = self.home_page.runtime_custom_input.get()
+            globs.mainScheduler.evolution_loop(runtime_var)
+        
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()
