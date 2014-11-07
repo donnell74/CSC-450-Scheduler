@@ -51,7 +51,7 @@ class HomePage(Page):
         self.runtime_selected_var.set(1)
         self.runtime_selected_var.trace("w", self.check_if_custom)
         
-        self.runtime_custom_input = IntVar()
+        self.runtime_custom_input = DoubleVar() #will be converted to int later, prevents type errors
         self.runtime_custom_input.set(0)
 
         for mode, val in runtime_modes:
@@ -713,7 +713,9 @@ class MainWindow(Frame):
         elif runtime_var == 480:
             globs.mainScheduler.evolution_loop(runtime_var)
         else: # runtime_var = 0, custom var
-            runtime_var = self.home_page.runtime_custom_input.get()
+            runtime_var = int(self.home_page.runtime_custom_input.get()) # convert from DoubleVar
+            if runtime_var < 1:
+                runtime_var = 1
             globs.mainScheduler.evolution_loop(runtime_var)
         
         interface.export_schedules(globs.mainScheduler.weeks)
