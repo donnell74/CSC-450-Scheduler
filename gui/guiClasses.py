@@ -720,20 +720,13 @@ class MainWindow(Frame):
         globs.mainScheduler.generate_starting_population()
 
         runtime_var = self.home_page.runtime_selected_var.get()
-        if runtime_var == 1:
-            globs.mainScheduler.evolution_loop(runtime_var)
-        elif runtime_var == 10:
-            globs.mainScheduler.evolution_loop(runtime_var)
-        elif runtime_var == 60:
-            globs.mainScheduler.evolution_loop(runtime_var)
-        elif runtime_var == 480:
-            globs.mainScheduler.evolution_loop(runtime_var)
-        else: # runtime_var = 0, custom var
+        if runtime_var not in [1, 10, 60, 480]:
             runtime_var = int(self.home_page.runtime_custom_input.get()) # convert from DoubleVar
             if runtime_var < 1:
                 runtime_var = 1
             print(runtime_var)
-            globs.mainScheduler.evolution_loop(runtime_var)
+
+        globs.mainScheduler.evolution_loop(runtime_var)
         
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
