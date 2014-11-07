@@ -64,8 +64,8 @@ class HomePage(Page):
         self.input_label.pack()
 
         self.runtime_custom_input = StringVar() #will be converted to int later, prevents type errors
-        self.runtime_custom_input.set(0)
-        self.runtime_custom_input.trace("w", self.check_if_string_val)
+        self.runtime_custom_input.set("0")
+        self.runtime_custom_input.trace("w", self.check_if_digit)
         
         self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)
         self.input_box.pack()
@@ -74,20 +74,17 @@ class HomePage(Page):
         self.version_label = Label(self, text="<versions info>")
         self.version_label.pack(side=BOTTOM, pady=5)
 
-    def check_if_string_val(self, *args):
+    def check_if_digit(self, *args):
+        self.input_box.config(state = DISABLED) # disabled so tkMessageBox doesn't corrupt input field
         entered_value = self.runtime_custom_input.get()
-        if len(entered_value) == 0: # user erased the default 0, will write new value
-            return 1
-        else:            
-            try:
-                int(entered_value)
-                return 1
-            except ValueError:
-                print(entered_value)
-                tkMessageBox.showerror(title = "Error", message = "Time must only contain numbers.")
+        for c in entered_value:
+            if not c.isdigit():
                 self.runtime_custom_input.set(entered_value[:-1]) # remove the non-digit character
+                tkMessageBox.showerror(title = "Error", message = "Time must only contain numbers.")
+                self.input_box.config(state = NORMAL)
                 return 0
-            #return 1
+        self.input_box.config(state = NORMAL)
+        return 1
         
 
     def check_if_custom(self, *args):
