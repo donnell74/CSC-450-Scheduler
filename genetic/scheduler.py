@@ -136,8 +136,13 @@ class Scheduler:
 
     def add_constraint(self, name, weight, func, *args):
         """Adds an constraint to the schedule"""
-        self.constraints.append(Constraint(name, weight, func, *args))
-        self.max_fitness += weight
+        exists = False
+        for constraint in globs.mainScheduler.constraints:
+            if constraint.name == name:
+                exists = True
+        if not exists:
+            self.constraints.append(Constraint(name, weight, func, *args))
+            self.max_fitness += weight
 
     def clear_constraints(self):
         """Removes all constraints from list"""
