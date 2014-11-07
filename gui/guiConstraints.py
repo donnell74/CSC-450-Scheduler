@@ -32,7 +32,8 @@ class InstructorConstraint(Page):
         Frame.__init__(self, root)
 
         self.constraints = constraints
-        
+        priority_options = ["Low", "Medium", "High", "Mandatory"]
+
         instructor_name = Label(self, text = "Instructor name:")
         instructor_name.pack(side = TOP)
 
@@ -43,19 +44,17 @@ class InstructorConstraint(Page):
         self.option_instructors = OptionMenu(self, self.str_instr_name_default, *list_of_instructors)
         self.option_instructors.pack(side = TOP)
 
-        # time or day toggle box
+        # type of Constraint toggle box
         label_time_day = Label(self, text = "Type: ")
         label_time_day.pack(side = TOP)
-        self.time_day_default = StringVar(self)
-        self.time_day_default.set("Time")
-        self.time_day_default.trace("w", self.time_day_toggle)
-        self.time_day_list = ["Time", "Day", "Computer Preference"]
-        self.option_time_day = OptionMenu(self, self.time_day_default, \
-                                          *self.time_day_list)
+        self.constraint_type_default = StringVar(self)
+        self.constraint_type_default.set("Time")
+        self.constraint_type_default.trace("w", self.time_day_toggle)
+        self.time_day_list = ["Time", "Day", "Computer Preference", "Max Per Day"]
+        self.option_time_day = OptionMenu(self, self.constraint_type_default, *self.time_day_list)
         self.option_time_day.pack(side = TOP)
 
         # dynamically change based on time/day being selected in the toggle
-        
 
         # time
         self.time_frame = Frame(self)
@@ -85,8 +84,9 @@ class InstructorConstraint(Page):
         self.priority_label.pack()
         self.instr_time_priority_default = StringVar(self)
         self.instr_time_priority_default.set("Low") # initial value
-        self.option_priority = OptionMenu(self.time_frame, \
-            self.instr_time_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.option_priority = OptionMenu(self.time_frame,
+                                          self.instr_time_priority_default,
+                                          *priority_options)
         self.option_priority.pack(side = TOP)
 
         self.submit_time = Button(self.time_frame, text = "Add Constraint", command = self.add_instr_time)
@@ -111,8 +111,9 @@ class InstructorConstraint(Page):
         self.priority_label.pack()
         self.instr_day_priority_default = StringVar(self)
         self.instr_day_priority_default.set("Low") # initial value
-        self.option_priority = OptionMenu(self.day_frame, \
-            self.instr_day_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.option_priority = OptionMenu(self.day_frame,
+                                          self.instr_day_priority_default,
+                                          *priority_options)
         self.option_priority.pack(side = TOP)
         
 
@@ -130,8 +131,10 @@ class InstructorConstraint(Page):
         self.computer_options = ["True", "False"]
         self.computer_radiobutton = StringVar()
         for i in range(len(self.computer_options)):
-            box = Radiobutton(self.computer_frame, text = self.computer_options[i], \
-                value = self.computer_options[i], variable = self.computer_radiobutton)
+            box = Radiobutton(self.computer_frame,
+                              text = self.computer_options[i],
+                              value = self.computer_options[i],
+                              variable = self.computer_radiobutton)
             box.pack(side = TOP, anchor = CENTER)
             
         self.priority_label = Label(self.computer_frame, text = "Priority: ")
@@ -140,14 +143,19 @@ class InstructorConstraint(Page):
         self.instr_computer_priority_default = StringVar(self)
         self.instr_computer_priority_default.set("Low") # initial value
 
-        self.option_priority = OptionMenu(self.computer_frame, \
-            self.instr_computer_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.option_priority = OptionMenu(self.computer_frame,
+                                          self.instr_computer_priority_default,
+                                          *priority_options)
         self.option_priority.pack(side = TOP)
 
         self.submit_computer = Button(self.computer_frame, \
             text = "Add Constraint", command = self.add_instr_computer)
         self.submit_computer.pack(side = TOP, pady = 25)
-        
+
+        # ADD MAX PER DAY STUFFS HERE
+        #
+        #
+        #
 
     def add_instr_time(self):
         instructor = self.str_instr_name_default.get()       
@@ -195,16 +203,20 @@ class InstructorConstraint(Page):
         self.time_default.set(t[0])        
         
 
-    def time_day_toggle(self, *args):
-        time_day = self.time_day_default.get()
-        if time_day == "Day":
+    def constraint_type_toggle(self, *args):
+        constraint_type = self.constraint_type_default.get()
+        if constraint_type == "Day":
             self.time_frame.pack_forget()
             self.computer_frame.pack_forget()
             self.day_frame.pack()
-        elif time_day == "Computer Preference":
+        elif constraint_type == "Computer Preference":
             self.time_frame.pack_forget()
             self.day_frame.pack_forget()
             self.computer_frame.pack()
+        elif constraint_type == "Max Per Day":
+            self.time_frame.pack_forget()
+            self.day_frame.pack_forget()
+            self.computer_frame.pack_forget()
         else:
             self.time_frame.pack()
             self.day_frame.pack_forget()
