@@ -87,6 +87,10 @@ def course_after_time(this_week, args):
     return 1 if hold else 0
 
 
+def lab_on_tr(this_week, args):
+    return int(this_week.find_course(args[0])[0].isTR == True)    
+
+
 def morning_class(this_week, args):
     """Checks if the given course starts before 12
     args should be [<course>]"""
@@ -101,7 +105,7 @@ def instructor_time_pref_before(this_week, args):
     """args should be a list containing this_instructor, courses, and
     before_time;
     this will have to be passed to you from the constraint generator
-    args looks like this [chosen_instructor, timeslot, is_mandatory]"""
+    args looks like this [chosen_instructor, timeslot, is_mandaory]"""
     this_instructor = args[0]
     time_slot = args[1]
     is_mandatory = args[2]

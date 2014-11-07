@@ -662,6 +662,11 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
+
+        for each_course in globs.mainScheduler.courses:
+            globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
+                                               constraint.lab_on_tr, [each_course])
+
         globs.mainScheduler.generate_starting_population()
 
         globs.mainScheduler.evolution_loop()

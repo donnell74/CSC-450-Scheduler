@@ -73,7 +73,8 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
                             credit = int(c.attrib["credit"]),
                             instructor = instructor,
                             capacity = int(c.attrib["capacity"]),
-                            needs_computers = bool(int(c.attrib["needs_computers"])))
+                            needs_computers = bool(int(c.attrib["needs_computers"])),
+                            is_lab = bool(int(c.attrib["is_lab"])))
             instructor.add_course(course)
             courses.append(course)
         return courses
