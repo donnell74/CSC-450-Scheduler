@@ -105,7 +105,7 @@ def instructor_time_pref_before(this_week, args):
     """args should be a list containing this_instructor, courses, and
     before_time;
     this will have to be passed to you from the constraint generator
-    args looks like this [chosen_instructor, timeslot, is_mandaory]"""
+    args looks like this [chosen_instructor, timeslot, is_mandatory]"""
     this_instructor = args[0]
     time_slot = args[1]
     is_mandatory = args[2]
