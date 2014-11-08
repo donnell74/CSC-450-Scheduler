@@ -667,8 +667,6 @@ class MainWindow(Frame):
             globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
 
-        globs.mainScheduler.generate_starting_population()
-
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
