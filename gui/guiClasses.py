@@ -45,10 +45,10 @@ class HomePage(Page):
                                         
 
         runtime_modes = [
-            ("Quick ~ 1 minute", 1),
-            ("Moderate ~ 10 minutes", 10),
-            ("High ~ 1 hour", 60),
-            ("Overnight ~ 8 hours", 480),
+            ("Quick (~1 minute)", 1),
+            ("Moderate (~10 minutes)", 10),
+            ("High (~1 hour)", 60),
+            ("Overnight (~8 hours)", 480),
             ("Custom", 0)
             ]
 
