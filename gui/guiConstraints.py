@@ -7,32 +7,32 @@ sys.path.append("../")
 import globs
 from genetic import constraint
 from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
-import tkMessageBox 
+import tkMessageBox
 
 
 class Page(Frame):
     def __init__(self, root):
         Frame.__init__(self, root)
- 
+
     def show(self):
         self.lift()
-        
+
 class HomeConstraintPage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        
+
         paragraph_text = " Select an option\n"
         self.description_label = Label(self, text=paragraph_text)
         self.description_label.pack()
 
 class InstructorConstraint(Page):
- 
+
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
 
         self.constraints = constraints
-        
+
         instructor_name = Label(self, text = "Instructor name:")
         instructor_name.pack(side = TOP)
 
@@ -55,7 +55,7 @@ class InstructorConstraint(Page):
         self.option_time_day.pack(side = TOP)
 
         # dynamically change based on time/day being selected in the toggle
-        
+
 
         # time
         self.time_frame = Frame(self)
@@ -75,9 +75,9 @@ class InstructorConstraint(Page):
 
         self.time_slots = globs.start_times
         self.time_default = StringVar(self)
-        self.time_default.set(self.time_slots[1]) 
+        self.time_default.set(self.time_slots[1])
 
-        self.time_slot_menu = OptionMenu(self.time_frame, self.time_default, *self.time_slots[1:]) 
+        self.time_slot_menu = OptionMenu(self.time_frame, self.time_default, *self.time_slots[1:])
         # default is before so knock out the first slot to avoid invalid constraints
         self.time_slot_menu.pack(side = TOP)
 
@@ -93,9 +93,9 @@ class InstructorConstraint(Page):
         self.submit_time.pack(side = RIGHT, pady = 25)
 
         # day - CHECKBOXES
-        self.day_frame = Frame(self, width = 100)  
+        self.day_frame = Frame(self, width = 100)
         # don't pack this because Time is the default option so days shouldn't be visible
-                        
+
         self.label_day = Label(self.day_frame, text = "Day(s) instructor prefers to teach:", \
                                wraplength = 100)
         self.label_day.pack(side = TOP)
@@ -106,7 +106,7 @@ class InstructorConstraint(Page):
             self.value = self.boxes[i]
             box = Checkbutton(self.day_frame, text = self.days[i], variable = self.value)
             box.pack(side = TOP, anchor = CENTER)
-            
+
         self.priority_label = Label(self.day_frame, text = "Priority: ")
         self.priority_label.pack()
         self.instr_day_priority_default = StringVar(self)
@@ -114,13 +114,13 @@ class InstructorConstraint(Page):
         self.option_priority = OptionMenu(self.day_frame, \
             self.instr_day_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
-        
+
 
         self.submit_day = Button(self.day_frame, text = "Add Constraint", command = self.add_instr_day)
         self.submit_day.pack(side = TOP, pady = 25)
 
         # computer preference
-        self.computer_frame = Frame(self, width = 100)  
+        self.computer_frame = Frame(self, width = 100)
         # don't pack this because Time is the default option so computers shouldn't be visible
 
         self.label_computer = Label(self.computer_frame, \
@@ -129,11 +129,12 @@ class InstructorConstraint(Page):
 
         self.computer_options = ["True", "False"]
         self.computer_radiobutton = StringVar()
+        self.computer_radiobutton.set("True")
         for i in range(len(self.computer_options)):
             box = Radiobutton(self.computer_frame, text = self.computer_options[i], \
                 value = self.computer_options[i], variable = self.computer_radiobutton)
             box.pack(side = TOP, anchor = CENTER)
-            
+
         self.priority_label = Label(self.computer_frame, text = "Priority: ")
         self.priority_label.pack()
 
@@ -147,16 +148,16 @@ class InstructorConstraint(Page):
         self.submit_computer = Button(self.computer_frame, \
             text = "Add Constraint", command = self.add_instr_computer)
         self.submit_computer.pack(side = TOP, pady = 25)
-        
+
 
     def add_instr_time(self):
-        instructor = self.str_instr_name_default.get()       
+        instructor = self.str_instr_name_default.get()
         before_after = self.when_default.get()
         timeslot = self.time_default.get()
         priority = self.instr_time_priority_default.get()
         create_time_pref_constraint(instructor, before_after, timeslot, priority, self.constraints)
         pass
-    
+
 
     def add_instr_day(self):
         instructor = self.str_instr_name_default.get()
@@ -167,7 +168,7 @@ class InstructorConstraint(Page):
             if checkboxes[i].get() == 1:  #checked, so push the day to day_code
                 day_code.append(days[i])
 
-        day_code = ''.join(day_code)              
+        day_code = ''.join(day_code)
         priority = self.instr_day_priority_default.get()
         create_day_pref_constraint(instructor, day_code, priority, self.constraints)
         pass
@@ -192,8 +193,8 @@ class InstructorConstraint(Page):
              t = globs.start_times[1:]
         for time in t :
                 menu.add_command(label=time, command=lambda value=time : self.time_default.set(value))
-        self.time_default.set(t[0])        
-        
+        self.time_default.set(t[0])
+
 
     def time_day_toggle(self, *args):
         time_day = self.time_day_default.get()
@@ -212,60 +213,60 @@ class InstructorConstraint(Page):
 
 
 class CourseConstraint(Page):
- 
+
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
-        
+
         globs.init()
 
         self.constraints = constraints
-        
+
         message_course = Label(self, text="Course code:")
         message_course.pack(side = TOP)
 
         self.str_course_default = StringVar(self)
         list_of_courses = globs.courses
         list_of_courses.append("All")
-        self.str_course_default.set(list_of_courses[0]) 
+        self.str_course_default.set(list_of_courses[0])
         self.option_course = OptionMenu(self, self.str_course_default, *list_of_courses)
         self.option_course.pack(side = TOP)
-        
+
         message_when = Label(self, text="When:")
         message_when.pack(side = TOP)
-        
+
         self.str_when_default = StringVar(self)
         self.str_when_default.set("Before")
         self.str_when_default.trace("w", self.callbackWhen)
         self.option_when = OptionMenu(self, self.str_when_default, "Before", "After")
         self.option_when.pack(side = TOP)
-        
+
         message_time = Label(self, text="Time:")
         message_time.pack(side = TOP)
-        
+
         self.str_time_default = StringVar(self)
-        self.str_time_default.set(globs.start_times[1]) #set the second element 
+        self.str_time_default.set(globs.start_times[1]) #set the second element
         self.option_time = OptionMenu(self, self.str_time_default, *globs.start_times[1:])
         self.option_time.pack(side = TOP)
-        
+
         message_priority = Label(self, text="Priority:")
         message_priority.pack(side = TOP)
-        
+
         self.course_time_priority_default = StringVar(self)
         self.course_time_priority_default.set("Low") # initial value
         self.option_priority = OptionMenu(self, \
             self.course_time_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
-        
+
         self.button_go = Button(self, text="Add Constraint", command=self.go)
         self.button_go.pack(side = RIGHT, pady = 25)
-        
+
     def go(self):
         course = self.str_course_default.get()
         time =  self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.course_time_priority_default.get()
         create_course_time_constraint(course, time, when, priority, self.constraints)
-    
+
     def callbackWhen(self, *args):
         when = self.str_when_default.get()
         menu = self.option_time["menu"]
@@ -276,8 +277,8 @@ class CourseConstraint(Page):
              t = globs.start_times[1:]
         for time in t :
                 menu.add_command(label=time, command=lambda value=time : self.str_time_default.set(value))
-        self.str_time_default.set(t[0])   
-        
+        self.str_time_default.set(t[0])
+
 class ConstraintPage(Page):
 
     def __init__(self, root, constraints):
@@ -287,12 +288,12 @@ class ConstraintPage(Page):
         self.head_label.pack()
         self.create_widgets()
         self.pack(side = TOP, fill = "both")
-        
-        
+
+
         # CONTENT
         self.content_container = Frame(self, width="400", height="300")
         self.content_container.pack(fill="both")
-        
+
         # PAGES
         self.home_page = HomeConstraintPage(self.content_container)
         #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
@@ -302,34 +303,34 @@ class ConstraintPage(Page):
         #self.constraints_view.place(in_ = self.instructor_page, anchor = E)
         #self.constraints_view.place(in_ = self.course_page, anchor = E)
         self.constraints_view.pack(side = RIGHT, anchor = NE, padx = 50)
-        
+
         self.instructor_page = InstructorConstraint(self.content_container, self.constraints_view)
         #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.instructor_page.pack(side = LEFT)
-        
+
         self.course_page = CourseConstraint(self.content_container, self.constraints_view)
         #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.course_page.pack(side = LEFT)
-        
+
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
-        
+
     def add_instructor_constraint(self):
         self.instructor_page.pack(side = LEFT, padx = 50)
         self.course_page.pack_forget()
-        
+
     def add_course_constraint(self):
         self.course_page.pack(side = LEFT, padx = 50)
         self.instructor_page.pack_forget()
-        
+
     def create_widgets(self):
-        
+
         self.button_course = Button(self, text="Add Course Constraint", command=self.add_course_constraint)
         self.button_course.pack(anchor = NW, padx = 50, pady = 10)
 
         self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
         self.button_instructor.pack(anchor = NW, padx = 50)
-        
+
 
 def get_priority_value(priority):
     if priority == "Low":
@@ -379,15 +380,15 @@ def constraint_adding_conflict(constraint_name, constraint_list):
 		if new_constraint[0] == old_constraint[0]: # same course code
                     if new_constraint[2] == old_constraint[2]: # same time slot
 			return 0  # can't be duplicate, so the before/after must vary, error
-							
+
 	else:
 	    # instructor constraint
 	    for constraint in constraint_list:
 		old_constraint = constraint.name.split('_')
                 if new_constraint[0] == old_constraint[0]: # same instructor
-                    if len(new_constraint) == len(old_constraint): 
+                    if len(new_constraint) == len(old_constraint):
                         # day pref is len = 3, time pref is len = 4
-                        if len(new_constraint) == 3:  
+                        if len(new_constraint) == 3:
                             if new_constraint[2] != old_constraint[2]: # different day codes
                                 return 0
                         else:  # time pref
@@ -395,9 +396,9 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                 # only thing that varies is before/after, error
                                 return 0
 	# if no return 0/error by now, the constraint is fine and doesn't conflict
-	return 1 
+	return 1
 
-            
+
 
 def create_course_time_constraint(course, start_time, when, priority, added_constraints):
     # convert the priority string to a weight value for fitness score
@@ -419,7 +420,7 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
                                "This constraint conflicts with a previously" \
                                " added constraint.")
         return
-    
+
     hour, minute = start_time.split(":")
     time_obj = time( int(hour), int(minute) )
 
@@ -428,37 +429,37 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
         for c in globs.mainScheduler.courses:
             if c.code == course:
                 course = c
-                break        
+                break
         if when == "Before":
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.course_before_time,
-                                                 [course, time_obj, is_mandatory]) 
+                                                 [course, time_obj, is_mandatory])
         else:  # one course AFTER a time
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                         constraint.course_after_time,
-                                         [course, time_obj, is_mandatory]) 
+                                         [course, time_obj, is_mandatory])
     else: # applies to all courses
         course = globs.mainScheduler.courses
         if when == "Before":
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_before_time,
-                                                 [course, time_obj, is_mandatory]) 
+                                                 [course, time_obj, is_mandatory])
         else: # all courses AFTER
              globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_after_time,
-                                                 [course, time_obj, is_mandatory]) 
-    
+                                                 [course, time_obj, is_mandatory])
+
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
-    return 
-    
+    return
+
 
 def create_time_pref_constraint(instructor, before_after, timeslot, priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
     if priority == 0:
         is_mandatory = True
-    
+
     instructor = pull_instructor_obj(instructor)
     hour, minute = timeslot.split(":")
     time_obj = time( int(hour), int(minute) )
@@ -475,18 +476,18 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
                                "This constraint conflicts with a previously" + \
                                 " added constraint.")
         return
-    
+
     if before_after == "Before":
         globs.mainScheduler.add_constraint(constraint_name, priority,  \
                                            constraint.instructor_time_pref_before, \
                                            [instructor, time_obj, is_mandatory])
-        
+
     else:  # after a time
         globs.mainScheduler.add_constraint(constraint_name, priority, \
                                            constraint.instructor_time_pref_after, \
                                            [instructor, time_obj, is_mandatory])
         pass
-    
+
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
@@ -502,7 +503,7 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     if len(day_code) > 4:  # can't select every day of the week, bad constraint
         error_message = "Error, a day preference can't be all days of the week, try again."
         tkMessageBox.showerror("Error", error_message)
-        return 
+        return
     if len(day_code) < 1: # can't pick no days, instructors have to work
         error_message = "Error, a day preference must include at least one day."
         tkMessageBox.showerror("Error", error_message)
@@ -520,8 +521,8 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
                                "This constraint conflicts with a previously" + \
                                 " added constraint.")
         return
-        
-    day_code = day_code.lower()    
+
+    day_code = day_code.lower()
     globs.mainScheduler.add_constraint(constraint_name, priority, \
                                        constraint.instructor_preference_day, \
                                        [instructor, day_code, is_mandatory])
@@ -539,7 +540,7 @@ def create_computer_pref_constraint(instructor, prefers_computers, priority, add
 
     instructor = pull_instructor_obj(instructor)
     constraint_name = "{0}_prefers_computers_{1}".format(instructor.name, prefers_computers)
-    
+
     globs.mainScheduler.add_constraint(constraint_name, priority, \
         constraint.instructor_preference_computer, [instructor, prefers_computers, is_mandatory])
 
