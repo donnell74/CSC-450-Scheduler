@@ -87,6 +87,10 @@ def course_after_time(this_week, args):
     return 1 if hold else 0
 
 
+def lab_on_tr(this_week, args):
+    return int(this_week.find_course(args[0])[0].isTR == True)    
+
+
 def morning_class(this_week, args):
     """Checks if the given course starts before 12
     args should be [<course>]"""
@@ -464,3 +468,4 @@ class Constraint:
         #is_valid (from this constraint)
         else:
             return self.func(this_week, self.args) * 1
+
