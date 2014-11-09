@@ -128,8 +128,8 @@ class InstructorConstraint(Page):
         self.label_computer.pack(side = TOP)
 
         self.computer_options = ["True", "False"]
-        self.computer_radiobutton = StringVar()
-        self.computer_radiobutton.set("True")
+        self.computer_radiobutton = StringVar(value = "True")
+
         for i in range(len(self.computer_options)):
             box = Radiobutton(self.computer_frame, text = self.computer_options[i], \
                 value = self.computer_options[i], variable = self.computer_radiobutton)
@@ -177,7 +177,10 @@ class InstructorConstraint(Page):
     def add_instr_computer(self):
         instructor = self.str_instr_name_default.get()
         radiobutton = self.computer_radiobutton
-        prefers_computers = bool(radiobutton.get())
+        if radiobutton.get() == "True": #cannot use bool() because bool("False") -> True
+            prefers_computers = True
+        else:
+            prefers_computers = False
         priority = self.instr_computer_priority_default.get()
         create_computer_pref_constraint(instructor, prefers_computers, priority, self.constraints)
         pass
@@ -540,6 +543,11 @@ def create_computer_pref_constraint(instructor, prefers_computers, priority, add
 
     instructor = pull_instructor_obj(instructor)
     constraint_name = "{0}_prefers_computers_{1}".format(instructor.name, prefers_computers)
+
+    if check_constraint_exists(constraint_name) == 0:
+        tkMessageBox.showerror("Duplicate Constraint", \
+                               "This constraint already exists.")
+        return
 
     globs.mainScheduler.add_constraint(constraint_name, priority, \
         constraint.instructor_preference_computer, [instructor, prefers_computers, is_mandatory])
