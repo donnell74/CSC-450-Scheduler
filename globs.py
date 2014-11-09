@@ -22,14 +22,14 @@ def init(): # call globals.init() from main
         mainScheduler = scheduler.Scheduler(courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide)
         print "Slot divide is", mainScheduler.slot_divide
         mainScheduler.generate_starting_population(just_one = True)
-            
+
         #prereqs computation and display
         prereqs = interface.get_prereqs(input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
         '''for prereq in prereqs:
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
                   " ".join([c.absolute_course for c in prereq.prereqs])'''
-    
+
     # used for gui strings
     # must be in military time
     # todo: make function to do the below
