@@ -7,7 +7,7 @@ from datetime import time, timedelta
 from structures import *
 from constraint import *
 
-#import interface # uncomment to use export_schedule_xml 
+#import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
 import os.path
 
@@ -44,7 +44,6 @@ class MalformedTimeslotError(Exception):
         return repr(self.value)
 
 
-
 class Scheduler:
 
     """Schedules all courses for a week"""
@@ -54,7 +53,7 @@ class Scheduler:
             if len(courses) != 0:
                 if not all(isinstance(each_course, Course) for \
                         each_course in courses):
-                   raise SchedulerInitError("Courses - Not all of type Course") 
+                   raise SchedulerInitError("Courses - Not all of type Course")
             else:
                 raise SchedulerInitError("Courses - List has no elements")
         else:
@@ -102,7 +101,7 @@ class Scheduler:
         self.time_slots = time_slots_mwf + time_slots_tr
         if type(time_slot_divide) == int:
             if time_slot_divide < 0 and \
-                time_slot_divide >= min(len(self.time_slots_mwf), 
+                time_slot_divide >= min(len(self.time_slots_mwf),
                                         len(self.time_slots_tr)):
                 raise SchedulerInitError("Time Slot Divide - Not valid number")
         else:
@@ -119,6 +118,7 @@ class Scheduler:
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
 
+
     def separate_by_credit(self, courses_list):
         """Groups the courses based on number of credit hours.
         IN: list of course objects
@@ -133,21 +133,25 @@ class Scheduler:
                 courses_by_credits[each_course.credit].append(each_course)
         return courses_by_credits
 
+
     def add_constraint(self, name, weight, func, *args):
         """Adds an constraint to the schedule"""
         self.constraints.append(Constraint(name, weight, func, *args))
         self.max_fitness += weight
 
+
     def clear_constraints(self):
         """Removes all constraints from list"""
         self.constraints = []
         self.max_fitness = 0
-        
+
+
     def delete_list_constraints(self, items):
         """Removes some constraints from list"""
         for i in range(len(sorted(items, reverse=True))):
             self.max_fitness -= self.constraints[i].weight
             del self.constraints[i]
+
 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
@@ -196,12 +200,12 @@ class Scheduler:
             start = start.split(':')
             start = list(map(int, start))
             start = time(start[0], start[1])
-            start_times.append(start)  
+            start_times.append(start)
 
             end = end.split(':')
             end = list(map(int, end))
             end = time(end[0], end[1])
-            end_times.append(end) 
+            end_times.append(end)
 
         full_list = this_week.list_time_slots()
         for each_slot in full_list:
@@ -210,6 +214,7 @@ class Scheduler:
                 matching_slots.append(each_slot)
 
         return matching_slots
+
 
     def replace_time_slots(self, slotsA, slotsB):
         """Change all courses for matching time slots ("swaps")
@@ -224,6 +229,7 @@ class Scheduler:
                     i.set_course(courseB)
                     j.set_course(courseA)
         return
+
 
     def assess_inconsistencies(self, this_week):
         """Returns a dictionary of surplus and lacking courses for a schedule/week
@@ -269,6 +275,7 @@ class Scheduler:
         self.randomly_fill_schedule(
             this_week, inconsistencies['lacking'], open_list)
 
+
     def crossover(self, P1, P2):
         """Mixes weeks (schedules) P1 and P2 to create 2 children weeks, then corrects
         the children weeks as necessary
@@ -305,6 +312,7 @@ class Scheduler:
             output.append(i)
         return output
 
+
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
         if len(self.weeks) < 2:
@@ -313,8 +321,6 @@ class Scheduler:
         if not all(isinstance(each_week, Week) for \
                 each_week in self.weeks):
             raise BreedError("An element in weeks is not a Week object")
-
-
 
         # combinations...(ex) 5 choose 2
         for each_week in range(0, len(self.weeks) - 1, 2):
@@ -339,7 +345,6 @@ class Scheduler:
         counter = 0
 
         MAX_TRIES = 5
-
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
@@ -407,6 +412,7 @@ class Scheduler:
             print()
 
         print("Final number of generations: ", total_iterations + 1)
+
 
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
@@ -660,7 +666,7 @@ class Scheduler:
                 self.assign_and_remove(
                         course, chosen, list_of_slots, this_week)
                 done = True
-            
+
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
