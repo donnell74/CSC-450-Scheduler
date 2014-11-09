@@ -367,6 +367,11 @@ def ensure_computer_requirement(this_week, args):
 
     return 1
 
+def instructor_max_courses(this_week, args):
+    """An instructor should not be scheduled more classes per day
+    than the number they specified in the GUI.
+    args should be [instructor, max_courses, is_mandatory]"""
+    pass
 
 def time_finder(end_t, time_gap):
     """ Helper function for num_subsequent_courses.

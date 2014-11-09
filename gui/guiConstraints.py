@@ -45,14 +45,14 @@ class InstructorConstraint(Page):
         self.option_instructors.pack(side = TOP)
 
         # type of Constraint toggle box
-        label_time_day = Label(self, text = "Type: ")
-        label_time_day.pack(side = TOP)
-        self.constraint_type_default = StringVar(self)
-        self.constraint_type_default.set("Time")
-        self.constraint_type_default.trace("w", self.time_day_toggle)
-        self.time_day_list = ["Time", "Day", "Computer Preference", "Max Per Day"]
-        self.option_time_day = OptionMenu(self, self.constraint_type_default, *self.time_day_list)
-        self.option_time_day.pack(side = TOP)
+        constraint_type_label = Label(self, text = "Type: ")
+        constraint_type_label.pack(side = TOP)
+        self.constraint_type_choice = StringVar(self)
+        self.constraint_type_choice.set("Time")
+        self.constraint_type_choice.trace("w", self.constraint_type_toggle)
+        self.constraint_type_list = ["Time", "Day", "Computer Preference", "Max Per Day"]
+        self.constraint_type_menu = OptionMenu(self, self.constraint_type_choice, *self.time_day_list)
+        self.constraint_type_menu.pack(side = TOP)
 
         # dynamically change based on time/day being selected in the toggle
 
@@ -148,14 +148,41 @@ class InstructorConstraint(Page):
                                           *priority_options)
         self.option_priority.pack(side = TOP)
 
-        self.submit_computer = Button(self.computer_frame, \
-            text = "Add Constraint", command = self.add_instr_computer)
+        self.submit_computer = Button(self.computer_frame, text = "Add Constraint", command = self.add_instr_computer)
         self.submit_computer.pack(side = TOP, pady = 25)
 
         # ADD MAX PER DAY STUFFS HERE
-        #
-        #
-        #
+        self.max_course_frame = Frame(self, width=100)
+
+        self.max_course_value = StringVar()
+        self.max_course_value.set("0")
+        self.max_course_value.trace("w", self.check_is_digit)
+        self.max_course_input = Entry(self.max_course_frame, textvariable=self.max_course_value)
+        self.max_course_input.pack()
+
+        self.max_course_priority_choice = StringVar()
+        self.max_course_priority_choice.set("Low")
+        self.option_priority = OptionMenu(self.max_course_frame,
+                                          self.max_course_priority_choice,
+                                          *priority_options)
+        self.option_priority.pack(side = TOP)
+
+        self.max_course_submit = Button(self.max_course_frame,
+                                        text="Add Constraint",
+                                        command=self.add_max_course)
+        self.max_course_submit.pack(side=TOP, pady=25)
+
+    def check_is_digit(self, *args):
+        self.max_course_input.config(state=DISABLED)
+        value = self.max_course_value.get()
+        for char in value:
+            if not char.isdigit():
+                self.max_course_value.set(value[:-1])
+                tkMessageBox.showerror(title="Error", message="Value must be a number")
+                self.max_course_input.config(state=NORMAL)
+                return 0
+        self.max_course_input.config(state=NORMAL)
+        return 1
 
     def add_instr_time(self):
         instructor = self.str_instr_name_default.get()       
@@ -189,6 +216,12 @@ class InstructorConstraint(Page):
         create_computer_pref_constraint(instructor, prefers_computers, priority, self.constraints)
         pass
 
+    def add_max_course(self):
+        instructor = self.str_instr_name_default.get()
+        max_courses = int(self.max_course_value.get())
+        priority = self.max_course_priority_choice.get()
+        create_max_course_constraint(instructor, max_courses, priority, self.constraints)
+        pass
 
     def callbackWhen(self, *args):
         when = self.when_default.get()
@@ -204,23 +237,27 @@ class InstructorConstraint(Page):
         
 
     def constraint_type_toggle(self, *args):
-        constraint_type = self.constraint_type_default.get()
+        constraint_type = self.constraint_type_choice.get()
         if constraint_type == "Day":
             self.time_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.max_course_frame.pack_forget()
             self.day_frame.pack()
         elif constraint_type == "Computer Preference":
             self.time_frame.pack_forget()
             self.day_frame.pack_forget()
+            self.max_course_frame.pack_forget()
             self.computer_frame.pack()
         elif constraint_type == "Max Per Day":
             self.time_frame.pack_forget()
             self.day_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.max_course_frame.pack()
         else:
-            self.time_frame.pack()
             self.day_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.max_course_frame.pack_forget()
+            self.time_frame.pack()
 
 
 class CourseConstraint(Page):
@@ -344,14 +381,12 @@ class ConstraintPage(Page):
         
 
 def get_priority_value(priority):
-    if priority == "Low":
-        priority = 10
-    elif priority == "Medium":
-        priority = 25
-    elif priority == "High":
-        priority = 50
-    else:  # mandatory, include a boolean in args
-        priority = 0
+    priorities = {"Low": 10,
+                  "Medium": 25,
+                  "High": 50
+                  }
+    # Look up number value from dict. Return 0 if mandatory
+    priority = priorities.get(priority, 0)
     return priority
 
 
@@ -386,26 +421,26 @@ def constraint_adding_conflict(constraint_name, constraint_list):
 	new_constraint = constraint_name.split('_')
 	if ' ' in new_constraint[0]: # courses have a space ("CSC 111"), instructors don't
 	    # course constraint
-            for constraint in constraint_list:
-                old_constraint = constraint.name.split('_')
-		if new_constraint[0] == old_constraint[0]: # same course code
-                    if new_constraint[2] == old_constraint[2]: # same time slot
-			return 0  # can't be duplicate, so the before/after must vary, error
+        for constraint in constraint_list:
+            old_constraint = constraint.name.split('_')
+            if new_constraint[0] == old_constraint[0]: # same course code
+                if new_constraint[2] == old_constraint[2]: # same time slot
+                    return 0  # can't be duplicate, so the before/after must vary, error
 							
 	else:
 	    # instructor constraint
 	    for constraint in constraint_list:
 		old_constraint = constraint.name.split('_')
-                if new_constraint[0] == old_constraint[0]: # same instructor
-                    if len(new_constraint) == len(old_constraint): 
-                        # day pref is len = 3, time pref is len = 4
-                        if len(new_constraint) == 3:  
-                            if new_constraint[2] != old_constraint[2]: # different day codes
-                                return 0
-                        else:  # time pref
-                            if new_constraint[3] == old_constraint[3]: # same time slot
-                                # only thing that varies is before/after, error
-                                return 0
+            if new_constraint[0] == old_constraint[0]: # same instructor
+                if len(new_constraint) == len(old_constraint): 
+                    # day pref is len = 3, time pref is len = 4
+                    if len(new_constraint) == 3:  
+                        if new_constraint[2] != old_constraint[2]: # different day codes
+                            return 0
+                    else:  # time pref
+                        if new_constraint[3] == old_constraint[3]: # same time slot
+                            # only thing that varies is before/after, error
+                            return 0
 	# if no return 0/error by now, the constraint is fine and doesn't conflict
 	return 1 
 
@@ -481,21 +516,20 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
                                "This constraint already exists.")
         return
 
-    if constraint_adding_conflict(constraint_name, \
-                                  globs.mainScheduler.constraints) == 0:
-        tkMessageBox.showerror("Constraint Conflict", \
+    if constraint_adding_conflict(constraint_name, globs.mainScheduler.constraints) == 0:
+        tkMessageBox.showerror("Constraint Conflict",
                                "This constraint conflicts with a previously" + \
                                 " added constraint.")
         return
     
     if before_after == "Before":
-        globs.mainScheduler.add_constraint(constraint_name, priority,  \
-                                           constraint.instructor_time_pref_before, \
+        globs.mainScheduler.add_constraint(constraint_name, priority,
+                                           constraint.instructor_time_pref_before,
                                            [instructor, time_obj, is_mandatory])
         
     else:  # after a time
-        globs.mainScheduler.add_constraint(constraint_name, priority, \
-                                           constraint.instructor_time_pref_after, \
+        globs.mainScheduler.add_constraint(constraint_name, priority,
+                                           constraint.instructor_time_pref_after,
                                            [instructor, time_obj, is_mandatory])
         pass
     
@@ -559,3 +593,12 @@ def create_computer_pref_constraint(instructor, prefers_computers, priority, add
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
 
+def create_max_course_constraint(instructor, max_courses, priority, added_constraints):
+    priority = get_priority_value(priority)
+    is_mandatory = (priority == 0)
+    instructor = pull_instructor_obj(instructor)
+
+    constraint_name = "{0}_max_courses_{1}".format(instructor.name, max_courses)
+    globs.mainScheduler.add_constraint(constraint_name, priority,
+                                       constraint.instructor_max_courses,
+                                       [instructor, max_courses, is_mandatory])
