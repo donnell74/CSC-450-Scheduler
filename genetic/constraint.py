@@ -437,7 +437,7 @@ def course_sections_at_different_times(this_week, arg):
 						return 0
 	
 	# no same course/different section at the same time - week is valid
-	return 0
+	return 1
 
 class Constraint:
 
