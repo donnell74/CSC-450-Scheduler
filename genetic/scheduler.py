@@ -338,7 +338,6 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        #MAX_TRIES = 5
         time_limit = now.time() + 60 * minutes_to_run 
 
         def week_slice_helper():
@@ -353,6 +352,8 @@ class Scheduler:
             self.weeks = self.weeks[:5]
             return valid_weeks
 
+        self.weeks = []
+        self.generate_starting_population()
         while True:
             print('Generation counter:', counter + 1)
             self.weeks = filter(lambda x: x.complete, self.weeks)
@@ -644,32 +645,33 @@ class Scheduler:
 
     def schedule_1_hour_course(self, course, list_of_slots, this_week):
         """Randomly schedule a 1 hour course"""
-        #COME BACK TO
         if course.credit != 1:
             raise FilterError("Schedule 1 hour course")
 
-        random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        random_slot = choice(list_of_slots)
+        current_pool = deepcopy(list_of_slots)
         done = False
-        while len(temp_pool) > 0 and not done:
-            possibilities = self.week_helper(random_slot, temp_pool)
+        while len(current_pool) > 0 and not done:
+            possibilities = this_week.find_matching_time_slot_row(random_slot)
+            possibilities = self.assess_time_slot_row_for_open_slots(possibilities)
             # each day open for that time and room
-            if len(possibilities['unoccupied']) > 0:
-                for each_assignee in possibilities['in_order']:
-                    assign_and_remove(
-                        course, each_assignee, list_of_time_slots, this_week)
+            if possibilities['type'] == 2:
+                chosen = random.choice(possibilities['time_slots'])
+                self.assign_and_remove(
+                        course, chosen, list_of_slots, this_week)
                 done = True
+            
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
                 # week from temp pool
-                for to_remove in possibilities['unoccupied']:
+                for to_remove in possibilities['time_slots']:
                     i = self.find_index(to_remove, current_pool)
-                    del(temp_pool[i])
+                    del(current_pool[i])
                 # get a new random time slot
                 random_slot = choice(current_pool)
         #status
-        return len(current_pool) == 0 and not done
+        return not done
 
 
     def randomly_fill_schedule(self, week_to_fill, courses_list, list_of_slots_to_fill):
