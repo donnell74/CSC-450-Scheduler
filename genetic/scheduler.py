@@ -6,6 +6,7 @@ from random import choice
 from datetime import time, timedelta
 from structures import *
 from constraint import *
+import time as now
 
 #import interface # uncomment to use export_schedule_xml 
 import xml.etree.ElementTree as ET
@@ -333,14 +334,12 @@ class Scheduler:
         self.weeks.extend(list_of_children)
 
 
-    def evolution_loop(self):
+    def evolution_loop(self, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-
-        MAX_TRIES = 5
-
+        time_limit = now.time() + 60 * minutes_to_run 
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
@@ -373,8 +372,9 @@ class Scheduler:
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
-            if counter == MAX_TRIES - 1:
-                print('Max tries reached; final output found')
+            print("Time left for evolution loop: ", time_limit - now.time())
+            if now.time() > time_limit:
+                print('Time limit reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
