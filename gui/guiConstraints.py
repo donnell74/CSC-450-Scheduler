@@ -51,7 +51,7 @@ class InstructorConstraint(Page):
         self.constraint_type_choice.set("Time")
         self.constraint_type_choice.trace("w", self.constraint_type_toggle)
         self.constraint_type_list = ["Time", "Day", "Computer Preference", "Max Per Day"]
-        self.constraint_type_menu = OptionMenu(self, self.constraint_type_choice, *self.time_day_list)
+        self.constraint_type_menu = OptionMenu(self, self.constraint_type_choice, *self.constraint_type_list)
         self.constraint_type_menu.pack(side = TOP)
 
         # dynamically change based on time/day being selected in the toggle
@@ -410,27 +410,26 @@ def check_constraint_exists(name):
 
 
 def constraint_adding_conflict(constraint_name, constraint_list):
-	""" Checks a constraint about to be added and determines if it will
-	conflict with another constraint already added.
-	Example:  CSC 232_before_9, CSC 232_after_9 is pointless, so we don't add
-	the new constraint.
-	IN:  new constraint name, list of added constraints
-	OUT: 0 or 1 if the constraint is bad/good
-	"""
+    """ Checks a constraint about to be added and determines if it will
+    conflict with another constraint already added.
+    Example:  CSC 232_before_9, CSC 232_after_9 is pointless, so we don't add
+    the new constraint.
+    IN:  new constraint name, list of added constraints
+    OUT: 0 or 1 if the constraint is bad/good
+    """
 
-	new_constraint = constraint_name.split('_')
-	if ' ' in new_constraint[0]: # courses have a space ("CSC 111"), instructors don't
-	    # course constraint
-        for constraint in constraint_list:
-            old_constraint = constraint.name.split('_')
+    new_constraint = constraint_name.split('_')
+    # courses have a space ("CSC 111"), instructors don't
+    if ' ' in new_constraint[0]:
+        for constr in constraint_list:  # renamed 'constraint' to 'constr' to avoid confusion from import
+            old_constraint = constr.name.split('_')
             if new_constraint[0] == old_constraint[0]: # same course code
                 if new_constraint[2] == old_constraint[2]: # same time slot
                     return 0  # can't be duplicate, so the before/after must vary, error
-							
-	else:
-	    # instructor constraint
-	    for constraint in constraint_list:
-		old_constraint = constraint.name.split('_')
+    else:
+        # instructor constraint
+        for constr in constraint_list:
+            old_constraint = constr.name.split('_')
             if new_constraint[0] == old_constraint[0]: # same instructor
                 if len(new_constraint) == len(old_constraint): 
                     # day pref is len = 3, time pref is len = 4
@@ -441,8 +440,8 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                         if new_constraint[3] == old_constraint[3]: # same time slot
                             # only thing that varies is before/after, error
                             return 0
-	# if no return 0/error by now, the constraint is fine and doesn't conflict
-	return 1 
+    # if no return 0/error by now, the constraint is fine and doesn't conflict
+    return 1
 
             
 
@@ -602,3 +601,5 @@ def create_max_course_constraint(instructor, max_courses, priority, added_constr
     globs.mainScheduler.add_constraint(constraint_name, priority,
                                        constraint.instructor_max_courses,
                                        [instructor, max_courses, is_mandatory])
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    return

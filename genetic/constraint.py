@@ -375,7 +375,29 @@ def instructor_max_courses(this_week, args):
     """An instructor should not be scheduled more classes per day
     than the number they specified in the GUI.
     args should be [instructor, max_courses, is_mandatory]"""
-    pass
+    instructor = args[0]
+    max_courses = args[1]
+    is_mandatory = args[2]
+    instr_courses_by_day = {
+        "m": [],
+        "t": [],
+        "w": [],
+        "r": [],
+        "f": []
+    }
+
+    for section in this_week.sections:
+        if section.instructor.name == instructor.name:
+            for day in section.days:
+                instr_courses_by_day[day.day_code].append(section)
+
+    for key in instr_courses_by_day.keys():
+        if len(instr_courses_by_day[key]) > max_courses:
+            if is_mandatory:
+                this_week.is_valid = False
+            return 0
+
+    return 1
 
 def time_finder(end_t, time_gap):
     """ Helper function for num_subsequent_courses.
