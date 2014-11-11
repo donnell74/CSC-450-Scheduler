@@ -116,6 +116,10 @@ class Scheduler:
         self.constraints = []
         self.max_fitness = 0
 
+        # default message to be displayed on the loading screen
+        self.gui_loading_info = "Generating schedules, please wait."
+        self.gui_loading_info1 = self.gui_loading_info2 = self.gui_loading_info3 = ""
+        
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
 
@@ -357,6 +361,8 @@ class Scheduler:
         self.generate_starting_population()
         while True:
             print('Generation counter:', counter + 1)
+            self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
+            
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
@@ -372,6 +378,7 @@ class Scheduler:
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
+            
             if counter == MAX_TRIES - 1:
                 print('Max tries reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
@@ -379,8 +386,13 @@ class Scheduler:
 
             print("Minimum fitness of the top schedules of the generation:",
                   min(i.fitness for i in self.weeks))
+            self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
+                                     str(min(i.fitness for i in self.weeks))
+            
             print("Number of valid weeks for the generation:", str(len(valid_weeks)))
-
+            self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
+                                     str(len(valid_weeks))
+                
             #insufficient valid weeks
             """
             if len(valid_weeks) == 0:
@@ -398,6 +410,7 @@ class Scheduler:
 
             self.breed()
             print("Breed complete")
+            
             week_slice_helper()
             self.weeks = self.weeks[:4]
             self.generate_starting_population(1)
@@ -407,7 +420,7 @@ class Scheduler:
             print()
 
         print("Final number of generations: ", total_iterations + 1)
-
+            
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
             if room.number != first_time_slot.room.number:
@@ -742,7 +755,12 @@ class Scheduler:
             counter += 1
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
-            print("Schedule", counter, "generated")
+            
+            #print("Schedule", counter, "generated")
+
+            # update message to be shown on the gui loading screen
+            self.gui_loading_info = "Schedule " + str(counter) + " generated"
+            
         if len(self.weeks) == 0:
             print("Could not schedule")
         return None
