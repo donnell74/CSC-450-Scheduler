@@ -357,8 +357,8 @@ class Scheduler:
             self.weeks = self.weeks[:5]
             return valid_weeks
 
+        # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
-        self.generate_starting_population()
         while True:
             print('Generation counter:', counter + 1)
             self.weeks = filter(lambda x: x.complete, self.weeks)

@@ -720,7 +720,6 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
-        globs.mainScheduler.generate_starting_population()
 
         runtime_var = self.home_page.runtime_selected_var.get()
         if runtime_var not in [1, 10, 60, 480]:
@@ -730,7 +729,7 @@ class MainWindow(Frame):
             print(runtime_var)
 
         globs.mainScheduler.evolution_loop(runtime_var)
-        
+
         for each_course in globs.mainScheduler.courses:
             globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
