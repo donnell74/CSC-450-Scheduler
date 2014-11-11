@@ -6,6 +6,8 @@ import sys
 sys.path.append("../")
 import globs
 from genetic import constraint, interface
+from threading import Thread
+from time import time
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -60,10 +62,10 @@ class ViewPage(Page):
         # button to allow user to toggle between old and new style of graphical schedules
         self.toggle_graphics = Button(self,
                                       command = lambda : self.toggle_schedules(),
-                                      text = 'Toggle Graphics',
+                                      text = 'Toggle View',
                                       padx = 10, pady = 10,
                                       cursor = 'hand2')
-        self.toggle_graphics.place(x = 533, y = 47)
+        self.toggle_graphics.place(x = 555, y = 47)
 
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
@@ -316,6 +318,8 @@ class ViewPage(Page):
 
     def format_graphical_schedule(self, schedule_text):
         """ Formats the graphical schedules """
+
+        schedule_text = schedule_text.split('\n')
         
         xstart = 19
         ystart = 6
@@ -334,21 +338,9 @@ class ViewPage(Page):
                      'Thursday' : xpad + 80 + (3 * 100),
                      'Friday' : xpad + 80 + (4 * 100)}
 
-        times = ['8am', '9am', '10am', '11am',
-                 '12pm', '1pm', '2pm', '3pm', '4pm', '5pm']
-
-        ypos_times = {8 : ypad + 50 + (0 * 100),
-                      9 : ypad + 50 + (1 * 100),
-                      10 : ypad + 50 + (2 * 100),
-                      11 : ypad + 50 + (3 * 100),
-                      12 : ypad + 50 + (4 * 100),
-                      13 : ypad + 50 + (5 * 100),
-                      14 : ypad + 50 + (6 * 100),
-                      15 : ypad + 50 + (7 * 100),
-                      16 : ypad + 50 + (8 * 100),
-                      17 : ypad + 50 + (9 * 100)}
-        
-        schedule_text = schedule_text.split('\n')
+        ypos_times = {}
+        y_times = []
+        times = {}
 
         instructor = ''
         
@@ -385,6 +377,79 @@ class ViewPage(Page):
                         option += 1
 
         option = 0 # reset
+                
+        # calculate what time to begin showing courses on the graphical schedule
+        for i in xrange(len(schedule_text) - 1):
+            s = schedule_text[i].split(' ')
+            
+            if (' ' in schedule_text[i]) and len(schedule_text[i]) > 0:
+                # len(s) < 7, then course does not have a section (001, 002, etc.)
+                if len(s) < 7:
+                    if s[3] + " " + s[4] in self.rooms[self.room_selection_option]:
+                        temp = schedule_text[i].split(' ')
+                        temp = temp[len(temp) - 1].split('-')[0].split(':')[0]
+                        temp = int(temp)
+                        if not temp in y_times:
+                            y_times.append(temp)
+                # course has a section number (001, 002, etc.)
+                else:
+                    if s[4] + " " + s[5] in self.rooms[self.room_selection_option]:
+                        temp = schedule_text[i].split(' ')
+                        temp = temp[len(temp) - 1].split('-')[0].split(':')[0]
+                        temp = int(temp)
+                        if not temp in y_times:
+                            y_times.append(temp)
+
+
+        y_times.sort()
+
+        a = y_times[0]
+        b = y_times[len(y_times) - 1]
+        n = 0
+        if (b - a) < 7:
+            n = 7 - (b - a)
+            
+        for i in xrange(a, b + 1 + n):
+            if not i in y_times:
+                y_times.append(i)
+                
+        y_times.sort()
+        
+        for i in xrange(len(y_times)):
+            ypos_times[y_times[i]] = (ypad + 50 + 100 + (i * 100))
+
+        # Build y-axis
+        if (y_times[0] - 1) > 13:
+            times[y_times[0] - 1] = str(y_times[0] - 13) + 'pm'
+        elif (y_times[0] - 1) == 13:
+            times[y_times[0] - 1] = str(12) + 'pm'
+        else:
+            times[y_times[0] - 1] = str(y_times[0] - 1) + 'am'
+            
+        for i in xrange(len(y_times)):
+            n = y_times[i]
+            if n > 12:
+                times[n] = str(n - 12) + 'pm'
+            elif n == 12:
+                times[n] = str(n) + 'pm'
+            else:
+                times[n] = str(n) + 'am'
+
+        if (y_times[len(y_times)-1] + 1) > 12:
+            times[y_times[len(y_times)-1] + 1] = str(y_times[len(y_times)-1] + 1 - 12) + 'pm'
+        elif (y_times[len(y_times)-1] + 1) == 12 or (y_times[len(y_times)-1] + 1) == 11:
+            times[y_times[len(y_times)-1] + 1] = str(y_times[len(y_times)-1] + 1) + 'pm'
+        else:
+            times[y_times[len(y_times)-1] + 1] = str(y_times[len(y_times)-1] + 1) + 'am'   
+
+        # draw y-axis values to the canvas
+        incr = 0
+        for i in times:
+            self.canv.create_text(xstart + xpad - 25,
+                                  ystart + ypad + 40 + (incr * 100),
+                                  text = times[i],
+                                  font = (font_style, size_l))
+            incr += 1
 
         # populate graphical schedule with course data
         for i in xrange(len(schedule_text) - 1):
@@ -392,6 +457,8 @@ class ViewPage(Page):
             txt = ''                # holds the course data
             schedule_days = ''      # holds the course days
             schedule_time = ''      # holds the course start time
+            start_time = ''
+            end_time = ''
             
             if not (' ' in schedule_text[i]) and len(schedule_text[i]) > 0:
                 # get instructor name
@@ -411,8 +478,7 @@ class ViewPage(Page):
                         
                         # output string with course info
                         course_info += temp[0] + \
-                                       ' ' + temp[1] + \
-                                       '\n' + temp[5]
+                                       ' ' + temp[1] + '\n'
                         
                 # course has a section number (001, 002, etc.)
                 else:
@@ -425,18 +491,31 @@ class ViewPage(Page):
                         # output string with course info
                         course_info += temp[0] + \
                                        ' ' + temp[1] + \
-                                       '\n' + 'Sec. ' + temp[2] + \
-                                       '\n' + temp[6]
-
+                                       '\n' + 'Sec. ' + temp[2] + '\n'
+                
+                # convert military time to 12 oclock time
+                start = start_time.split(':')[0]
+                end = end_time.split(':')[0]
+                if start > '12':
+                    start = str(int(start) - 12)
+                    start_time = start + start_time[2:]
+                if end  > '12':
+                    end = str(int(end) - 12)
+                    end_time = end + end_time[2:]
+                
+                course_info += start_time + "-" + end_time
+                
                 # txt is the text value in canv.create_text       
                 txt = instructor + '\n' + course_info
-
+                
                 for day in schedule_days:
-
+                    
+                    n = int(schedule_time.split(':')[0])
+                    
                     # Monday
                     if day == 'm' or day == 'M':
                         self.canv.create_text(xpos_days['Monday'],
-                                              ypos_times[int(schedule_time.split(':')[0])],
+                                              ypos_times[n],
                                               text = txt,
                                               width = 100,
                                               font = (font_style, size_l))
@@ -468,7 +547,7 @@ class ViewPage(Page):
                                               text = txt,
                                               width = 100,
                                               font = (font_style, size_l))
-
+                    
         # background for the days of the week
         self.canv.create_rectangle(0, 0, 1050, 30, fill = 'cyan', outline = '')
 
@@ -494,19 +573,12 @@ class ViewPage(Page):
                               text = days[4],
                               font = (font_style, size_l))
 
-        # draw AM times down the y-axis of the canvas
-        for i in xrange(len(times)):
-            self.canv.create_text(xstart + xpad - 25,
-                                  ystart + ypad + 40 + (i * 100),
-                                  text = times[i],
-                                  font = (font_style, size_l))
-
         if self.is_run_clicked:
             self.create_room_selection()
 
         # reset
         self.room_selection_option = 0
-        
+                     
     def format_compact_schedule(self, schedule_text):
         """ Formats the compact schedules """
         
@@ -572,8 +644,7 @@ class ViewPage(Page):
             self.table_labels[n].configure(fg = color)
             
         self.table_labels[n].after(animation_speed, self.fade_in, n)
-        
-                
+                        
 class MiscPage(Page):
 
     def __init__(self, root):
@@ -581,15 +652,74 @@ class MiscPage(Page):
         self.head_label = Label(self, text="Misc Page", \
                                 font =(font_style, size_h2))
         self.head_label.pack()
+        
+        self.load_bar_bg = Label(self, width = 40, height = 2)
+        self.load_bar_bg.place(x = 207, y = 70)
+        
+        self.load_bar = Label(self, width = 0, height = 2)
+        self.load_bar.place(x = 207, y = 70)
 
+        self.info_label = Label(self, text='', \
+                          font =(font_style, size_l))
+        self.info_label.pack()
+        
+        self.labels = []
+        for i in xrange(3):
+            self.labels.append(Label(self, text='', font =(font_style, size_l)))
+            self.labels[i].place(x = 203, y = ((i + 1) * 20) + 100)
+                
+        self.is_loading = False
+        self.prev_text = ''
+        self.past = ""
+        
+    def update(self):
+
+        # part 1 of the genetic algorithm
+        if self.past == "":
+            info = globs.mainScheduler.gui_loading_info
+            self.info_label['text'] = info
+            
+            if not self.is_loading:
+                if info.split(' ')[0] == "Schedule" and info.split(' ')[2] == "generated":
+                    self.load_bar['bg'] = 'green'
+                    self.is_loading = True
+                else:
+                    self.load_bar_bg['bg'] = 'gray'
+                    self.load_bar['bg'] = 'gray'
+            else:
+                if info != self.prev_text:
+                    self.load_bar['width'] += 2
+                    self.prev_text = info
+        # part 2 of the genetic algorithm
+        else:
+            info1 = globs.mainScheduler.gui_loading_info1
+            #info2 = globs.mainScheduler.gui_loading_info2
+            #info3 = globs.mainScheduler.gui_loading_info3
+            info2 = info3 = ''
+            
+            temp = [info1, info2, info3]
+            
+            if info1 != self.prev_text:
+                self.load_bar['width'] += 2
+                self.prev_text = info1
+                
+                for i in xrange(3):
+                    self.labels[i]['text'] = temp[i]
+                    
+        self.past = globs.mainScheduler.gui_loading_info1
+        
 class MainWindow(Frame):
 
     def __init__(self, root):
+        self.root = root
+        
         globs.init()
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
-
+        
         ToolTips(root)
+        self.run_finished = False
+        self.run_clicked = False
         
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width="500", height="600")
@@ -647,31 +777,71 @@ class MainWindow(Frame):
     def show_misc(self):
         self.misc_page.lift()
 
-    def run_scheduler(self): # MOVE THIS ELSEWHERE?
-        instructors = globs.instructors
-        # RUN SCHEDULER METHOD
-        # Add hard/obvious constraints before running
-        globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, [instructors])
-        globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
-                                           constraint.sequential_time_different_building_conflict, [instructors])
-        globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
-
-        globs.mainScheduler.add_constraint("capacity checking", 0, constraint.ensure_course_room_capacity, [])
-        globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
-        globs.mainScheduler.add_constraint("computer requirement", 0, constraint.ensure_computer_requirement, [])
-        globs.mainScheduler.add_constraint("course sections at different times", \
-                                           0, constraint.course_sections_at_different_times, \
-                                           [globs.courses[:-1]])  # the last item is "All", ignore it
-
-        for each_course in globs.mainScheduler.courses:
-            globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
-                                               constraint.lab_on_tr, [each_course])
-
+    def thread_run_scheduler(self):
         globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
+        self.run_finished = True
+        return
+
+    def finished(self):
+        """ Display view_page after run_scheduler is finished running. """
+        
         self.view_page.is_run_clicked = True
-        self.view_page.show_nav()
         self.view_page.insert_schedule(0)  # show the first schedule in the view page
+        self.view_page.show_nav()
+        
         # DISPLAY VIEW PAGE
-        self.view_page.lift()
+        self.show_view()
+        
+        self.run_clicked = False
+        return
+    
+    def loading_bar(self):
+        self.root.after(250, self.show_misc)
+        
+        prev = time()
+        
+        fps = 5.0   # update misc_page this many times a second
+        fps = 1/fps
+        
+        while not self.run_finished:
+            curr = time()
+            
+            if (curr - prev) >= fps:
+                # update loading bar on misc_page
+                self.misc_page.update()
+                prev = curr
+
+        self.root.after(100, self.finished)
+        return
+        
+    def run_scheduler(self): # MOVE THIS ELSEWHERE?
+        
+        if not self.run_clicked:
+            self.run_clicked = True
+            
+            instructors = globs.instructors
+            # RUN SCHEDULER METHOD
+            # Add hard/obvious constraints before running
+            globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, [instructors])
+            globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
+                                               constraint.sequential_time_different_building_conflict, [instructors])
+            globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
+
+            globs.mainScheduler.add_constraint("capacity checking", 0, constraint.ensure_course_room_capacity, [])
+            globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
+            globs.mainScheduler.add_constraint("computer requirement", 0, constraint.ensure_computer_requirement, [])
+            globs.mainScheduler.add_constraint("course sections at different times", \
+                                               0, constraint.course_sections_at_different_times, \
+                                               [globs.courses[:-1]])  # the last item is "All", ignore it
+
+            for each_course in globs.mainScheduler.courses:
+                globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
+                                                   constraint.lab_on_tr, [each_course])
+
+            t = Thread(target = self.thread_run_scheduler)
+            t.start()
+            t2 = Thread(target = self.loading_bar)
+            t2.start()
+        
         return
