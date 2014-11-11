@@ -728,13 +728,12 @@ class MainWindow(Frame):
                 runtime_var = 1
             print(runtime_var)
 
-        globs.mainScheduler.evolution_loop(runtime_var)
-
         for each_course in globs.mainScheduler.courses:
             globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
 
-        globs.mainScheduler.evolution_loop()
+        globs.mainScheduler.evolution_loop(runtime_var)
+
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()
