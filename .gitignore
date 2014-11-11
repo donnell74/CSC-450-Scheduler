@@ -1,2 +1,6 @@
 # test
 *.pyc
+*.log
+schedule_*.csv
+/html/*
+/latex/*
