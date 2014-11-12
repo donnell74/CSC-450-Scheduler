@@ -52,13 +52,11 @@ class ViewPage(Page):
         self.head_label.pack()
 
         self.is_run_clicked = False
-        
-        # holds canvas object
-        self.canvas = []
 
         self.drop_down = []
 
-
+        self.canvas = []
+        
         # button to allow user to toggle between old and new style of graphical schedules
         self.toggle_graphics = Button(self,
                                       command = lambda : self.toggle_schedules(),
@@ -83,13 +81,13 @@ class ViewPage(Page):
     
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
+        
+        # delete drop downs
+        self.delete(self.drop_down)
 
         # delete previous canvas
         self.delete(self.canvas)
         
-        # delete drop downs
-        self.delete(self.drop_down)
-                
         # default is to display graphical schedules first
         if not self.toggle_schedules_flag:
             if self.is_run_clicked:
@@ -123,10 +121,8 @@ class ViewPage(Page):
                               text = 'Click RUN to generate schedules.',
                               bg = 'white')
         self.bg_label.place(x = 50, y = 107)
-
+        
         if self.is_run_clicked:
-            # delete previous canvas
-            self.delete(self.canvas)
             self.insert_schedule(self.last_viewed_schedule)
 
     def create_room_selection(self):
@@ -163,9 +159,6 @@ class ViewPage(Page):
         
     def create_graphical_schedules(self):
         """ Creates a graphical respresentation of the valid schedules """
-        
-        # delete previous canvas
-        self.delete(self.canvas)
         
         # create new canvas to hold the schedules
         self.canv = Canvas(self, bg = 'white')
@@ -297,22 +290,32 @@ class ViewPage(Page):
         
         # format the schedules
         if not self.toggle_schedules_flag:
+
+            # delete previous canvas
+            self.delete(self.canvas)
+        
             self.create_graphical_schedules()
+
+            # delete previous canvas items
+            self.canv.delete("all")
+        
             self.format_graphical_schedule(globs.mainScheduler.weeks[n].print_concise())
             self.bg_label['fg'] = 'white'
             
         else:
             # hide bg_label text
             self.bg_label['fg'] = 'white'
-            # delete previous canvas
-            self.delete(self.canvas)
+
+            # delete previous canvas items
+            self.canv.delete("all")
+        
             self.format_compact_schedule(globs.mainScheduler.weeks[n].print_concise())
 
     def format_graphical_schedule(self, schedule_text):
         """ Formats the graphical schedules """
 
         schedule_text = schedule_text.split('\n')
-        
+
         xstart = 19
         ystart = 6
         xpad = xstart + 20
@@ -575,7 +578,7 @@ class ViewPage(Page):
         """ Formats the compact schedules """
         
         schedule_text = schedule_text.split('\n')
-            
+        
         yt = 12
         for i in xrange(len(schedule_text) - 1):
             # teacher labels
