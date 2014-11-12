@@ -77,21 +77,16 @@ class ViewPage(Page):
         self.room_selection_option = 0  # default to 0
         # dict to hold selection option + room name/number
         self.selections = {}
-        
-        self.table_labels = []  # holds the labels for the schedules
-        
+
         # display schedules
         self.toggle_schedules()
     
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
-        
+
         # delete previous canvas
         self.delete(self.canvas)
         
-        # delete old labels to make room for new ones
-        self.delete(self.table_labels)
-
         # delete drop downs
         self.delete(self.drop_down)
                 
@@ -129,10 +124,9 @@ class ViewPage(Page):
                               bg = 'white')
         self.bg_label.place(x = 50, y = 107)
 
-        # initial color of the schedule labels
-        self.color = [255, 255, 255]
-
         if self.is_run_clicked:
+            # delete previous canvas
+            self.delete(self.canvas)
             self.insert_schedule(self.last_viewed_schedule)
 
     def create_room_selection(self):
@@ -308,12 +302,10 @@ class ViewPage(Page):
             self.bg_label['fg'] = 'white'
             
         else:
-            # destroy old labels to make room for new ones
-            self.delete(self.table_labels)
-            
             # hide bg_label text
             self.bg_label['fg'] = 'white'
-            
+            # delete previous canvas
+            self.delete(self.canvas)
             self.format_compact_schedule(globs.mainScheduler.weeks[n].print_concise())
 
     def format_graphical_schedule(self, schedule_text):
@@ -421,7 +413,7 @@ class ViewPage(Page):
         # Build y-axis
         if (y_times[0] - 1) > 13:
             times[y_times[0] - 1] = str(y_times[0] - 13) + 'pm'
-        elif (y_times[0] - 1) == 13:
+        elif (y_times[0] - 1) == 13 or (y_times[0] - 1) == 12:
             times[y_times[0] - 1] = str(12) + 'pm'
         else:
             times[y_times[0] - 1] = str(y_times[0] - 1) + 'am'
@@ -584,31 +576,24 @@ class ViewPage(Page):
         
         schedule_text = schedule_text.split('\n')
             
+        yt = 12
         for i in xrange(len(schedule_text) - 1):
             # teacher labels
-            if not (' ' in schedule_text[i]) and len(schedule_text[i]) > 0:    
-                self.table_labels.append(Label(self, text = schedule_text[i],
-                                               font = (font_style, size_l),
-                                               width = 66,
-                                               bg = 'black',
-                                               fg = 'white',
-                                               anchor = NW))
+            if not (' ' in schedule_text[i]) and len(schedule_text[i]) > 0:
+                self.canv.create_rectangle(0, yt-12, 1050, yt + 12,
+                                           fill = 'black',
+                                           outline = '')
+                self.canv.create_text(10, yt, anchor = 'w',
+                                      text = schedule_text[i],
+                                      font = (font_style, size_l),
+                                      fill = 'white')
+                
             else:   # course info labels
-                self.table_labels.append(Label(self, text = schedule_text[i],
-                                               font=(font_style, size_l),
-                                               width = 66,
-                                               bg = 'white',
-                                               fg = 'black',
-                                               anchor = NW))
-        # position the labels
-        yt = 103
-        for i in xrange(len(self.table_labels)):
-            self.table_labels[i].place(x = 50, y = yt)
-            yt += 24
-            
-        self.color = [255,255,255]  # set color to white for fade in
-        for i in xrange(len(self.table_labels)):
-            self.fade_in(i) # begin fade in animation
+                self.canv.create_text(10, yt, anchor = 'w',
+                                      text = schedule_text[i],
+                                      font = (font_style, size_l))
+                
+            yt += 29
 
     def delete(self, labels):
         """ Delete dynamically created objects from memory """
@@ -617,33 +602,6 @@ class ViewPage(Page):
             labels[i].destroy()     # destroy old labels
             
         del labels[:]
-        
-    def fade_in(self, n):
-        """ Fades a schedule in from white to a certain color """
-        
-        animation_speed = 50
-        
-        # convert rgb values to hex values
-        color = ""  # holds the hex string
-        for i in xrange(3):
-            if i == 0:
-                color += "#%02x" % self.color[i]
-            else:
-                color += ("#%02x" % self.color[i]).strip('#')
-
-        # update rgb values
-        for i in xrange(3):
-            if (self.color[0] >= 0):
-                self.color[i] -= 1
-            else:
-                return # stop recursive fade_in animation
-            
-        if len(self.table_labels[n]['text'].split(' ')) == 1:
-            self.table_labels[n].configure(bg = color)
-        else:
-            self.table_labels[n].configure(fg = color)
-            
-        self.table_labels[n].after(animation_speed, self.fade_in, n)
                         
 class MiscPage(Page):
 
