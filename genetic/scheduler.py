@@ -137,7 +137,7 @@ class Scheduler:
     def add_constraint(self, name, weight, func, *args):
         """Adds an constraint to the schedule"""
         exists = False
-        for constraint in globs.mainScheduler.constraints:
+        for constraint in self.constraints:
             if constraint.name == name:
                 exists = True
         if not exists:
