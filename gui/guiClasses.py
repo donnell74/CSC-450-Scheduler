@@ -6,6 +6,7 @@ import sys
 sys.path.append("../")
 import globs
 from genetic import constraint, interface
+import tkMessageBox
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -24,7 +25,7 @@ class HomePage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="CSC-450-Scheduler", font=(font_style, size_h1))
+        self.head_label = Label(self, text="CSC Department Scheduler", font=(font_style, size_h1))
         self.head_label.pack(pady=10)
 
         paragraph_text = "User Guide: step-by-step\n\n" +\
@@ -35,8 +36,65 @@ class HomePage(Page):
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
-        self.version_label = Label(self, text="<version info?>")
-        self.version_label.pack(side=BOTTOM, pady=5)
+        runtime_option_text = "Choose a run speed:"
+        self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
+        self.runtime_label.pack()
+        self.runtime_disclaimer = Label(self, text = "The scheduler may finish earlier"\
+                                        " if it finds 5 valid schedules.", font = (font_style, 10))
+        self.runtime_disclaimer.pack(pady = 5)
+                                        
+
+        runtime_modes = [
+            ("Quick (~1 minute)", 1),
+            ("Moderate (~10 minutes)", 10),
+            ("High (~1 hour)", 60),
+            ("Overnight (~8 hours)", 480),
+            ("Custom", 0)
+            ]
+
+        self.runtime_selected_var = IntVar()
+        self.runtime_selected_var.set(1)
+        self.runtime_selected_var.trace("w", self.check_if_custom)
+
+        for mode, val in runtime_modes:
+            b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
+                            value = val, font = (font_style, size_l))
+            b.pack(anchor = W, padx = 225)
+
+
+        self.custom_input = Frame(self, width = 50, height = 20)
+        self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
+                                 font = (font_style, size_l))
+        self.input_label.pack()
+
+        self.runtime_custom_input = StringVar() #will be converted to int later, prevents type errors
+        self.runtime_custom_input.set("0")
+        self.runtime_custom_input.trace("w", self.check_if_digit)
+        
+        self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)
+        self.input_box.pack()
+        # self.custom_input.pack() # uncomment to show this by default
+
+
+    def check_if_digit(self, *args):
+        self.input_box.config(state = DISABLED) # disabled so tkMessageBox doesn't corrupt input field
+        entered_value = self.runtime_custom_input.get()
+        for c in entered_value:
+            if not c.isdigit():
+                self.runtime_custom_input.set(entered_value[:-1]) # remove the non-digit character
+                tkMessageBox.showerror(title = "Error", message = "Time must only contain numbers.")
+                self.input_box.config(state = NORMAL)
+                return 0
+        self.input_box.config(state = NORMAL)
+        return 1
+        
+
+    def check_if_custom(self, *args):
+        runtime_var_value = self.runtime_selected_var.get()
+        if runtime_var_value == 0: # custom is selected
+            self.custom_input.pack()
+        else:
+            self.custom_input.pack_forget()
 
 # Constraint page is located in guiConstraints.py
 
@@ -664,7 +722,17 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
+        globs.mainScheduler.generate_starting_population()
 
+        runtime_var = self.home_page.runtime_selected_var.get()
+        if runtime_var not in [1, 10, 60, 480]:
+            runtime_var = int(self.home_page.runtime_custom_input.get()) # convert from DoubleVar
+            if runtime_var < 1:
+                runtime_var = 1
+            print(runtime_var)
+
+        globs.mainScheduler.evolution_loop(runtime_var)
+        
         for each_course in globs.mainScheduler.courses:
             globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
