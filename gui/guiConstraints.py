@@ -511,11 +511,12 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     constraint_name = "{0}_prefers_{1}_{2}".format(instructor.name, before_after.lower(), str(time_obj))
 
     if check_constraint_exists(constraint_name) == 0:
-        tkMessageBox.showerror("Duplicate Constraint", \
+        tkMessageBox.showerror("Duplicate Constraint",
                                "This constraint already exists.")
         return
 
-    if constraint_adding_conflict(constraint_name, globs.mainScheduler.constraints) == 0:
+    if constraint_adding_conflict(constraint_name,
+                                  globs.mainScheduler.constraints) == 0:
         tkMessageBox.showerror("Constraint Conflict",
                                "This constraint conflicts with a previously" + \
                                 " added constraint.")
@@ -555,20 +556,20 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
 
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
     if check_constraint_exists(constraint_name) == 0:
-        tkMessageBox.showerror("Duplicate Constraint", \
+        tkMessageBox.showerror("Duplicate Constraint",
                                "This constraint already exists.")
         return
 
-    if constraint_adding_conflict(constraint_name, \
+    if constraint_adding_conflict(constraint_name,
                                   globs.mainScheduler.constraints) == 0:
-        tkMessageBox.showerror("Constraint Conflict", \
+        tkMessageBox.showerror("Constraint Conflict",
                                "This constraint conflicts with a previously" + \
                                 " added constraint.")
         return
         
     day_code = day_code.lower()    
-    globs.mainScheduler.add_constraint(constraint_name, priority, \
-                                       constraint.instructor_preference_day, \
+    globs.mainScheduler.add_constraint(constraint_name, priority,
+                                       constraint.instructor_preference_day,
                                        [instructor, day_code, is_mandatory])
 
     # update scrollbox with this created constraint
