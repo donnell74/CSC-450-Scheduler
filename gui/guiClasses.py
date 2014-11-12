@@ -647,8 +647,9 @@ class MainWindow(Frame):
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
 
-        ToolTips(root)
-        
+        if sys.platform.startswith('win'):
+            ToolTips(root)
+
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width="500", height="600")
         self.menu.pack(side=LEFT, fill="both")
