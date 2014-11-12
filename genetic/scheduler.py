@@ -343,7 +343,6 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        time_limit = now.time() + 60 * minutes_to_run 
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
@@ -359,12 +358,16 @@ class Scheduler:
 
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
+        time_limit = now.time() + 60 * minutes_to_run 
         while True:
             print('Generation counter:', counter + 1)
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
+                time_to_run_gsp = now.time()
                 self.generate_starting_population()
+                time_to_run_gsp = now.time() - time_to_run_gsp
+                time_limit = time_limit + time_to_run_gsp
                 total_iterations += 1
                 counter += 1
                 continue
