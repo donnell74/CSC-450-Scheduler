@@ -20,10 +20,12 @@ def all_before_time(this_week, args):
         else:
             return 1
     else:  # not mandatory
-        if False in holds:  # can be modified for partial credit?
-            return 0
-        else:  # no conflicts
-            return 1  
+        partial_weight = get_partial_credit(holds)
+        return partial_weight
+        #if False in holds:  # can be modified for partial credit?
+        #    return 0
+        #else:  # no conflicts
+        #    return 1  
     
 
 def all_after_time(this_week, args):
@@ -45,10 +47,12 @@ def all_after_time(this_week, args):
         else:
             return 1
     else:  # not mandatory
-        if False in holds:  # can be modified for partial credit?
-            return 0
-        else:  # no conflicts
-            return 1  
+        partial_weight = get_partial_credit(holds)
+        return partial_weight
+##        if False in holds:  # can be modified for partial credit?
+##            return 0
+##        else:  # no conflicts
+##            return 1  
 
 
 def course_before_time(this_week, args):
@@ -117,18 +121,22 @@ def instructor_time_pref_before(this_week, args):
         if each_section.time_slots[0].start_time > time_slot:
             #case 1: a course fails
             holds.append(0)
+        else:
+            holds.append(1) # case 2: a course passes
                     
         if is_mandatory:
-            if len(holds) >= 1: # at least one failure
+            if False in holds: # at least one failure
                 this_week.valid = False
                 return 0
             else:
                 return 1
         else: # not mandatory, treat it like normal
-            if len(holds) >= 1:
-                   return 0
-            else: # no failures, add the weight to the fitness score
-                   return 1
+            partial_weight = get_partial_credit(holds)
+            return partial_weight
+##            if len(holds) >= 1:
+##                   return 0
+##            else: # no failures, add the weight to the fitness score
+##                   return 1
 
 
 def instructor_time_pref_after(this_week, args):
@@ -156,10 +164,12 @@ def instructor_time_pref_after(this_week, args):
             else:
                 return 1
         else: # not mandatory, treat it like normal
-            if len(holds) >= 1:
-                   return 0
-            else: # no failures, add the weight to the fitness score
-                   return 1
+            partial_weight = get_partial_credit(holds)
+            return partial_weight
+##            if len(holds) >= 1:
+##                   return 0
+##            else: # no failures, add the weight to the fitness score
+##                   return 1
 
 
 def instructor_conflict(this_week, args):
@@ -372,25 +382,22 @@ def ensure_computer_requirement(this_week, args):
     return 1
 
 
-def time_finder(end_t, time_gap):
-    """ Helper function for num_subsequent_courses.
-        Creates a new time object <time_gap> minutes after the end_t
-        of a different course to mimic the next course's start time.
-        Returns the new time object. """
-    time_str = str(end_t)[:5]
-    t_hr, t_min = time_str.split(":")
-    t_hr = int(t_hr)
-    t_min = int(t_min)
-    if t_min < (59 - time_gap):  # can add the time_gap without problems
-        t_min += time_gap
-    else:  # less than time_gap to the next hour
-        diff = 59 - time_gap
-        t_hr += 1
-        t_min = diff
+def get_partial_credit(results_list):
+    """ Counts the number of true values in a list and returns the
+        partial credit value for the constraint weight.
+        IN: a list of true/falese values, such as holds
+        OUT: a decimal (percentage) of the true values in the list. """
+    count = 0
 
-    next_start_time = time(t_hr, t_min)
-    return next_start_time
-    
+    for value in results_list:
+        if value == True:
+                count += 1
+
+    count = float(count)/len(list)
+    partial_weight = round(count, 1)
+
+    return partial_weight
+        
 
 class ConstraintCreationError(Exception):
     def __init__(self, value):
