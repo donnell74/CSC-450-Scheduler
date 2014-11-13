@@ -10,8 +10,8 @@ def all_before_time(this_week, args):
     holds = []
     is_mandatory = args[2]
 
-    for c in args[0]:  # access list of courses, don't pass is_mandatory 
-        holds.append(course_before_time(this_week, [c, args[1]]))
+    for c in args[0]:  # access list of courses
+        holds.append(course_before_time(this_week, [c, args[1], is_mandatory]))
 
     if is_mandatory:
         if False in holds:
@@ -37,8 +37,8 @@ def all_after_time(this_week, args):
     holds = []
     is_mandatory = args[2]
 
-    for c in args[0]:  # access list of courses, don't pass is_mandatory 
-        holds.append(course_after_time(this_week, [c, args[1]]))
+    for c in args[0]:  # access list of courses
+        holds.append(course_after_time(this_week, [c, args[1], is_mandatory]))
 
     if is_mandatory:
         if False in holds:
@@ -249,6 +249,7 @@ def instructor_preference_day(this_week, args):
     instructor = args[0]
     day_code = args[1]
     is_mandatory = args[2]
+    holds = []
     
     for section_week in this_week.sections:
         if instructor.name == section_week.instructor.name:
@@ -256,17 +257,29 @@ def instructor_preference_day(this_week, args):
                 if not day.day_code in day_code:
                     if is_mandatory:
                         this_week.valid = False
-                    return 0
+                        return 0
+                    else:
+                        holds.append(0)
+                else:
+                    holds.append(1)
                     
-    return 1
+    # if mandatory and it's here, it passed
+    if is_mandatory:
+        return 0
+    else: # not mandatory, partial credit
+        partial_credit = get_partial_credit(holds)
+        return partial_credit
+    
 
 def instructor_preference_computer(this_week, args):
     """If an instructor prefers to teach in a class with
     or without computers, validate the week on this criteria.
-    Args should be [instructor, computer_preference]"""
+    Args should be [instructor, computer_preference, is_mandatory]"""
     instructor = args[0]
     computer_preference = args[1]
     is_mandatory = args[2]
+    holds = []
+    
     for section_week in this_week.sections:
         if section_week.instructor.name == instructor.name:
             if computer_preference == True: 
@@ -274,15 +287,30 @@ def instructor_preference_computer(this_week, args):
                 if section_week.room.has_computers == False:
                     if is_mandatory:
                         this_week.valid = False
-                    return 0
+                        return 0 # mandatory contraints are all or nothing
+                    else:
+                        holds.append(0)
+                else:
+                    holds.append(1)
             else: 
                 #instructor doesn't prefer computers
                 if section_week.room.has_computers == True:
                     if is_mandatory:
                         this_week.valid = False
-                    return 0
+                        return 0
+                    else:
+                        holds.append(0)
+                else:
+                    holds.append(1)
+
+    # if mandatory and it's here, it passed
+    if is_mandatory:
+        return 0
+    else:
+        partial_credit = get_partial_credit(holds)
+        return partial_credit
     #passes
-    return 1
+    #return 1
 
 
 def is_overlap(timeslot1, timeslot2):
@@ -393,7 +421,7 @@ def get_partial_credit(results_list):
         if value == True:
                 count += 1
 
-    count = float(count)/len(list)
+    count = float(count)/len(results_list)
     partial_weight = round(count, 1)
 
     return partial_weight
