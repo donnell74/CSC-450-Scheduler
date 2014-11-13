@@ -647,8 +647,9 @@ class MainWindow(Frame):
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
 
-        ToolTips(root)
-        
+        if sys.platform.startswith('win'):
+            ToolTips(root)
+
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width="500", height="600")
         self.menu.pack(side=LEFT, fill="both")
@@ -720,7 +721,6 @@ class MainWindow(Frame):
         globs.mainScheduler.add_constraint("course sections at different times", \
                                            0, constraint.course_sections_at_different_times, \
                                            [globs.courses[:-1]])  # the last item is "All", ignore it
-        globs.mainScheduler.generate_starting_population()
 
         runtime_var = self.home_page.runtime_selected_var.get()
         if runtime_var not in [1, 10, 60, 480]:
@@ -729,13 +729,12 @@ class MainWindow(Frame):
                 runtime_var = 1
             print(runtime_var)
 
-        globs.mainScheduler.evolution_loop(runtime_var)
-        
         for each_course in globs.mainScheduler.courses:
             globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
 
-        globs.mainScheduler.evolution_loop()
+        globs.mainScheduler.evolution_loop(runtime_var)
+
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()

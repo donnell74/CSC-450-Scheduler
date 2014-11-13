@@ -486,13 +486,13 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     if okay_to_add_constraint(constraint_name) == False: return
 
     if before_after == "Before":
-        globs.mainScheduler.add_constraint(constraint_name, priority,  \
-                                           constraint.instructor_time_pref_before, \
+        globs.mainScheduler.add_constraint(constraint_name, priority,
+                                           constraint.instructor_time_pref_before,
                                            [instructor, time_obj, is_mandatory])
 
     else:  # after a time
-        globs.mainScheduler.add_constraint(constraint_name, priority, \
-                                           constraint.instructor_time_pref_after, \
+        globs.mainScheduler.add_constraint(constraint_name, priority,
+                                           constraint.instructor_time_pref_after,
                                            [instructor, time_obj, is_mandatory])
         pass
 
@@ -522,8 +522,8 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
     if okay_to_add_constraint(constraint_name) == False: return
 
     day_code = day_code.lower()
-    globs.mainScheduler.add_constraint(constraint_name, priority, \
-                                       constraint.instructor_preference_day, \
+    globs.mainScheduler.add_constraint(constraint_name, priority,
+                                       constraint.instructor_preference_day,
                                        [instructor, day_code, is_mandatory])
 
     # update scrollbox with this created constraint
