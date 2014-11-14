@@ -3,9 +3,14 @@ from Tkconstants import TOP, RIGHT, LEFT, NW, NE
 from guiConstraintsView import ConstraintsView
 from guiConstraintsInstructor import InstructorConstraint
 from guiConstraintsCourse import CourseConstraint
-import globs
-from genetic import constraint
 
+
+class Page(Frame):
+    def __init__(self, root):
+        Frame.__init__(self, root)
+
+    def show(self):
+        self.lift()
 
 class ConstraintPage(Page):
 

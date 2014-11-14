@@ -14,12 +14,6 @@ size_h2 = 18
 size_p = 14
 size_l = 12
 
-class Page(Frame):
-    def __init__(self, root):
-        Frame.__init__(self, root)
-
-    def show(self):
-        self.lift()
 
 class HomePage(Page):
 
@@ -748,34 +742,34 @@ class MainWindow(Frame):
         instructors = globs.instructors
         # RUN SCHEDULER METHOD
         # Add hard/obvious constraints before running
-        globs.mainScheduler.add_constraint(name="instructor conflict",
-                                           weight=0,
-                                           func=constraint.instructor_conflict,
-                                           args=[instructors])
-        globs.mainScheduler.add_constraint(name="sequential_time_different_building_conflict",
-                                           weight=0,
-                                           func=constraint.sequential_time_different_building_conflict,
-                                           args=[instructors])
-        globs.mainScheduler.add_constraint(name="subsequent courses",
-                                           weight=0,
-                                           func=constraint.num_subsequent_courses,
-                                           args=[instructors])
-        globs.mainScheduler.add_constraint(name="capacity checking",
-                                           weight=0,
-                                           func=constraint.ensure_course_room_capacity,
-                                           args=[])
-        globs.mainScheduler.add_constraint(name="no overlapping courses",
-                                           weight=0,
-                                           func=constraint.no_overlapping_courses,
-                                           args=[])
-        globs.mainScheduler.add_constraint(name="computer requirement",
-                                           weight=0,
-                                           func=constraint.ensure_computer_requirement,
-                                           args=[])
-        globs.mainScheduler.add_constraint(name="course sections at different times",
-                                           weight=0,
-                                           func=constraint.course_sections_at_different_times,
-                                           args=[globs.courses[:-1]])  # the last item is "All", ignore it
+        globs.mainScheduler.add_constraint("instructor conflict",
+                                           0,
+                                           constraint.instructor_conflict,
+                                           [instructors])
+        globs.mainScheduler.add_constraint("sequential_time_different_building_conflict",
+                                           0,
+                                           constraint.sequential_time_different_building_conflict,
+                                           [instructors])
+        globs.mainScheduler.add_constraint("subsequent courses",
+                                           0,
+                                           constraint.num_subsequent_courses,
+                                           [instructors])
+        globs.mainScheduler.add_constraint("capacity checking",
+                                           0,
+                                           constraint.ensure_course_room_capacity,
+                                           [])
+        globs.mainScheduler.add_constraint("no overlapping courses",
+                                           0,
+                                           constraint.no_overlapping_courses,
+                                           [])
+        globs.mainScheduler.add_constraint("computer requirement",
+                                           0,
+                                           constraint.ensure_computer_requirement,
+                                           [])
+        globs.mainScheduler.add_constraint("course sections at different times",
+                                           0,
+                                           constraint.course_sections_at_different_times,
+                                           [globs.courses[:-1]])  # the last item is "All", ignore it
 
         runtime_var_choice = self.home_page.runtime_selected_var.get()
         if runtime_var_choice not in [1, 10, 60, 480]:
@@ -787,10 +781,10 @@ class MainWindow(Frame):
 
         for each_course in globs.mainScheduler.courses:
             if each_course.is_lab:
-                globs.mainScheduler.add_constraint(name="lab on tr: " + each_course.code,
-                                                   weight=0,
-                                                   func=constraint.lab_on_tr,
-                                                   args=[each_course])
+                globs.mainScheduler.add_constraint("lab on tr: " + each_course.code,
+                                                   0,
+                                                   constraint.lab_on_tr,
+                                                   [each_course])
 
         globs.mainScheduler.evolution_loop(runtime_var_choice)
 
