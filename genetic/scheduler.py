@@ -345,17 +345,19 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
+        weeks_to_keep = 5 
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
             valid_weeks = filter(lambda x: x.valid, self.weeks)
             valid_weeks.sort(key=lambda x: x.fitness, reverse=True)
             if len(valid_weeks) > 0:
-                temp = filter(lambda x: not x.valid, self.weeks)[:5 - len(valid_weeks)]
+                temp = filter(lambda x: not x.valid, self.weeks)[:weeks_to_keep \
+                                                                    - len(valid_weeks)]
                 temp.sort(key=lambda x: x.fitness, reverse=True)
                 self.weeks = valid_weeks + temp
 
-            self.weeks = self.weeks[:5]
+            self.weeks = self.weeks[:weeks_to_keep]
             return valid_weeks
 
         # Resetting self.weeks will trigger generate_starting_population() below
@@ -408,9 +410,6 @@ class Scheduler:
 
             self.breed()
             print("Breed complete")
-            week_slice_helper()
-            self.weeks = self.weeks[:4]
-            self.generate_starting_population(1)
             total_iterations += 1
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
@@ -543,7 +542,7 @@ class Scheduler:
             raise FilterError("Schedule 4 hour course")
 
         random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        current_pool = copy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -606,7 +605,7 @@ class Scheduler:
             raise FilterError("Schedule 3 hour course")
 
         random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        current_pool = copy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -659,7 +658,7 @@ class Scheduler:
             raise FilterError("Schedule 1 hour course")
 
         random_slot = choice(list_of_slots)
-        current_pool = deepcopy(list_of_slots)
+        current_pool = copy(list_of_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -733,7 +732,7 @@ class Scheduler:
                 week_to_fill.complete = False
 
 
-    def generate_starting_population(self, num_to_generate = 15, just_one = False):
+    def generate_starting_population(self, num_to_generate = 50, just_one = False):
         """Generates starting population"""
         #Quick case for getting to GUI
         if just_one and len(self.weeks) == 0:
