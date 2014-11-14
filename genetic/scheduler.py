@@ -163,6 +163,7 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
+            this_week.constraints[each_constraint.name] = each_fitness
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness
@@ -172,6 +173,8 @@ class Scheduler:
 
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
+
+        #print(this_week.constraints)
 
 
     def mutate(self, this_week):
