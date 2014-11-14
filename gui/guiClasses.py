@@ -682,7 +682,7 @@ class MainWindow(Frame):
         self.home_page = HomePage(self.content_container)
         self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         
-        self.constraint_page = ConstraintPage(self.content_container, globs.mainScheduler.constraints)
+        self.constraint_page = ConstraintPage(self.content_container)
         self.constraint_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
 
         self.view_page = ViewPage(self.content_container)
