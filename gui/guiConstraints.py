@@ -163,7 +163,7 @@ class InstructorConstraint(Page):
         self.gap_start_default = StringVar()
         self.gap_start_default.set(self.start_time_list[0])
         self.gap_start_default.trace("w", self.callback_gap_start)
-        # TRACE
+        
         self.gap_start_option = OptionMenu(self.break_frame, \
                                            self.gap_start_default, *self.start_time_list)
         self.gap_start_option.pack(side = TOP)
@@ -171,9 +171,8 @@ class InstructorConstraint(Page):
         self.end_time_label = Label(self.break_frame, text = "End Time:")
         self.end_time_label.pack(side = TOP)
         self.gap_end_default = StringVar()
-        self.gap_end_default.set(self.end_time_list[0])
-        # TRACE
-        # self.gap_end_default.trace("w", callback_gap_end)
+        self.gap_end_default.set(self.end_time_list[0]) # trace isn't necessary
+        
         self.gap_end_option = OptionMenu(self.break_frame, \
                                          self.gap_end_default, *self.end_time_list)
         self.gap_end_option.pack(side = TOP)
@@ -194,11 +193,11 @@ class InstructorConstraint(Page):
     def add_instr_break(self):
         instructor = self.str_instr_name_default.get()
         gap_start = self.gap_start_default.get()
+        gap_start = self.string_to_time(gap_start)
         gap_end = self.gap_end_default.get()
+        gap_end = self.string_to_time(gap_end)
         priority = self.break_priority_default.get()
-        # create_instr_break(instructor, gap_start, gap_end, priority, self.constraints)
-        print("added instructor break with params:")
-        print(instructor, gap_start, gap_end, priority)
+        create_instr_break(instructor, gap_start, gap_end, priority, self.constraints)
         pass
 
     def add_instr_time(self):
@@ -234,37 +233,28 @@ class InstructorConstraint(Page):
         pass
 
     def callback_gap_start(self, *args):
-        # if gap_start changes, adjust the gap_end accordingly
+        # if gap_start changes, adjust the gap_end_list accordingly to prevent inverted times
         gap_start = self.gap_start_default.get()
-        end_time_list = globs.end_times
+        gap_start = self.string_to_time(gap_start)
+        
+        end_time_list = self.end_time_list
         gap_end_menu = self.gap_end_option["menu"]
         gap_end_menu.delete(0, "end")
         
         for i in range(len(self.end_time_list)):
-            if gap_start < self.end_time_list[i]:
+            end_slot = self.string_to_time(self.end_time_list[i])
+            if gap_start < end_slot:
                 self.end_time_list = end_time_list[i:]
                 break
         for time in self.end_time_list:
             gap_end_menu.add_command(label = time,
-                                     command = lambda value = time : self.self.gap_end_default(value) )
+                                     command = lambda value = time : self.gap_end_default.set(value) )
         self.gap_end_default.set(self.end_time_list[0])
 
 
-    def callback_gap_end(self, *args):
-        # if gap_end changes, adjust the gap_start accordingly
-        gap_end = self.gap_end_default.get()
-        start_time_list = globs.start_times
-        gap_start_menu = self.gap_start_option["menu"]
-        gap_start_menu.delete(0, "end")
-        
-        for i in range(len(self.start_time_list)):
-            if gap_end > self.start_time_list[i]:
-                self.start_time_list = start_time_list[:i]
-                break
-        for time in self.start_time_list:
-            gap_start_menu.add_command(label = time,
-                                     command = lambda value = time : self.gap_start_default(value) )
-        self.gap_start_default.set(self.start_time_list[0])
+    def string_to_time(self, time_str):
+        t_hr, t_min = time_str.split(":")
+        return time( int(t_hr), int(t_min) )
         
 
     def callbackWhen(self, *args):
@@ -639,4 +629,25 @@ def create_computer_pref_constraint(instructor, prefers_computers, priority, add
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
+
+def create_instr_break(instructor, gap_start, gap_end, priority, added_constraints):
+    priority = get_priority_value(priority)
+    is_mandatory = False
+    if priority == 0:
+        is_mandatory = True
+
+    instructor = pull_instructor_obj(instructor)
+    constraint_name = "{0}_break_{1}-{2}".format(instructor, gap_start, gap_end)
+
+    globs.mainScheduler.add_constraint(constraint_name,
+                                       priority,
+                                       constraint.instructor_break_constraint,
+                                       [    instructor,
+                                            gap_start,
+                                            gap_end,
+                                            is_mandatory ]
+                                       )
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    return
+                                    
 

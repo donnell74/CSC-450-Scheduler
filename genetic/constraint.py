@@ -313,6 +313,42 @@ def instructor_preference_computer(this_week, args):
     #return 1
 
 
+def instructor_break_constraint(this_week, args):
+    """ Allows an instructor to specify a gap where they do not
+    want to teach any courses.  (Ex: a lunch break)
+    IN: the list of args: [instructor_obj, gap_start, gap_end,
+                            is_mandatory]
+    OUT: if mandatory, sets the week validity and returns 0,
+            else partial credit score
+    """
+    instructor = args[0]
+    gap_start = args[1]
+    gap_end = args[2]
+    is_mandatory = args[3]
+
+    holds = []
+
+    for i in range(len(instructor.courses)): 
+        course = this_week.find_course(instructor.courses[i])[0]
+        if course.start_time < gap_end:
+            if course.start_time < gap_start: # before gap altogether, fine
+                holds.append(1)
+            else:  # in gap, bad
+                if is_mandatory:
+                    this_week.valid = False
+                    return 0
+                else: 
+                    holds.append(0)
+        else:  # after gap altogether, course.start_time > gap_end
+            holds.append(1)
+
+    if is_mandatory: # if no fails by here, it passed
+        return 0
+    else:
+        partial_weight = get_partial_credit(holds)
+        return partial_weight
+
+
 def is_overlap(timeslot1, timeslot2):
     """Return true if timeslots overlap else false"""
     if timeslot1.start_time < timeslot2.start_time:
