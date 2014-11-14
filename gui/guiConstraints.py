@@ -238,23 +238,25 @@ class InstructorConstraint(Page):
         pass
 
     def callback_gap_start(self, *args):
-        # if gap_start changes, adjust the gap_end_list accordingly to prevent inverted times
+        """ Monitors the Instructor Break start time.  If it changes,
+        this will update the end time list so that you can't have
+        bad end times (before the start time). """
         gap_start = self.gap_start_default.get()
         gap_start = self.string_to_time(gap_start)
         
-        end_time_list = self.end_time_list
+        end_time_list = globs.end_times
         gap_end_menu = self.gap_end_option["menu"]
         gap_end_menu.delete(0, "end")
         
         for i in range(len(self.end_time_list)):
             end_slot = self.string_to_time(self.end_time_list[i])
-            if gap_start < end_slot:
-                self.end_time_list = end_time_list[i:]
+            if gap_start <= end_slot: 
+                end_time_list = end_time_list[i:]
                 break
         for time in self.end_time_list:
             gap_end_menu.add_command(label = time,
                                      command = lambda value = time : self.gap_end_default.set(value) )
-        self.gap_end_default.set(self.end_time_list[0])
+        self.gap_end_default.set(end_time_list[0])
 
 
     def string_to_time(self, time_str):
