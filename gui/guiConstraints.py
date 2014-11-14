@@ -89,6 +89,11 @@ class InstructorConstraint(Page):
             self.instr_time_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
 
+        before_after_disclaimer = "Note: you should not use these constraints to specify a gap (eg, lunch break). \n" \
+                                  "If you want a gap, use an Instructor Break constraint."
+        self.disclaimer = Label(self.time_frame, text = before_after_disclaimer, wraplength = 180, justify = LEFT)
+        self.disclaimer.pack()
+
         self.submit_time = Button(self.time_frame, text = "Add Constraint", command = self.add_instr_time)
         self.submit_time.pack(side = RIGHT, pady = 25)
 
