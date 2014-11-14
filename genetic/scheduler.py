@@ -3,6 +3,7 @@ from copy import deepcopy
 from copy import copy
 from random import randint
 from random import choice
+from math import floor
 from datetime import time, timedelta
 from structures import *
 from constraint import *
@@ -380,7 +381,7 @@ class Scheduler:
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
-            print("Time left for evolution loop: ", time_limit - now.time())
+            print("Time left for evolution loop: %d seconds" % (time_limit - floor(now.time())))
             if now.time() > time_limit:
                 print('Time limit reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
