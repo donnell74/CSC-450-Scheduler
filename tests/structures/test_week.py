@@ -3,7 +3,7 @@ import unittest
 from genetic.structures import *
 from genetic import *
 
-sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_scheduler = interface.create_scheduler_from_file_test("tests/schedules/morning_class_test.xml")
 
 class TestWeek(unittest.TestCase):
 
@@ -21,10 +21,10 @@ class TestWeek(unittest.TestCase):
 
     def test_find_course(self):
         self.assertEqual(len(self.week.find_course(sample_scheduler.courses[0])), 3)
-        self.assertEqual(len(self.week.find_course(Course(code="BIO123",
-                                                          credit="4",
+        self.assertEqual(len(self.week.find_course(Course(code="CSC 131 001",
+                                                          credit="1",
                                                           capacity=60,
-                                                          instructor="Some Guy"))), 0)
+                                                          instructor="Saquer"))), 0)
 
     def test_list_time_slots(self):
         pass

@@ -22,6 +22,8 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     setCourses = [i.attrib for i in root.findall("course")]
     return_schedule = Scheduler(courses, rooms, time_slots_mwf, time_slots_tr,
                                 int(time_slot_divide), test = True)
+    return_schedule.weeks.append( structures.Week(rooms, return_schedule, test = True) )
+    print(setCourses)
     return_schedule.weeks[0].fill_week(setCourses)
     return return_schedule
 

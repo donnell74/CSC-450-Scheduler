@@ -3,7 +3,7 @@ import unittest
 from genetic.structures import *
 from genetic import *
 
-sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_scheduler = interface.create_scheduler_from_file_test("tests/schedules/morning_class_test.xml")
 
 class TestRoom(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class TestRoom(unittest.TestCase):
         pass
 
     def test_init(self):
-        self.assertEqual(len(self.room.schedule), 3)
+        self.assertEqual(len(self.room.schedule), 2)
 
     def test_info(self):
         self.assertEqual(self.room.info("Day"), sample_scheduler.weeks[0].days[0])

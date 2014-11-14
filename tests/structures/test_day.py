@@ -3,7 +3,7 @@ import unittest
 from genetic.structures import *
 from genetic import *
 
-sample_scheduler = interface.create_scheduler_from_file("tests/schedules/morning_class_test.xml")
+sample_scheduler = interface.create_scheduler_from_file_test("tests/schedules/morning_class_test.xml")
 
 class TestDay(unittest.TestCase):
 
