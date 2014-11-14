@@ -31,6 +31,7 @@ class Week:
         self.complete = True
         #Week's copy of courses
         self.sections = []
+        self.constraints = {}
 
     def info(self, query):
         """Goes up the object hierarchy to find object for given week
