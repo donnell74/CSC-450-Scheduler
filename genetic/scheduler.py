@@ -321,10 +321,10 @@ class Scheduler:
             raise BreedError("An element in weeks is not a Week object")
 
 
-
+        list_of_children = []
         # combinations...(ex) 5 choose 2
-        for each_week in range(0, len(self.weeks) - 1, 2):
-            for each_other_week in range(each_week + 1, len(self.weeks), 2):
+        for each_week in range(len(self.weeks) - 1):
+            for each_other_week in range(each_week + 1, len(self.weeks)):
                 children = self.crossover(self.weeks[each_week],
                     self.weeks[each_other_week])
                 if len(children) > 0:
@@ -335,7 +335,8 @@ class Scheduler:
                             #self.mutate(each_child)
                             pass
                     # add to list of weeks
-                    self.weeks.extend(children)
+                list_of_children.extend(children)
+        self.weeks.extend(list_of_children)
 
 
     def evolution_loop(self, minutes_to_run = 1):
