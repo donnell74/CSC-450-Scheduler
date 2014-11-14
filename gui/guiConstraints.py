@@ -49,7 +49,7 @@ class InstructorConstraint(Page):
         self.time_day_default = StringVar(self)
         self.time_day_default.set("Time")
         self.time_day_default.trace("w", self.time_day_toggle)
-        self.time_day_list = ["Time", "Day", "Computer Preference"]
+        self.time_day_list = ["Time", "Day", "Computer Preference", "Instructor Break"]
         self.option_time_day = OptionMenu(self, self.time_day_default, \
                                           *self.time_day_list)
         self.option_time_day.pack(side = TOP)
@@ -147,7 +147,59 @@ class InstructorConstraint(Page):
         self.submit_computer = Button(self.computer_frame, \
             text = "Add Constraint", command = self.add_instr_computer)
         self.submit_computer.pack(side = TOP, pady = 25)
+
+        # instructor break
+        self.break_frame = Frame(self, width = 100)
+
+        self.label_break = Label(self.break_frame, \
+                                 text = "Instructor would like no classes between:", wraplength = 120)
+        self.label_break.pack(side = TOP)
+
+        self.start_time_list = globs.start_times
+        self.end_time_list = globs.end_times
+
+        self.start_time_label = Label(self.break_frame, text = "Start Time:")
+        self.start_time_label.pack(side = TOP)
+        self.gap_start_default = StringVar()
+        self.gap_start_default.set(self.start_time_list[0])
+        self.gap_start_default.trace("w", self.callback_gap_start)
+        # TRACE
+        self.gap_start_option = OptionMenu(self.break_frame, \
+                                           self.gap_start_default, *self.start_time_list)
+        self.gap_start_option.pack(side = TOP)
+
+        self.end_time_label = Label(self.break_frame, text = "End Time:")
+        self.end_time_label.pack(side = TOP)
+        self.gap_end_default = StringVar()
+        self.gap_end_default.set(self.end_time_list[0])
+        # TRACE
+        # self.gap_end_default.trace("w", callback_gap_end)
+        self.gap_end_option = OptionMenu(self.break_frame, \
+                                         self.gap_end_default, *self.end_time_list)
+        self.gap_end_option.pack(side = TOP)
         
+        self.break_priority_label = Label(self.break_frame, text = "Priority")
+        self.break_priority_label.pack(side = TOP)
+        self.priority_list = ["Low", "Medium", "High", "Mandatory"]
+        self.break_priority_default = StringVar()
+        self.break_priority_default.set(self.priority_list[0])
+        self.break_priority = OptionMenu(self.break_frame, \
+                                         self.break_priority_default, *self.priority_list)
+        self.break_priority.pack(side = TOP)
+
+        self.submit_break = Button(self.break_frame, \
+                                   text = "Add Constraint", command = self.add_instr_break)
+        self.submit_break.pack(side = TOP, pady = 25)
+        
+    def add_instr_break(self):
+        instructor = self.str_instr_name_default.get()
+        gap_start = self.gap_start_default.get()
+        gap_end = self.gap_end_default.get()
+        priority = self.break_priority_default.get()
+        # create_instr_break(instructor, gap_start, gap_end, priority, self.constraints)
+        print("added instructor break with params:")
+        print(instructor, gap_start, gap_end, priority)
+        pass
 
     def add_instr_time(self):
         instructor = self.str_instr_name_default.get()       
@@ -181,6 +233,39 @@ class InstructorConstraint(Page):
         create_computer_pref_constraint(instructor, prefers_computers, priority, self.constraints)
         pass
 
+    def callback_gap_start(self, *args):
+        # if gap_start changes, adjust the gap_end accordingly
+        gap_start = self.gap_start_default.get()
+        end_time_list = globs.end_times
+        gap_end_menu = self.gap_end_option["menu"]
+        gap_end_menu.delete(0, "end")
+        
+        for i in range(len(self.end_time_list)):
+            if gap_start < self.end_time_list[i]:
+                self.end_time_list = end_time_list[i:]
+                break
+        for time in self.end_time_list:
+            gap_end_menu.add_command(label = time,
+                                     command = lambda value = time : self.self.gap_end_default(value) )
+        self.gap_end_default.set(self.end_time_list[0])
+
+
+    def callback_gap_end(self, *args):
+        # if gap_end changes, adjust the gap_start accordingly
+        gap_end = self.gap_end_default.get()
+        start_time_list = globs.start_times
+        gap_start_menu = self.gap_start_option["menu"]
+        gap_start_menu.delete(0, "end")
+        
+        for i in range(len(self.start_time_list)):
+            if gap_end > self.start_time_list[i]:
+                self.start_time_list = start_time_list[:i]
+                break
+        for time in self.start_time_list:
+            gap_start_menu.add_command(label = time,
+                                     command = lambda value = time : self.gap_start_default(value) )
+        self.gap_start_default.set(self.start_time_list[0])
+        
 
     def callbackWhen(self, *args):
         when = self.when_default.get()
@@ -200,15 +285,23 @@ class InstructorConstraint(Page):
         if time_day == "Day":
             self.time_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.break_frame.pack_forget()
             self.day_frame.pack()
         elif time_day == "Computer Preference":
             self.time_frame.pack_forget()
             self.day_frame.pack_forget()
+            self.break_frame.pack_forget()
             self.computer_frame.pack()
+        elif time_day == "Instructor Break":
+            self.time_frame.pack_forget()
+            self.day_frame.pack_forget()
+            self.computer_frame.pack_forget()
+            self.break_frame.pack()
         else:
             self.time_frame.pack()
             self.day_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.break_frame.pack_forget()
 
 
 class CourseConstraint(Page):
