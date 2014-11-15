@@ -53,9 +53,10 @@ class ViewPage(Page):
 
         self.is_run_clicked = False
 
-        self.drop_down = []
-
-        self.canvas = []
+        # holds the room names that are in the drop down selection
+        self.drop_down_items = []
+        # holds canvas items
+        self.canvas_items = []
         
         # button to allow user to toggle between old and new style of graphical schedules
         self.toggle_graphics = Button(self,
@@ -83,10 +84,10 @@ class ViewPage(Page):
         """ Switch between the compact or graphical schedule """
         
         # delete drop downs
-        self.delete(self.drop_down)
+        self.delete(self.drop_down_items)
 
         # delete previous canvas
-        self.delete(self.canvas)
+        self.delete(self.canvas_items)
         
         # default is to display graphical schedules first
         if not self.toggle_schedules_flag:
@@ -132,26 +133,26 @@ class ViewPage(Page):
                             font = (font_style, size_p))
         self.room_label.place(x = 50, y = 10)
         
-        self.var = StringVar(self)
-        self.var.set(self.rooms[self.room_selection_option]) # default value
+        self.selected_option = StringVar(self)
+        self.selected_option.set(self.rooms[self.room_selection_option]) # default value
         
-        self.select = apply(OptionMenu,
-                            (self, self.var) + tuple(self.rooms))
-        self.select.place(x = 115, y = 5)
+        self.menu_select = apply(OptionMenu,
+                            (self, self.selected_option) + tuple(self.rooms))
+        self.menu_select.place(x = 115, y = 5)
 
-        self.var.trace('w', lambda *args: self.get_selected(self.var))
+        self.selected_option.trace('w', lambda *args: self.get_selected(self.selected_option))
         
-        self.drop_down.append(self.select)
-        self.drop_down.append(self.room_label)
+        self.drop_down_items.append(self.menu_select)
+        self.drop_down_items.append(self.room_label)
 
-    def get_selected(self, var):
+    def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
 
-        v = var.get()
+        option = selected.get()
         for i in xrange(len(self.selections)):
             
-            if v in self.selections[i]:
+            if option in self.selections[i]:
                 self.room_selection_option = i
 
         # update schedule
@@ -186,7 +187,7 @@ class ViewPage(Page):
                     xscrollcommand = hbar.set)  
 
         # keep track of canvas object so it can be deleted
-        self.canvas.append(self.canv)
+        self.canvas_items.append(self.canv)
 
         # listen for mouse wheel
         self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
@@ -286,13 +287,13 @@ class ViewPage(Page):
         self.last_viewed_schedule = n
 
         # delete drop downs
-        self.delete(self.drop_down)
+        self.delete(self.drop_down_items)
         
         # format the schedules
         if not self.toggle_schedules_flag:
 
             # delete previous canvas
-            self.delete(self.canvas)
+            self.delete(self.canvas_items)
         
             self.create_graphical_schedules()
 
