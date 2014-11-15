@@ -309,9 +309,9 @@ def is_overlap(timeslot1, timeslot2):
 
     return False
 
-def no_overlapping_courses(this_week):
+def no_overlapping_courses(this_week, args):
     """Check that all timeslots do not overlap any other
-    timeslots.  Args is not necessary because there is
+    timeslots.  Args is an empty list because there is
     nothing to pass except for the week object."""
     times = []
     all_time_slots = this_week.list_time_slots()
@@ -379,10 +379,10 @@ def num_subsequent_courses(this_week, args):
     return 1
 
 
-def ensure_course_room_capacity(this_week):
+def ensure_course_room_capacity(this_week, args):
     """A course must be assigned to a room with enough capacity to
     hold the course's capacity.
-    Args is not necessary; all relevant data is in this_week.
+    Args is an empty list; all relevant data is in this_week.
     """
 
     for section in this_week.sections:
@@ -393,10 +393,10 @@ def ensure_course_room_capacity(this_week):
     return 1
 
 
-def ensure_computer_requirement(this_week):
+def ensure_computer_requirement(this_week, args):
     """ If a course is specified as requiring computers, its assigned
     room must also have computers to make its week valid.
-    Args is not necessary; all relevant data is in this_week.
+    Args is an empty list; all relevant data is in this_week.
     """
 
     for section in this_week.sections:
