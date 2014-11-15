@@ -163,7 +163,6 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
-            this_week.constraints[each_constraint.name] = each_fitness
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness
@@ -173,8 +172,6 @@ class Scheduler:
 
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
-
-        #print(this_week.constraints)
 
 
     def mutate(self, this_week):
@@ -317,7 +314,7 @@ class Scheduler:
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
-        def decide_prob_crossover(week1, week2, tilt = .1):
+        def decide_prob_crossover(week1, week2, tilt = .01):
             valid_prob_crossover = (week1.valid + week2.valid) * .5
             if valid_prob_crossover == 0:
                 valid_prob_crossover = .1
@@ -325,7 +322,7 @@ class Scheduler:
             if self.max_fitness == 0:
                 return valid_prob_crossover
 
-            total_fitness = (week1.fitness + week2.fitness) / 2.0
+            total_fitness = week1.fitness + week2.fitness
             fitness_prob_crossover = (total_fitness + (tilt *\
                      (self.max_fitness - total_fitness))) / self.max_fitness
             return valid_prob_crossover * fitness_prob_crossover
@@ -345,6 +342,7 @@ class Scheduler:
                 # decide if we are crossing over
                 prob_crossover = decide_prob_crossover(self.weeks[each_week],
                                                        self.weeks[each_other_week])
+                print(prob_crossover)
                 roll = randint(0, 100)
                 if int(prob_crossover * 100) > roll:
                     children = self.crossover(self.weeks[each_week],
@@ -753,7 +751,7 @@ class Scheduler:
                 week_to_fill.complete = False
 
 
-    def generate_starting_population(self, num_to_generate = 1000, just_one = False):
+    def generate_starting_population(self, num_to_generate = 25, just_one = False):
         """Generates starting population"""
         #Quick case for getting to GUI
         if just_one and len(self.weeks) == 0:

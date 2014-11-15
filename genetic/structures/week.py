@@ -243,6 +243,7 @@ class Week:
         print ("Fitness score: ", self.fitness)
         print ("Is Valid: ", self.valid)
         print (concise_schedule_str)
+        [print(key, self.constraints[key]) for key in self.constraints.keys()]
         print ("=" * 25)
         return concise_schedule_str
 
