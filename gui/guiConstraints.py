@@ -253,7 +253,7 @@ class InstructorConstraint(Page):
             if gap_start <= end_slot: 
                 end_time_list = end_time_list[i:]
                 break
-        for time in self.end_time_list:
+        for time in end_time_list:
             gap_end_menu.add_command(label = time,
                                      command = lambda value = time : self.gap_end_default.set(value) )
         self.gap_end_default.set(end_time_list[0])
