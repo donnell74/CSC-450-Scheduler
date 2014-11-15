@@ -670,6 +670,9 @@ class MiscPage(Page):
                     
         self.past = globs.mainScheduler.gui_loading_info1
         
+    def finish_loading(self):
+        self.load_bar['width'] = 40
+        
 class MainWindow(Frame):
 
     def __init__(self, root):
@@ -745,7 +748,7 @@ class MainWindow(Frame):
         self.run_finished = True
         return
 
-    def finished(self):
+    def finished_running(self):
         """ Display view_page after run_scheduler is finished running. """
         
         self.view_page.is_run_clicked = True
@@ -773,8 +776,9 @@ class MainWindow(Frame):
                 # update loading bar on misc_page
                 self.misc_page.update()
                 prev = curr
-
-        self.root.after(100, self.finished)
+                
+        self.misc_page.finish_loading()
+        self.root.after(100, self.finished_running)
         return
         
     def run_scheduler(self): # MOVE THIS ELSEWHERE?
