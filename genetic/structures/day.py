@@ -2,10 +2,8 @@ from __future__ import print_function
 from copy import copy
 import structures
 
-
 class Day:
-
-    """A particular day, consisting of a list of room objects"""
+    """ Represents a single day, consisting of a list of room objects """
 
     def __init__(self, rooms, day_code, this_week, test = False):
         if test:
@@ -17,26 +15,30 @@ class Day:
         else:
             print("Day code was not recognized")
             return
-        
-        room_list = []
-        # 'rooms' is now a list of tuples. [0]: building, [1]: number. 
-                                         # [2]: capacity. [3]: has_computers
+
+        room_object_list = []
+        """
+        'rooms' is a list of tuples in the form:
+            (building, number, capacity, has_computers)
+        """
         for room in rooms:
-            new_room = structures.Room(building         = room[0],
-                                       number           = room[1],
-                                       capacity         = room[2],
-                                       has_computers    = room[3],
-                                       this_day         = self,
-                                       test             = test)
-            room_list.append(new_room)
-        
-        self.rooms = room_list
+            room_object = structures.Room(building = room[0],
+                                          number = room[1],
+                                          capacity = room[2],
+                                          has_computers = room[3],
+                                          this_day = self,
+                                          test = test)
+            room_object_list.append(room_object)
+
+        self.rooms = room_object_list
 
     def info(self, query):
-        """Goes up the object hierarchy to find object for given day
+        """
+        Goes up the object hierarchy to find object for given day
         Possible queries: week, schedule
         IN: query string
-        OUT: object of query's type for given day"""
+        OUT: object of query's type for given day
+        """
         if query not in ["Week", "Schedule"]:
             print("Invalid query for Day")
             return
@@ -49,7 +51,6 @@ class Day:
         for each_room in self.rooms:
             if each_room.number == query_number:
                 return each_room
-
         return None
 
     def __str__(self):
