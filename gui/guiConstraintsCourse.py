@@ -135,7 +135,7 @@ def constraint_adding_conflict(constraint_name, constraint_list):
     # if no return 0/error by now, the constraint_obj is fine and doesn't conflict
     return 1
 
-def create_course_time_constraint(course, start_time, when, priority, constraints_view):
+def create_course_time_constraint(course, start_time, when, priority, constraints_view_obj):
     """Creates course time constraint"""
     # convert the priority string to a weight value for fitness score
     priority = get_priority_value(priority)
@@ -184,6 +184,5 @@ def create_course_time_constraint(course, start_time, when, priority, constraint
                                                 constraint.all_after_time,
                                                  [course, time_obj, is_mandatory])
 
-    # update scrollbox with this created constraint
-    constraints_view.view_constraints((constraint_name + " Priority = ", priority))
+    constraints_view_obj.add_constraint_listbox(constraint_name, priority)
     return

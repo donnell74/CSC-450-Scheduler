@@ -201,7 +201,7 @@ def get_priority_value(priority):
         priority = 0
     return priority
 
-def create_time_pref_constraint(instructor, before_after, timeslot, priority, added_constraints):
+def create_time_pref_constraint(instructor, before_after, timeslot, priority, constraints_view_obj):
     """Creates time preference constraint"""
     priority = get_priority_value(priority)
     is_mandatory = False
@@ -236,8 +236,7 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
                                            constraint.instructor_time_pref_after,
                                            [instructor, time_obj, is_mandatory])
 
-    # update listbox with this created constraint
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    constraints_view_obj.add_constraint_listbox(constraint_name, priority)
     return
 
 def constraint_adding_conflict(constraint_name, constraint_list):
