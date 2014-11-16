@@ -10,7 +10,7 @@ class Prereq:
         self.prereqs = []
         #course objects for absolute course
         self.courses = self.determine_courses(list_of_all_courses)
- 
+
     def add_prereq(self, absolute_course, list_of_all_courses):
         """Adds as prereq for absolute and objects"""
         self.absolute_prereqs.append(absolute_course)
