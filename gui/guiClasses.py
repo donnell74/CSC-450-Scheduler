@@ -731,7 +731,8 @@ class MainWindow(Frame):
             print(runtime_var)
 
         for each_course in globs.mainScheduler.courses:
-            globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
+            if each_course.is_lab:
+                globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
 
         globs.mainScheduler.evolution_loop(runtime_var)
