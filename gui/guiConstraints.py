@@ -490,7 +490,7 @@ def constraint_adding_conflict(constraint_name, constraint_list):
 
     new_constraint = constraint_name.split('_')
     if len(constraint_list) > 0:        # no need to check first constraint
-        # !!! this logic could pontially break if we have an instructor with two last names !!!
+        # !!! this logic could potentially break if we have an instructor with two last names !!!
         if ' ' in new_constraint[0]:    # courses have a space ("CSC 111"), instructors don't
             # course constraint
             for constraint in constraint_list:
@@ -509,12 +509,32 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                         if len(new_constraint) == 3: # day pref
                             if new_constraint[2] != old_constraint[2]:  # different day codes; conflict
                                 return True
-                        elif new_constraint[3] in ["before", "after"]:  # time pref
+                        elif new_constraint[2] in ["before", "after"]:  # time pref
                             if new_constraint[3] == old_constraint[3]:  # same time slot; conflict
                                 return True
+                            else: # check if it overlaps a break constraint
+                                if old_constraint[1] == "break":
+                                    if new_constraint[3] in [old_constraint[2], old_constraint[3]]:
+                                        # on edge, not in break, it's fine
+                                        continue
+                                    else: # not on edge, check for conflict
+                                        if new_constraint[3] < old_constraint[3]:
+                                            if new_constraint[3] > old_constraint[2]:
+                                                # in break, conflict
+                                                return True
                         elif new_constraint[2] == "computers":          # computer pref
                             if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
                                 return True
+                        elif new_constraint[1] == "break":              # break constraint
+                            if old_constraint[3] in [new_constraint[2], new_constraint[3]]: 
+                                # if it's on the edge of one of the break times, it's fine
+                                continue
+                            else:  # old_constraint's time is not one of the break edges
+                                if old_constraint[3] < new_constraint[3]: # less than break end
+                                    if old_constraint[3] > new_constraint[2]: 
+                                        # in break, conflict
+                                        return True
+
     # if no return True by now, the constraint is fine and doesn't conflict
     return False
 
@@ -647,7 +667,7 @@ def create_instr_break(instructor, gap_start, gap_end, priority, added_constrain
         is_mandatory = True
 
     instructor = pull_instructor_obj(instructor)
-    constraint_name = "{0}_break_{1}-{2}".format(instructor, gap_start, gap_end)
+    constraint_name = "{0}_break_{1}_{2}".format(instructor, gap_start, gap_end)
     
     if okay_to_add_constraint(constraint_name) == False: return
 
