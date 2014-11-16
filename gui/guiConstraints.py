@@ -648,6 +648,8 @@ def create_instr_break(instructor, gap_start, gap_end, priority, added_constrain
 
     instructor = pull_instructor_obj(instructor)
     constraint_name = "{0}_break_{1}-{2}".format(instructor, gap_start, gap_end)
+    
+    if okay_to_add_constraint(constraint_name) == False: return
 
     globs.mainScheduler.add_constraint(constraint_name,
                                        priority,
