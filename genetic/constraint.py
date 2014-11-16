@@ -99,7 +99,7 @@ def course_after_time(this_week, args):
 
 def lab_on_tr(this_week, args):
     """ Checks that a lab course is scheduled on TR """
-    return int(this_week.find_course(args[0])[0].isTR == True)
+    return int(this_week.find_course(args[0])[0].is_tr == True)
 
 
 def morning_class(this_week, args):

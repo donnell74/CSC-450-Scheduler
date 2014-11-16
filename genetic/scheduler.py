@@ -9,7 +9,7 @@ from structures import *
 from constraint import *
 import time as now
 
-#import interface # uncomment to use export_schedule_xml 
+#import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
 import os.path
 
@@ -56,7 +56,7 @@ class Scheduler:
             if len(courses) != 0:
                 if not all(isinstance(each_course, Course) for \
                         each_course in courses):
-                   raise SchedulerInitError("Courses - Not all of type Course") 
+                   raise SchedulerInitError("Courses - Not all of type Course")
             else:
                 raise SchedulerInitError("Courses - List has no elements")
         else:
@@ -104,7 +104,7 @@ class Scheduler:
         self.time_slots = time_slots_mwf + time_slots_tr
         if type(time_slot_divide) == int:
             if time_slot_divide < 0 and \
-                time_slot_divide >= min(len(self.time_slots_mwf), 
+                time_slot_divide >= min(len(self.time_slots_mwf),
                                         len(self.time_slots_tr)):
                 raise SchedulerInitError("Time Slot Divide - Not valid number")
         else:
@@ -149,7 +149,7 @@ class Scheduler:
         """Removes all constraints from list"""
         self.constraints = []
         self.max_fitness = 0
-        
+
     def delete_list_constraints(self, items):
         """Removes some constraints from list"""
         for i in range(len(sorted(items, reverse=True))):
@@ -203,12 +203,12 @@ class Scheduler:
             start = start.split(':')
             start = list(map(int, start))
             start = time(start[0], start[1])
-            start_times.append(start)  
+            start_times.append(start)
 
             end = end.split(':')
             end = list(map(int, end))
             end = time(end[0], end[1])
-            end_times.append(end) 
+            end_times.append(end)
 
         full_list = this_week.list_time_slots()
         for each_slot in full_list:
@@ -359,7 +359,7 @@ class Scheduler:
 
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
-        time_limit = now.time() + 60 * minutes_to_run 
+        time_limit = now.time() + 60 * minutes_to_run
         while True:
             print('Generation counter:', counter + 1)
             self.weeks = filter(lambda x: x.complete, self.weeks)
@@ -455,20 +455,20 @@ class Scheduler:
                 row_dict['time_slots'].append(each_time_slot)
                 row_dict['days'] += each_time_slot.day
 
-                if each_time_slot.isTR and row_dict['type'] == 0:
+                if each_time_slot.is_tr and row_dict['type'] == 0:
                     row_dict['type'] = 2
-                elif not each_time_slot.isTR and row_dict['type'] == 0:
+                elif not each_time_slot.is_tr and row_dict['type'] == 0:
                     row_dict['type'] = 1
-                elif (each_time_slot.isTR and row_dict['type'] == 1) or \
-                     (not each_time_slot.isTR and row_dict['type'] == 2):
+                elif (each_time_slot.is_tr and row_dict['type'] == 1) or \
+                     (not each_time_slot.is_tr and row_dict['type'] == 2):
                     row_dict['type'] = 3
-                elif (not each_time_slot.isTR and row_dict['type'] == 1) or \
-                     (each_time_slot.isTR and row_dict['type'] == 2):
+                elif (not each_time_slot.is_tr and row_dict['type'] == 1) or \
+                     (each_time_slot.is_tr and row_dict['type'] == 2):
                     pass
                 else:
-                    print(each_time_slot.isTR)
+                    print(each_time_slot.is_tr)
                     print(row_dict['type'])
-                    raise MalformedTimeslotError("Timeslot does not have a isTR attribute")
+                    raise MalformedTimeslotError("Timeslot does not have a is_tr attribute")
 
         return row_dict
 
@@ -613,7 +613,7 @@ class Scheduler:
             # each day open for that time and room
             if len(possibilities['time_slots']) == 5:
                 # MWF
-                if not random_slot.isTR:
+                if not random_slot.is_tr:
                     for each_slot in possibilities['time_slots']:
                         if each_slot.day in 'mwf':
                             self.assign_and_remove(
@@ -669,7 +669,7 @@ class Scheduler:
                 self.assign_and_remove(
                         course, chosen, list_of_slots, this_week)
                 done = True
-            
+
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
