@@ -5,7 +5,7 @@ from readFile import *
 import sys
 sys.path.append("../")
 import globs
-from genetic import constraint, interface
+from genetic import constraint, interface, scheduler
 import tkMessageBox
 
 font_style = "Helvetica"
@@ -123,9 +123,18 @@ class ViewPage(Page):
                                       cursor = 'hand2')
         self.toggle_graphics.place(x = 533, y = 47)
 
+        #button to show if constraints were accepted or rejected
+        self.constraint_acceptance = Button(self,
+                                            command = lambda : self.toggle_constraint_acceptance(),
+                                            text = 'Toggle Constriant',
+                                            padx =10, pady = 3,
+                                            cursor = 'hand2')
+        self.constraint_acceptance.place(x = 533, y = 1)
+
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
 
+        self.toggle_constraint_acceptance_flag = False
         # holds the rooms
         self.rooms = []
         
@@ -138,6 +147,10 @@ class ViewPage(Page):
         
         # display schedules
         self.toggle_schedules()
+
+        
+
+        
     
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
@@ -164,6 +177,34 @@ class ViewPage(Page):
         else:
             if self.is_run_clicked:
                 self.toggle_schedules_flag = False
+                
+            self.create_compact_schedules()
+
+    def toggle_constraint_acceptance(self):
+        """ Switch between the acceptance and rejected constraints """
+        
+        # delete previous canvas
+        self.delete(self.canvas)
+        
+        # delete old labels to make room for new ones
+        self.delete(self.table_labels)
+
+        # delete drop downs
+        self.delete(self.drop_down)
+                
+        # default is to display accepted constraints first
+        if not self.toggle_constraint_acceptance_flag:
+            if self.is_run_clicked:
+                self.toggle_constraint_acceptance_flag = True
+                self.create_graphical_schedules()
+                self.insert_schedule(self.last_viewed_schedule)
+                
+            else:
+                self.create_compact_schedules()
+                
+        else:
+            if self.is_run_clicked:
+                self.toggle_constraint_acceptance_flag = False
                 
             self.create_compact_schedules()
 

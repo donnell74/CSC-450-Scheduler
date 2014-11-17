@@ -8,11 +8,14 @@ from datetime import time, timedelta
 from structures import *
 from constraint import *
 import time as now
+import gc
 
 #import interface # uncomment to use export_schedule_xml 
 import xml.etree.ElementTree as ET
 import os.path
 
+#gc.set_debug(gc.DEBUG_LEAK)
+    
 
 class SchedulerInitError(Exception):
     def __init__(self, value):
@@ -166,6 +169,7 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
+            this_week.constraints[each_constraint.name] = each_fitness
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness
@@ -175,6 +179,8 @@ class Scheduler:
 
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
+
+        #print(this_week.constraints)
 
 
     def mutate(self, this_week):
@@ -317,6 +323,19 @@ class Scheduler:
 
     def breed(self):
         """Produces a set of schedules based of the current set of schedules"""
+        def decide_prob_crossover(week1, week2, tilt = .1):
+            valid_prob_crossover = (week1.valid + week2.valid) * .5
+            if valid_prob_crossover == 0:
+                valid_prob_crossover = .1
+
+            if self.max_fitness == 0:
+                return valid_prob_crossover
+
+            total_fitness = (week1.fitness + week2.fitness) / 2.0
+            fitness_prob_crossover = (total_fitness + (tilt *\
+                     (self.max_fitness - total_fitness))) / self.max_fitness
+            return valid_prob_crossover * fitness_prob_crossover
+
         if len(self.weeks) < 2:
             raise BreedError("Weeks is not the correct length")
 
@@ -325,21 +344,27 @@ class Scheduler:
             raise BreedError("An element in weeks is not a Week object")
 
 
-
+        list_of_children = []
         # combinations...(ex) 5 choose 2
-        for each_week in range(0, len(self.weeks) - 1, 2):
-            for each_other_week in range(each_week + 1, len(self.weeks), 2):
-                children = self.crossover(self.weeks[each_week],
-                    self.weeks[each_other_week])
-                if len(children) > 0:
-                    # Chance of mutation for each child
-                    for each_child in children:
-                        roll = randint(1, 3)
-                        if roll == 2:
-                            #self.mutate(each_child)
-                            pass
-                    # add to list of weeks
-                    self.weeks.extend(children)
+        for each_week in range(len(self.weeks) - 1):
+            for each_other_week in range(each_week + 1, len(self.weeks)):
+                # decide if we are crossing over
+                prob_crossover = decide_prob_crossover(self.weeks[each_week],
+                                                       self.weeks[each_other_week])
+                roll = randint(0, 100)
+                if int(prob_crossover * 100) > roll:
+                    children = self.crossover(self.weeks[each_week],
+                                              self.weeks[each_other_week])
+                    if len(children) > 0:
+                        # Chance of mutation for each child
+                        for each_child in children:
+                            roll = randint(1, 3)
+                            if roll == 2:
+                                #self.mutate(each_child)
+                                pass
+                        # add to list of weeks
+                    list_of_children.extend(children)
+        self.weeks.extend(list_of_children)
 
 
     def evolution_loop(self, minutes_to_run = 1):
@@ -347,17 +372,26 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
+        weeks_to_keep = 5 
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
             valid_weeks = filter(lambda x: x.valid, self.weeks)
             valid_weeks.sort(key=lambda x: x.fitness, reverse=True)
             if len(valid_weeks) > 0:
-                temp = filter(lambda x: not x.valid, self.weeks)[:5 - len(valid_weeks)]
+                temp = filter(lambda x: not x.valid, self.weeks)[:weeks_to_keep \
+                                                                    - len(valid_weeks)]
                 temp.sort(key=lambda x: x.fitness, reverse=True)
-                self.weeks = valid_weeks + temp
+                self.weeks = (valid_weeks + temp)[:weeks_to_keep]
+            else:
+                for each_week in self.weeks:
+                    if not each_week.valid:
+                        del each_week
 
-            self.weeks = self.weeks[:5]
+                self.weeks = valid_weeks[:weeks_to_keep]
+                for each_week in valid_weeks[weeks_to_keep:]:
+                    del each_week
+
             return valid_weeks
 
         # Resetting self.weeks will trigger generate_starting_population() below
@@ -408,11 +442,9 @@ class Scheduler:
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
                 break
 
+            print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
             print("Breed complete")
-            week_slice_helper()
-            self.weeks = self.weeks[:4]
-            self.generate_starting_population(1)
             total_iterations += 1
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
@@ -545,7 +577,7 @@ class Scheduler:
             raise FilterError("Schedule 4 hour course")
 
         random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        current_pool = copy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -608,7 +640,7 @@ class Scheduler:
             raise FilterError("Schedule 3 hour course")
 
         random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        current_pool = copy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -661,7 +693,7 @@ class Scheduler:
             raise FilterError("Schedule 1 hour course")
 
         random_slot = choice(list_of_slots)
-        current_pool = deepcopy(list_of_slots)
+        current_pool = copy(list_of_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -735,7 +767,7 @@ class Scheduler:
                 week_to_fill.complete = False
 
 
-    def generate_starting_population(self, num_to_generate = 15, just_one = False):
+    def generate_starting_population(self, num_to_generate = 1000, just_one = False):
         """Generates starting population"""
         #Quick case for getting to GUI
         if just_one and len(self.weeks) == 0:

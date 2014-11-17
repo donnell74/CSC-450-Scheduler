@@ -1,7 +1,7 @@
 from __future__ import print_function
 import structures
 from copy import copy
-
+from weakref import ref
 
 class Room:
 
@@ -39,9 +39,9 @@ class Room:
         elif query == "Day":
             return self.day
         elif query == "Week":
-            return self.day.week
+            return self.day.week()
         elif query == "Schedule":
-            return self.day.week.schedule
+            return self.day.week().schedule()
         elif query == "Capacity":
             return self.capacity
         elif query == "Computers":
@@ -70,5 +70,7 @@ class Room:
             yield t_slot
 
     def __eq__(self, other):
+        if isinstance(other, ref):
+            other = other()
         return self.building == other.building and\
                self.number == other.number

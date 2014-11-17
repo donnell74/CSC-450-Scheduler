@@ -468,35 +468,35 @@ class ConstraintCalcFitnessError(Exception):
 
 
 def course_sections_at_different_times(this_week, arg):
-    """ Ensures that different sections of a course with the same absolute name
-    such as CSC 130 001 or 002, are not scheduled at the same time.
-    NOTE: this should work for both section numbers and lab sections denoted by
-    letters.
-    IN: the list of all courses
-    OUT: Returns 0 and adjusts week.valid as necessary
-    """
-    course_list = arg[0]
-    for i in range(len(course_list)):
-        i_code = course_list[i].code.split(' ')  # ['csc', '130', '001']
-        course_i_base_code = i_code[0] + i_code[1] # 'csc130'
-        for j in range(i + 1, len(course_list)):
-            j_code = course_list[j].code.split(' ')
-            course_j_base_code = j_code[0] + j_code[1]
-            if course_i_base_code == course_j_base_code:
-                # same base course, different sections, so pull time slots
-                course_i_time = this_week.find_course(course_list[i])[0].start_time
-                course_j_time = this_week.find_course(course_list[j])[0].start_time
-                if course_i_time == course_j_time:
-                    # check the day codes to be sure it's not MWF at 9 and TR at 9
-                    course_i_days = this_week.find_section(course_list[i].code).days
-                    course_j_days = this_week.find_section(course_list[j].code).days
-                    days_in_common = list(set(course_i_days) & set(course_j_days)) # intersection of lists
-                    if len(days_in_common) > 0:  # at least one day in common
-                        this_week.valid = False
-                        return 0
+	""" Ensures that different sections of a course with the same absolute name
+	such as CSC 130 001 or 002, are not scheduled at the same time.
+	NOTE: this should work for both section numbers and lab sections denoted by
+	letters.
+	IN: the list of all courses
+	OUT: Returns 0 and adjusts week.valid as necessary
+	"""
+        course_list = arg[0]
+	for i in range(len(course_list)):
+		i_code = course_list[i].code.split(' ')  # ['csc', '130', '001']
+		course_i_base_code = i_code[0] + i_code[1] # 'csc130'
+		for j in range(i + 1, len(course_list)):
+			j_code = course_list[j].code.split(' ')
+			course_j_base_code = j_code[0] + j_code[1]
+			if course_i_base_code == course_j_base_code:
+				# same base course, different sections, so pull time slots
+				course_i_time = this_week.find_course(course_list[i])[0].start_time
+				course_j_time = this_week.find_course(course_list[j])[0].start_time
+				if course_i_time == course_j_time:
+					# check the day codes to be sure it's not MWF at 9 and TR at 9
+					course_i_days = this_week.find_section(course_list[i].code).days
+					course_j_days = this_week.find_section(course_list[j].code).days
+					days_in_common = list(set(course_i_days) & set(course_j_days)) # intersection of lists
+					if len(days_in_common) > 0:  # at least one day in common
+						this_week.valid = False
+						return 0
 
-    # no same course/different section at the same time - week is valid
-    return 0
+	# no same course/different section at the same time - week is valid
+	return 1
 
 class Constraint:
 
