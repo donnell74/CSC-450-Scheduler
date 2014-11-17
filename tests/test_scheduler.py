@@ -5,7 +5,7 @@ from genetic import *
 import genetic.interface
 
 filename = "tests/schedules/morning_class_test.xml"
-sample_scheduler = interface.create_scheduler_from_file(filename)
+sample_scheduler = interface.create_scheduler_from_file_test(filename)
 sample_courses = interface.create_course_list_from_file_test(filename)
 
 class TestScheduler(unittest.TestCase):
@@ -31,20 +31,16 @@ class TestScheduler(unittest.TestCase):
     def test_add_contsraint(self):
         sample_scheduler.add_constraint("morning_classes", 30, 
                 constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, 
+        sample_scheduler.add_constraint("morning_classes_2", 30, 
                 constraint.morning_class, [sample_scheduler.courses[1]]) 
         self.assertEquals(len(sample_scheduler.constraints), 2)
         self.assertEquals(sample_scheduler.max_fitness, 60)
 
     def test_calc_fitness(self):
-        sample_scheduler.add_constraint("morning_classes", 30, 
-                constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, 
-                constraint.morning_class, [sample_scheduler.courses[1]]) 
-        sample_scheduler.add_constraint("morning_classes", 30, 
-                constraint.morning_class, [sample_scheduler.courses[2]]) 
+        sample_scheduler.add_constraint("lab_on_tr", 30, 
+                constraint.lab_on_tr, [sample_scheduler.courses[1]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
-        self.assertEquals(sample_scheduler.weeks[0].fitness, 60)
+        self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
 
     def test_find_respective_time_slot(self):
         pass
@@ -60,35 +56,10 @@ class TestScheduler(unittest.TestCase):
         #Make sure not exact same time slot obj"""
 
     def test_separate_by_credit(self):
-       #self.assertEquals(len(sample_scheduler.separated[1]), 0)
-        self.assertEquals(len(sample_scheduler.separated[3]), 1)
-        self.assertEquals(len(sample_scheduler.separated[4]), 1)
-        self.assertEquals(len(sample_scheduler.separated[5]), 1)
-        self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130")
-        self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 131")
-        self.assertEquals(sample_scheduler.separated[5][0].code, "CSC 232")
-
-    def test_find_time_slots_from_cuts_mwf(self):
-        filename = "tests/schedules/find_time_slots_from_cuts_mwf.xml"
-        this_scheduler = interface.create_scheduler_from_file(filename)
-        this_courses = interface.create_course_list_from_file_test(filename)
-        extras = interface.create_extras_list_from_file(filename)
-        converted = [s.day + " - " + s.room.building + " - " + s.room.number\
-            + " - " + str(s.start_time)[:-3] for s in \
-            this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0],
-                                            extras["input"]["slots_list"])]
-        self.assertEquals(converted, extras["expected"])
-
-    def test_find_time_slots_from_cuts_tr(self):
-        filename = "tests/schedules/find_time_slots_from_cuts_tr.xml"
-        this_scheduler = interface.create_scheduler_from_file(filename)
-        this_courses = interface.create_course_list_from_file_test(filename)
-        extras = interface.create_extras_list_from_file(filename)
-        converted = [s.day + " - " + s.room.building + " - " + s.room.number \
-            + " - " + str(s.start_time)[:-3] for s in \
-            this_scheduler.find_time_slots_from_cuts(this_scheduler.weeks[0], 
-                                            extras["input"]["slots_list"])]
-        self.assertEquals(converted, extras["expected"])
+        self.assertEquals(len(sample_scheduler.separated[1]), 2)
+        self.assertEquals(len(sample_scheduler.separated[3]), 3)
+        self.assertEquals(sample_scheduler.separated[1][0].code, "CSC 131 001")
+        self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130 A")
 
     def test_replace_time_slots(self):
         pass
