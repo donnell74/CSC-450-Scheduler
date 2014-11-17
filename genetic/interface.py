@@ -132,6 +132,8 @@ def create_xml_from_yaml(path_to_yaml):
 
         xml_file.close()
 
+        return
+
     except Exception as exception_instance:
         print(exception_instance)
         return None
