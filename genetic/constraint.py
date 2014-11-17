@@ -10,8 +10,9 @@ def all_before_time(this_week, args):
     holds = []
     is_mandatory = args[2]
 
-    for c in args[0]:  # access list of courses, don't pass is_mandatory
-        holds.append(course_before_time(this_week, [c, args[1]]))
+    for c in args[0]:  # access list of courses
+        holds.append(course_before_time(this_week, [c, args[1], is_mandatory]))
+
 
     if is_mandatory:
         if False in holds:
@@ -20,10 +21,8 @@ def all_before_time(this_week, args):
         else:
             return 1
     else:  # not mandatory
-        if False in holds:  # can be modified for partial credit?
-            return 0
-        else:  # no conflicts
-            return 1
+        partial_weight = get_partial_credit(holds)
+        return partial_weight
 
 
 def all_after_time(this_week, args):
@@ -35,8 +34,8 @@ def all_after_time(this_week, args):
     holds = []
     is_mandatory = args[2]
 
-    for c in args[0]:  # access list of courses, don't pass is_mandatory
-        holds.append(course_after_time(this_week, [c, args[1]]))
+    for c in args[0]:  # access list of courses
+        holds.append(course_after_time(this_week, [c, args[1], is_mandatory]))
 
     if is_mandatory:
         if False in holds:
@@ -45,10 +44,9 @@ def all_after_time(this_week, args):
         else:
             return 1
     else:  # not mandatory
-        if False in holds:  # can be modified for partial credit?
-            return 0
-        else:  # no conflicts
-            return 1
+        partial_weight = get_partial_credit(holds)
+        return partial_weight
+
 
 
 def course_before_time(this_week, args):
@@ -117,18 +115,19 @@ def instructor_time_pref_before(this_week, args):
         if each_section.time_slots[0].start_time > time_slot:
             #case 1: a course fails
             holds.append(0)
+        else:
+            holds.append(1) # case 2: a course passes
 
         if is_mandatory:
-            if len(holds) >= 1: # at least one failure
+            if False in holds: # at least one failure
                 this_week.valid = False
                 return 0
             else:
                 return 1
         else: # not mandatory, treat it like normal
-            if len(holds) >= 1:
-                   return 0
-            else: # no failures, add the weight to the fitness score
-                   return 1
+            partial_weight = get_partial_credit(holds)
+            return partial_weight
+
 
 
 def instructor_time_pref_after(this_week, args):
@@ -156,10 +155,9 @@ def instructor_time_pref_after(this_week, args):
             else:
                 return 1
         else: # not mandatory, treat it like normal
-            if len(holds) >= 1:
-                   return 0
-            else: # no failures, add the weight to the fitness score
-                   return 1
+            partial_weight = get_partial_credit(holds)
+            return partial_weight
+
 
 
 def instructor_conflict(this_week, args):
@@ -240,23 +238,37 @@ def instructor_preference_day(this_week, args):
     day_code = args[1]
     is_mandatory = args[2]
 
+    holds = []
+
     for section_week in this_week.sections:
         if instructor.name == section_week.instructor.name:
             for day in section_week.days:
                 if not day.day_code in day_code:
                     if is_mandatory:
                         this_week.valid = False
-                    return 0
+                        return 0
+                    else:
+                        holds.append(0)
+                else:
+                    holds.append(1)
+                    
+    # if mandatory and it's here, it passed
+    if is_mandatory:
+        return 0
+    else: # not mandatory, partial credit
+        partial_credit = get_partial_credit(holds)
+        return partial_credit
 
-    return 1
 
 def instructor_preference_computer(this_week, args):
     """If an instructor prefers to teach in a class with
     or without computers, validate the week on this criteria.
-    Args should be [instructor, computer_preference]"""
+    Args should be [instructor, computer_preference, is_mandatory]"""
     instructor = args[0]
     computer_preference = args[1]
     is_mandatory = args[2]
+    holds = []
+    
     for section_week in this_week.sections:
         if section_week.instructor.name == instructor.name:
             if computer_preference == True:
@@ -264,15 +276,65 @@ def instructor_preference_computer(this_week, args):
                 if section_week.room.has_computers == False:
                     if is_mandatory:
                         this_week.valid = False
-                    return 0
-            else:
+                        return 0 # mandatory contraints are all or nothing
+                    else:
+                        holds.append(0)
+                else:
+                    holds.append(1)
+            else: 
                 #instructor doesn't prefer computers
                 if section_week.room.has_computers == True:
                     if is_mandatory:
                         this_week.valid = False
+                        return 0
+                    else:
+                        holds.append(0)
+                else:
+                    holds.append(1)
+
+    # if mandatory and it's here, it passed
+    if is_mandatory:
+        return 0
+    else:
+        partial_credit = get_partial_credit(holds)
+        return partial_credit
+
+
+
+def instructor_break_constraint(this_week, args):
+    """ Allows an instructor to specify a gap where they do not
+    want to teach any courses.  (Ex: a lunch break)
+    IN: the list of args: [instructor_obj, gap_start, gap_end,
+                            is_mandatory]
+    OUT: if mandatory, sets the week validity and returns 0,
+            else partial credit score
+    """
+    instructor = args[0]
+    gap_start = args[1]
+    gap_end = args[2]
+    is_mandatory = args[3]
+
+    holds = []
+
+    for i in range(len(instructor.courses)): 
+        course = this_week.find_course(instructor.courses[i])[0]
+        if course.start_time < gap_end:
+            if course.start_time < gap_start: # before gap altogether, fine
+                holds.append(1)
+            else:  # in gap, bad
+                if is_mandatory:
+                    this_week.valid = False
                     return 0
-    #passes
-    return 1
+                else: 
+                    holds.append(0)
+        else:  # after gap altogether, course.start_time > gap_end
+            holds.append(1)
+
+    if is_mandatory: # if no fails by here, it passed
+        return 0
+    else:
+        partial_weight = get_partial_credit(holds)
+        return partial_weight
 
 
 def is_overlap(timeslot1, timeslot2):
@@ -372,24 +434,21 @@ def ensure_computer_requirement(this_week, args):
     return 1
 
 
-def time_finder(end_t, time_gap):
-    """ Helper function for num_subsequent_courses.
-        Creates a new time object <time_gap> minutes after the end_t
-        of a different course to mimic the next course's start time.
-        Returns the new time object. """
-    time_str = str(end_t)[:5]
-    t_hr, t_min = time_str.split(":")
-    t_hr = int(t_hr)
-    t_min = int(t_min)
-    if t_min < (59 - time_gap):  # can add the time_gap without problems
-        t_min += time_gap
-    else:  # less than time_gap to the next hour
-        diff = 59 - time_gap
-        t_hr += 1
-        t_min = diff
+def get_partial_credit(results_list):
+    """ Counts the number of true values in a list and returns the
+        partial credit value for the constraint weight.
+        IN: a list of true/false values, such as holds
+        OUT: a decimal (percentage) of the true values in the list. """
+    count = 0
 
-    next_start_time = time(t_hr, t_min)
-    return next_start_time
+    for value in results_list:
+        if value == True:
+                count += 1
+
+    count = float(count)/len(results_list)
+    partial_weight = round(count, 1)
+
+    return partial_weight
 
 
 class ConstraintCreationError(Exception):

@@ -49,7 +49,7 @@ class InstructorConstraint(Page):
         self.time_day_default = StringVar(self)
         self.time_day_default.set("Time")
         self.time_day_default.trace("w", self.time_day_toggle)
-        self.time_day_list = ["Time", "Day", "Computer Preference"]
+        self.time_day_list = ["Time", "Day", "Computer Preference", "Instructor Break"]
         self.option_time_day = OptionMenu(self, self.time_day_default, \
                                           *self.time_day_list)
         self.option_time_day.pack(side = TOP)
@@ -88,6 +88,11 @@ class InstructorConstraint(Page):
         self.option_priority = OptionMenu(self.time_frame, \
             self.instr_time_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
+
+        before_after_disclaimer = "Note: you should not use these constraints to specify a gap (eg, lunch break). \n" \
+                                  "If you want a gap, use an Instructor Break constraint."
+        self.disclaimer = Label(self.time_frame, text = before_after_disclaimer, wraplength = 180, justify = LEFT)
+        self.disclaimer.pack()
 
         self.submit_time = Button(self.time_frame, text = "Add Constraint", command = self.add_instr_time)
         self.submit_time.pack(side = RIGHT, pady = 25)
@@ -149,6 +154,58 @@ class InstructorConstraint(Page):
             text = "Add Constraint", command = self.add_instr_computer)
         self.submit_computer.pack(side = TOP, pady = 25)
 
+        # instructor break
+        self.break_frame = Frame(self, width = 100)
+
+        self.label_break = Label(self.break_frame, \
+                                 text = "Instructor would like no classes between:", wraplength = 120)
+        self.label_break.pack(side = TOP)
+
+        self.start_time_list = globs.start_times
+        self.end_time_list = globs.end_times
+
+        self.start_time_label = Label(self.break_frame, text = "Start Time:")
+        self.start_time_label.pack(side = TOP)
+        self.gap_start_default = StringVar()
+        self.gap_start_default.set(self.start_time_list[0])
+        self.gap_start_default.trace("w", self.callback_gap_start)
+
+        self.gap_start_option = OptionMenu(self.break_frame, \
+                                           self.gap_start_default, *self.start_time_list)
+        self.gap_start_option.pack(side = TOP)
+
+        self.end_time_label = Label(self.break_frame, text = "End Time:")
+        self.end_time_label.pack(side = TOP)
+        self.gap_end_default = StringVar()
+        self.gap_end_default.set(self.end_time_list[0]) # trace isn't necessary
+
+        self.gap_end_option = OptionMenu(self.break_frame, \
+                                         self.gap_end_default, *self.end_time_list)
+        self.gap_end_option.pack(side = TOP)
+
+        self.break_priority_label = Label(self.break_frame, text = "Priority")
+        self.break_priority_label.pack(side = TOP)
+        self.priority_list = ["Low", "Medium", "High", "Mandatory"]
+        self.break_priority_default = StringVar()
+        self.break_priority_default.set(self.priority_list[0])
+        self.break_priority = OptionMenu(self.break_frame, \
+                                         self.break_priority_default, *self.priority_list)
+        self.break_priority.pack(side = TOP)
+
+        self.submit_break = Button(self.break_frame, \
+                                   text = "Add Constraint", command = self.add_instr_break)
+        self.submit_break.pack(side = TOP, pady = 25)
+        
+    def add_instr_break(self):
+        instructor = self.str_instr_name_default.get()
+        gap_start = self.gap_start_default.get()
+        gap_start = self.string_to_time(gap_start)
+        gap_end = self.gap_end_default.get()
+        gap_end = self.string_to_time(gap_end)
+        priority = self.break_priority_default.get()
+        create_instr_break(instructor, gap_start, gap_end, priority, self.constraints)
+        pass
+
 
     def add_instr_time(self):
         instructor = self.str_instr_name_default.get()
@@ -185,6 +242,32 @@ class InstructorConstraint(Page):
         create_computer_pref_constraint(instructor, prefers_computers, priority, self.constraints)
         pass
 
+    def callback_gap_start(self, *args):
+        """ Monitors the Instructor Break start time.  If it changes,
+        this will update the end time list so that you can't have
+        bad end times (before the start time). """
+        gap_start = self.gap_start_default.get()
+        gap_start = self.string_to_time(gap_start)
+        
+        end_time_list = globs.end_times
+        gap_end_menu = self.gap_end_option["menu"]
+        gap_end_menu.delete(0, "end")
+        
+        for i in range(len(self.end_time_list)):
+            end_slot = self.string_to_time(self.end_time_list[i])
+            if gap_start <= end_slot: 
+                end_time_list = end_time_list[i:]
+                break
+        for time in end_time_list:
+            gap_end_menu.add_command(label = time,
+                                     command = lambda value = time : self.gap_end_default.set(value) )
+        self.gap_end_default.set(end_time_list[0])
+
+
+    def string_to_time(self, time_str):
+        t_hr, t_min = time_str.split(":")
+        return time( int(t_hr), int(t_min) )
+        
 
     def callbackWhen(self, *args):
         when = self.when_default.get()
@@ -204,15 +287,23 @@ class InstructorConstraint(Page):
         if time_day == "Day":
             self.time_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.break_frame.pack_forget()
             self.day_frame.pack()
         elif time_day == "Computer Preference":
             self.time_frame.pack_forget()
             self.day_frame.pack_forget()
+            self.break_frame.pack_forget()
             self.computer_frame.pack()
+        elif time_day == "Instructor Break":
+            self.time_frame.pack_forget()
+            self.day_frame.pack_forget()
+            self.computer_frame.pack_forget()
+            self.break_frame.pack()
         else:
             self.time_frame.pack()
             self.day_frame.pack_forget()
             self.computer_frame.pack_forget()
+            self.break_frame.pack_forget()
 
 
 class CourseConstraint(Page):
@@ -399,7 +490,7 @@ def constraint_adding_conflict(constraint_name, constraint_list):
 
     new_constraint = constraint_name.split('_')
     if len(constraint_list) > 0:        # no need to check first constraint
-        # !!! this logic could pontially break if we have an instructor with two last names !!!
+        # !!! this logic could potentially break if we have an instructor with two last names !!!
         if ' ' in new_constraint[0]:    # courses have a space ("CSC 111"), instructors don't
             # course constraint
             for constraint in constraint_list:
@@ -418,12 +509,32 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                         if len(new_constraint) == 3: # day pref
                             if new_constraint[2] != old_constraint[2]:  # different day codes; conflict
                                 return True
-                        elif new_constraint[3] in ["before", "after"]:  # time pref
+                        elif new_constraint[2] in ["before", "after"]:  # time pref
                             if new_constraint[3] == old_constraint[3]:  # same time slot; conflict
                                 return True
+                            else: # check if it overlaps a break constraint
+                                if old_constraint[1] == "break":
+                                    if new_constraint[3] in [old_constraint[2], old_constraint[3]]:
+                                        # on edge, not in break, it's fine
+                                        continue
+                                    else: # not on edge, check for conflict
+                                        if new_constraint[3] < old_constraint[3]:
+                                            if new_constraint[3] > old_constraint[2]:
+                                                # in break, conflict
+                                                return True
                         elif new_constraint[2] == "computers":          # computer pref
                             if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
                                 return True
+                        elif new_constraint[1] == "break":              # break constraint
+                            if old_constraint[3] in [new_constraint[2], new_constraint[3]]: 
+                                # if it's on the edge of one of the break times, it's fine
+                                continue
+                            else:  # old_constraint's time is not one of the break edges
+                                if old_constraint[3] < new_constraint[3]: # less than break end
+                                    if old_constraint[3] > new_constraint[2]: 
+                                        # in break, conflict
+                                        return True
+
     # if no return True by now, the constraint is fine and doesn't conflict
     return False
 
@@ -548,4 +659,27 @@ def create_computer_pref_constraint(instructor, prefers_computers, priority, add
     # update scrollbox with this created constraint
     added_constraints.view_constraints((constraint_name + " Priority = ", priority))
     return
+
+def create_instr_break(instructor, gap_start, gap_end, priority, added_constraints):
+    priority = get_priority_value(priority)
+    is_mandatory = False
+    if priority == 0:
+        is_mandatory = True
+
+    instructor = pull_instructor_obj(instructor)
+    constraint_name = "{0}_break_{1}_{2}".format(instructor, gap_start, gap_end)
+    
+    if okay_to_add_constraint(constraint_name) == False: return
+
+    globs.mainScheduler.add_constraint(constraint_name,
+                                       priority,
+                                       constraint.instructor_break_constraint,
+                                       [    instructor,
+                                            gap_start,
+                                            gap_end,
+                                            is_mandatory ]
+                                       )
+    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    return
+                                    
 
