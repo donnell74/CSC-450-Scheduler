@@ -8,11 +8,14 @@ from datetime import time, timedelta
 from structures import *
 from constraint import *
 import time as now
+import gc
 
 #import interface # uncomment to use export_schedule_xml 
 import xml.etree.ElementTree as ET
 import os.path
 
+#gc.set_debug(gc.DEBUG_LEAK)
+    
 
 class SchedulerInitError(Exception):
     def __init__(self, value):
@@ -376,9 +379,16 @@ class Scheduler:
                 temp = filter(lambda x: not x.valid, self.weeks)[:weeks_to_keep \
                                                                     - len(valid_weeks)]
                 temp.sort(key=lambda x: x.fitness, reverse=True)
-                self.weeks = valid_weeks + temp
+                self.weeks = (valid_weeks + temp)[:weeks_to_keep]
+            else:
+                for each_week in self.weeks:
+                    if not each_week.valid:
+                        del each_week
 
-            self.weeks = self.weeks[:weeks_to_keep]
+                self.weeks = valid_weeks[:weeks_to_keep]
+                for each_week in valid_weeks[weeks_to_keep:]:
+                    del each_week
+
             return valid_weeks
 
         # Resetting self.weeks will trigger generate_starting_population() below
@@ -429,6 +439,7 @@ class Scheduler:
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
                 break
 
+            print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
             print("Breed complete")
             total_iterations += 1

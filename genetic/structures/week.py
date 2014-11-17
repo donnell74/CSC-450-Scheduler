@@ -3,7 +3,7 @@ import structures
 from copy import copy
 from copy import deepcopy
 from datetime import time
-
+from weakref import ref
 
 class MalformedWeekError(Exception):
     def __init__(self, value):
@@ -22,7 +22,7 @@ class Week:
         if test:
             self.schedule = this_scheduler
         else:
-            self.schedule = copy(this_scheduler)
+            self.schedule = ref(this_scheduler)
         self.days = [structures.Day(rooms, day_code, self, test)
                      for day_code in 'mtwrf']
         self.fitness = 0
@@ -42,7 +42,7 @@ class Week:
             print("Invalid query for Week")
             return
         elif query == "Schedule":
-            return self.schedule
+            return self.schedule()
 
     def update_sections(self, courses):
         """Updates list of sections with all details

@@ -13,7 +13,7 @@ def init(): # call globals.init() from main
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
-    time_slot_divide = 4 #todo: remove this from xml
+    time_slot_divide = 2 #todo: remove this from xml
     #DO NOT DO THIS AGAIN
     #GREG IS SORRY
     try:
