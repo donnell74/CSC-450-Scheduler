@@ -38,7 +38,7 @@ class TestScheduler(unittest.TestCase):
 
     def test_calc_fitness(self):
         sample_scheduler.add_constraint("lab_on_tr", 30, 
-                constraint.lab_on_tr, [sample_scheduler.courses[0]])
+                constraint.lab_on_tr, [sample_scheduler.courses[1]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
 
@@ -57,11 +57,9 @@ class TestScheduler(unittest.TestCase):
 
     def test_separate_by_credit(self):
         self.assertEquals(len(sample_scheduler.separated[1]), 2)
-        self.assertEquals(len(sample_scheduler.separated[3]), 4)
-        self.assertEquals(len(sample_scheduler.separated[4]), 1)
+        self.assertEquals(len(sample_scheduler.separated[3]), 3)
         self.assertEquals(sample_scheduler.separated[1][0].code, "CSC 131 001")
-        self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130 002")
-        self.assertEquals(sample_scheduler.separated[4][0].code, "CSC 333")
+        self.assertEquals(sample_scheduler.separated[3][0].code, "CSC 130 A")
 
     def test_replace_time_slots(self):
         pass
