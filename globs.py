@@ -53,9 +53,9 @@ def init(): # call globals.init() from main
                                     constraint.course_sections_at_different_times,
                                     [courses[:-1]])  # the last item is "All", ignore it
 
-        for each_course in globs.mainScheduler.courses:
+        for each_course in mainScheduler.courses:
             if each_course.is_lab:
-                globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
+                mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
                                                constraint.lab_on_tr, [each_course])
 
 
