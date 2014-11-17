@@ -153,11 +153,14 @@ class Scheduler:
         self.constraints = []
         self.max_fitness = 0
         
-    def delete_list_constraints(self, items):
-        """Removes some constraints from list"""
-        for i in range(len(sorted(items, reverse=True))):
-            self.max_fitness -= self.constraints[i].weight
-            del self.constraints[i]
+    def delete_list_constraints(self, constraint_name_list):
+        """Removes list constraints from schedule"""
+        for constraint_name in constraint_name_list:
+            for constraint_obj in self.constraints:
+                if constraint_name == constraint_obj.name:
+                    self.max_fitness -= constraint_obj.weight
+                    self.constraints.remove(constraint_obj)
+                    break
 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
