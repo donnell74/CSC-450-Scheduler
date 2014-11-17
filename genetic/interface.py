@@ -50,6 +50,8 @@ def create_xml_from_yaml(path_to_yaml):
 
         yaml_file = open(path_to_yaml, 'r')
         yaml_dict = yaml.load(yaml_file)
+        yaml_file.close()
+
         yaml_data_object = yaml_dict['data']['schedule']
         schedule_name = yaml_data_object['name']
         course_list = yaml_data_object['course_list']
@@ -122,6 +124,8 @@ def create_xml_from_yaml(path_to_yaml):
         indent_level -= 1
 
         xml_file.write(print_indent(indent_level) + tag("data", closing = True) + newline())
+
+        xml_file.close()
 
     except Exception as exception_instance:
         print(exception_instance)
