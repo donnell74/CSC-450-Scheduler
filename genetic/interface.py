@@ -7,47 +7,52 @@ from scheduler import *
 from time import strftime, gmtime
 
 def create_xml_from_yaml(path_to_yaml):
+    """
+    Creates an xml input file (Input.xml) from yaml.
+    IN: path to yaml input
+    OUT: None (does not return anything; creates Input.xml in genetic/seeds/)
+    """
+    def course_object_to_xml_string(code, credit, instructor, prereq,
+                                    capacity, needs_computers, is_lab):
+        # since "prereq='{}'".format('') -> "prereq=''''", we need an ugly conditional
+        if prereq:
+            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='{3}' "
+                                       "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
+            return unformatted_xml_string.format(code, credit, instructor,
+                                                 prereq, capacity, needs_computers, is_lab)
+        else: # prereq == None
+            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='' "
+                                       "capacity='{3}' needs_computers='{4}' is_lab='{5}'></item>")
+            return unformatted_xml_string.format(code, credit, instructor,
+                                                 capacity, needs_computers, is_lab)
+
+    def room_object_to_xml_string(building, number, capacity, has_computers):
+        unformatted_xml_string = ("<item building='{0}' number='{1}' capacity='{2}' "
+                                  "has_computers='{3}'></item>")
+        return unformatted_xml_string.format(building, number, capacity, has_computers)
+
+    def print_number_spaces(num):
+        return " " * num
+
+    def print_indent(num):
+        return print_number_spaces(2 * num)
+
+    def schedule_tag(name):
+        return "<schedule name='{0}'>".format(name)
+
+    def tag(name, closing = False):
+        if closing == True:
+            return "</{0}>".format(name)
+        else:
+            return "<{0}>".format(name)
+
+    def newline():
+        return "\n"
+
+    def xml_header():
+        return "<?xml version='1.0'?>"
+
     try:
-        def course_object_to_xml_string(code, credit, instructor, prereq,
-                                        capacity, needs_computers, is_lab):
-            # since "prereq='{}'".format('') -> "prereq=''''", we need an ugly conditional
-            if prereq:
-                unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='{3}' "
-                                           "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
-                return unformatted_xml_string.format(code, credit, instructor,
-                                                     prereq, capacity, needs_computers, is_lab)
-            else: # prereq == None
-                unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='' "
-                                           "capacity='{3}' needs_computers='{4}' is_lab='{5}'></item>")
-                return unformatted_xml_string.format(code, credit, instructor,
-                                                     capacity, needs_computers, is_lab)
-
-        def room_object_to_xml_string(building, number, capacity, has_computers):
-            unformatted_xml_string = ("<item building='{0}' number='{1}' capacity='{2}' "
-                                      "has_computers='{3}'></item>")
-            return unformatted_xml_string.format(building, number, capacity, has_computers)
-
-        def print_number_spaces(num):
-            return " " * num
-
-        def print_indent(num):
-            return print_number_spaces(2 * num)
-
-        def schedule_tag(name):
-            return "<schedule name='{0}'>".format(name)
-
-        def tag(name, closing = False):
-            if closing == True:
-                return "</{0}>".format(name)
-            else:
-                return "<{0}>".format(name)
-
-        def newline():
-            return "\n"
-
-        def xml_header():
-            return "<?xml version='1.0'?>"
-
         yaml_file = open(path_to_yaml, 'r')
         yaml_dict = yaml.load(yaml_file)
         yaml_file.close()
