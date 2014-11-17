@@ -495,7 +495,6 @@ class ConstraintCalcFitnessError(Exception):
 
 
 def course_sections_at_different_times(this_week, arg):
-<<<<<<< HEAD
     """ Ensures that different sections of a course with the same absolute name
     such as CSC 130 001 or 002, are not scheduled at the same time.
     NOTE: this should work for both section numbers and lab sections denoted by
