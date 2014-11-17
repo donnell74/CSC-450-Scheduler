@@ -199,7 +199,7 @@ class Week:
                         for each_slot in each_day.get_room(each_course["room"].split()[1]):
                             if each_slot.start_time == startTime and \
                                each_slot.end_time == endTime:
-                                for each_s_course in self.schedule.courses:
+                                for each_s_course in self.schedule().courses:
                                     if each_s_course.code == each_course["code"]:
                                         each_slot.course = each_s_course
                                         each_slot.instructor = each_s_course.instructor

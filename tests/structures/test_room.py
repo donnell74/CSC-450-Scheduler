@@ -18,11 +18,6 @@ class TestRoom(unittest.TestCase):
         self.assertEqual(len(self.roomMWF.schedule), 3)
         self.assertEqual(len(self.roomTR.schedule), 5)
 
-    def test_info(self):
-        self.assertEqual(self.roomMWF.info("Day"), sample_scheduler.weeks[0].days[0])
-        self.assertEqual(self.roomMWF.info("Week"), sample_scheduler.weeks[0])
-        self.assertEqual(self.roomMWF.info("Schedule"), sample_scheduler) 
-
 
 if __name__ == "__main__":
     unittest.main()
