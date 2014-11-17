@@ -1,4 +1,4 @@
-from genetic import interface, scheduler
+from genetic import interface, scheduler, constraint
 
 def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
@@ -29,6 +29,29 @@ def init(): # call globals.init() from main
         '''for prereq in prereqs:
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
                   " ".join([c.absolute_course for c in prereq.prereqs])'''
+
+        # Add all mandatory constraints here
+        mainScheduler.add_constraint("instructor conflict", 0,
+                                    constraint.instructor_conflict,
+                                    [instructors])
+        mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
+                                    constraint.sequential_time_different_building_conflict,
+                                    [instructors])
+        mainScheduler.add_constraint("subsequent courses", 0,
+                                    constraint.num_subsequent_courses,
+                                    [instructors])
+        mainScheduler.add_constraint("capacity checking", 0,
+                                    constraint.ensure_course_room_capacity,
+                                    [])
+        mainScheduler.add_constraint("no overlapping courses", 0,
+                                    constraint.no_overlapping_courses,
+                                    [])
+        mainScheduler.add_constraint("computer requirement", 0,
+                                    constraint.ensure_computer_requirement,
+                                    [])
+        mainScheduler.add_constraint("course sections at different times", 0,
+                                    constraint.course_sections_at_different_times,
+                                    [courses[:-1]])  # the last item is "All", ignore it
 
     # used for gui strings
     # must be in military time
