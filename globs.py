@@ -4,23 +4,18 @@ import os
 def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
 
-    xml_input_path = "genetic/seeds/Input.xml"
     yaml_input_path = "genetic/seeds/Input.yaml"
 
-    # Find input seed from file
-    """
-    XML is preferred, but if Input.xml is not found, an attempt to find Input.yaml will be made
-    and if file is present, it will be converted to XML before proceding
-    """
-    if os.path.isfile(xml_input_path) == False: #if there is no xml input, check for yaml
-        if os.path.isfile(yaml_input_path) == False: #if neither xml nor yaml, return
-            print("No valid input found. Please put put an input seed named 'Input.yaml' or " +
+    # Create XML input from YAMl (Input.yaml)
+    if os.path.isfile(yaml_input_path) == False:
+        print("No valid input found. Please put put an input seed named 'Input.yaml' or " +
                   "'Input.xml' in ./genetic/seeds/ and try again")
-            return
-        else:
-            interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
+        return
+    else:
+        interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
 
     # Now that we have valid XML input, create requisite objects from file
+    xml_input_path = "genetic/seeds/Input.xml"
     instructors = interface.create_instructors_from_courses(xml_input_path)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
     courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
