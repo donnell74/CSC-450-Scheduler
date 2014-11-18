@@ -162,9 +162,14 @@ class InstructorConstraint(Page):
         self.max_course_value = StringVar()
         self.max_course_value.set("0")
         self.max_course_value.trace("w", self.check_is_digit)
-        self.max_course_input = Entry(self.max_course_frame, textvariable=self.max_course_value)
-        self.max_course_input.pack()
+        self.max_course_input = Entry(self.max_course_frame,
+                                      textvariable=self.max_course_value,
+                                      width=5)
+        self.max_course_input.pack(pady=10)
 
+        self.max_course_priority_label = Label(self.max_course_frame,
+                                               text="Priority")
+        self.max_course_priority_label.pack()
         self.max_course_priority_choice = StringVar()
         self.max_course_priority_choice.set("Low")
         self.option_priority = OptionMenu(self.max_course_frame,
