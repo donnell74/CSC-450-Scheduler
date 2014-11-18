@@ -68,7 +68,7 @@ class HomePage(Page):
         self.input_label.pack()
 
         self.runtime_custom_input = StringVar() #will be converted to int later, prevents type errors
-        self.runtime_custom_input.set("0")
+        self.runtime_custom_input.set("5")
         self.runtime_custom_input.trace("w", self.check_if_digit)
         
         self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)

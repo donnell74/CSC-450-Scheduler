@@ -635,7 +635,7 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
                                                  [course, time_obj, is_mandatory])
 
     # update scrollbox with this created constraint
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 
@@ -664,7 +664,7 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
         pass
 
     # update scrollbox with this created constraint
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 
@@ -694,7 +694,7 @@ def create_day_pref_constraint(instructor, day_code, priority, added_constraints
                                        [instructor, day_code, is_mandatory])
 
     # update scrollbox with this created constraint
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 
@@ -713,7 +713,7 @@ def create_computer_pref_constraint(instructor, prefers_computers, priority, add
         constraint.instructor_preference_computer, [instructor, prefers_computers, is_mandatory])
 
     # update scrollbox with this created constraint
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 def create_max_course_constraint(instructor, max_courses, priority, added_constraints):
@@ -747,6 +747,6 @@ def create_instr_break(instructor, gap_start, gap_end, priority, added_constrain
                                             gap_end,
                                             is_mandatory ]
                                        )
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
