@@ -1,10 +1,143 @@
 import csv
 from structures import *
 import os
+import yaml
 import xml.etree.ElementTree as ET
 from scheduler import *
 from time import strftime, gmtime
 from weakref import ref
+
+def create_xml_from_yaml(path_to_yaml):
+    """
+    Creates an xml input file (Input.xml) from yaml.
+    IN: path to yaml input
+    OUT: None (does not return anything; creates Input.xml in genetic/seeds/)
+    """
+    def course_object_to_xml_string(code, credit, instructor, prereq,
+                                    capacity, needs_computers, is_lab):
+        # since "prereq='{}'".format('') -> "prereq=''''", we need an ugly conditional
+        if prereq:
+            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='{3}' "
+                                       "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
+            return unformatted_xml_string.format(code, credit, instructor,
+                                                 prereq, capacity, needs_computers, is_lab)
+        else: # prereq == None
+            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='' "
+                                       "capacity='{3}' needs_computers='{4}' is_lab='{5}'></item>")
+            return unformatted_xml_string.format(code, credit, instructor,
+                                                 capacity, needs_computers, is_lab)
+
+    def room_object_to_xml_string(building, number, capacity, has_computers):
+        unformatted_xml_string = ("<item building='{0}' number='{1}' capacity='{2}' "
+                                  "has_computers='{3}'></item>")
+        return unformatted_xml_string.format(building, number, capacity, has_computers)
+
+    def print_number_spaces(num):
+        return " " * num
+
+    def print_indent(num):
+        return print_number_spaces(2 * num)
+
+    def schedule_tag(name):
+        return "<schedule name='{0}'>".format(name)
+
+    def tag(name, closing = False):
+        if closing == True:
+            return "</{0}>".format(name)
+        else:
+            return "<{0}>".format(name)
+
+    def newline():
+        return "\n"
+
+    def xml_header():
+        return "<?xml version='1.0'?>"
+
+    try:
+        yaml_file = open(path_to_yaml, 'r')
+        yaml_dict = yaml.load(yaml_file)
+        yaml_file.close()
+
+        yaml_data_object = yaml_dict['data']['schedule']
+        schedule_name = yaml_data_object['name']
+        course_list = yaml_data_object['course_list']
+        time_list_tr = yaml_data_object['time_list_tr']
+        time_list_mwf = yaml_data_object['time_list_mwf']
+        room_list = yaml_data_object['room_list']
+
+        xml_file = open('./genetic/seeds/Input.xml', 'w')
+        indent_level = 0
+
+        xml_file.write(print_indent(indent_level) + xml_header() + newline())
+        xml_file.write(print_indent(indent_level) + tag("data") + newline())
+        indent_level += 1
+
+        xml_file.write(print_indent(indent_level) + schedule_tag(schedule_name) + newline())
+        indent_level += 1
+
+        xml_file.write(print_indent(indent_level) + tag("courseList") + newline())
+        indent_level += 1
+
+        for course in course_list:
+            if course['prereq'] == None:
+                course_prereq = ""
+            else:
+                course_prereq = course['prereq']
+            course_xml_string = course_object_to_xml_string(code = course['code'],
+                                                            credit = course['credit'],
+                                                            instructor = course['instructor'],
+                                                            prereq = course_prereq,
+                                                            capacity = course['capacity'],
+                                                            needs_computers = course['needs_computers'],
+                                                            is_lab = course['is_lab'])
+            xml_file.write(print_indent(indent_level) + course_xml_string + newline())
+        indent_level -= 1
+
+        xml_file.write(print_indent(indent_level) + tag("courseList", closing = True) + newline())
+        xml_file.write(print_indent(indent_level) + tag("roomList") + newline())
+        indent_level += 1
+
+        for room in room_list:
+            room_xml_string = room_object_to_xml_string(building = room['building'],
+                                                        number = room['number'],
+                                                        capacity = room['capacity'],
+                                                        has_computers = room['has_computers'])
+            xml_file.write(print_indent(indent_level) + room_xml_string + newline())
+        indent_level -= 1
+
+        xml_file.write(print_indent(indent_level) + tag("roomList", closing = True) + newline())
+        xml_file.write(print_indent(indent_level) + tag("timeListMWF") + newline())
+        indent_level += 1
+
+        for time_slot in time_list_mwf:
+            xml_time_slot_string = "{0}{1}{2}".format(tag("item"), time_slot, tag("item", closing = True))
+            xml_file.write(print_indent(indent_level) + xml_time_slot_string + newline())
+        indent_level -= 1
+
+        xml_file.write(print_indent(indent_level) + tag("timeListMWF", closing = True) + newline())
+        xml_file.write(print_indent(indent_level) + tag("timeListTR") + newline())
+        indent_level += 1
+
+        for time_slot in time_list_tr:
+            xml_time_slot_string = "{0}{1}{2}".format(tag("item"), time_slot, tag("item", closing = True))
+            xml_file.write(print_indent(indent_level) + xml_time_slot_string + newline())
+        indent_level -= 1
+
+        xml_file.write(print_indent(indent_level) + tag("timeListTR", closing = True) + newline())
+        indent_level -= 1
+
+        xml_file.write(print_indent(indent_level) + tag("schedule", closing = True) + newline())
+        indent_level -= 1
+
+        xml_file.write(print_indent(indent_level) + tag("data", closing = True) + newline())
+
+        xml_file.close()
+
+        return
+
+    except Exception as exception_instance:
+        print(exception_instance)
+        return None
 
 def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     """Reads in an xml file and schedules all courses found in it
@@ -13,7 +146,7 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
     instructors = create_instructors_from_courses(path_to_xml)
-    instructors_dict = dict(zip([inst.name for inst in instructors], 
+    instructors_dict = dict(zip([inst.name for inst in instructors],
                            [inst for inst in instructors]))
     courses = create_course_list_from_file(path_to_xml, instructors_dict)
     rooms = create_room_list_from_file(path_to_xml)
@@ -148,7 +281,7 @@ def create_instructors_from_courses(path_to_xml):
         tree = ET.parse(path_to_xml)
         root = tree.getroot()
         instructors_unique = []
-        instructors_raw = [course.attrib["instructor"] for course in 
+        instructors_raw = [course.attrib["instructor"] for course in
                            root.find("schedule").find("courseList").getchildren()]
         for each_instructor in instructors_raw:
             if each_instructor not in instructors_unique:
@@ -161,7 +294,7 @@ def create_instructors_from_courses(path_to_xml):
 
 
 # should be updated to final object attributes (pr)
-def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"): 
+def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedules/"):
     """Exports given week as xml for testing purposes
     IN: week object, extras string, prefix string, export directory
     OUT: creates an xml file for the given input"""
@@ -188,7 +321,7 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
         out.write("</roomList>\n")
 
         out.write("<timeList>\n")
-        for each_slot in week.schedule.time_slots: 
+        for each_slot in week.schedule.time_slots:
             out.write("<item>%s</item>\n" % (each_slot))
         out.write("</timeList>\n")
 
@@ -214,8 +347,8 @@ def export_schedule_xml(week, extras="", prefix="", export_dir="./tests/schedule
 
         for instructor in instructors:
             for key in instructor.courses:
-                # course / credit / startTime / endTime / room number / instructor 
-                out.write("""<course 
+                # course / credit / startTime / endTime / room number / instructor
+                out.write("""<course
 code="%s"
 credit="%s"
 startTime="%s"

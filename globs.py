@@ -1,15 +1,26 @@
 from genetic import interface, scheduler, constraint
+import os
 
 def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
 
-    # Get all courses and instructors from file
-    input_path = "genetic/seeds/Input.xml"
-    instructors = interface.create_instructors_from_courses(input_path)
+    yaml_input_path = "genetic/seeds/Input.yaml"
+
+    # Create XML input from YAMl (Input.yaml)
+    if os.path.isfile(yaml_input_path) == False:
+        print("No valid input found. Please put put an input seed named 'Input.yaml' or " +
+                  "'Input.xml' in ./genetic/seeds/ and try again")
+        return
+    else:
+        interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
+
+    # Now that we have valid XML input, create requisite objects from file
+    xml_input_path = "genetic/seeds/Input.xml"
+    instructors = interface.create_instructors_from_courses(xml_input_path)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
-    courses = interface.create_course_list_from_file(input_path, instructors_dict)
-    rooms = interface.create_room_list_from_file(input_path)
-    time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(input_path)
+    courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
+    rooms = interface.create_room_list_from_file(xml_input_path)
+    time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(xml_input_path)
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
@@ -24,7 +35,7 @@ def init(): # call globals.init() from main
         mainScheduler.generate_starting_population(just_one = True)
 
         #prereqs computation and display
-        prereqs = interface.get_prereqs(input_path, courses)
+        prereqs = interface.get_prereqs(xml_input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
         '''for prereq in prereqs:
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
