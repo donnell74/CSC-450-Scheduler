@@ -57,7 +57,6 @@ class Week:
                 self.sections.append(each_section)
         except:
             print(each_course)
-            print(self)
 
     def find_section(self, course_code):
         """IN: course_code as string
