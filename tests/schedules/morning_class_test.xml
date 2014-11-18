@@ -43,7 +43,7 @@
     <course 
         code="CSC 131 A"
         credit="4"
-        startTime="09:00"
+        startTime="10:00"
         endTime="11:00"
         days="MWF"
         room="CHEK 209"

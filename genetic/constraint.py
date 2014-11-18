@@ -461,6 +461,7 @@ def instructor_max_courses(this_week, args):
 
     return 1
 
+
 def get_partial_credit(results_list):
     """ Counts the number of true values in a list and returns the
         partial credit value for the constraint weight.
@@ -523,7 +524,7 @@ def course_sections_at_different_times(this_week, arg):
                         return 0
 
     # no same course/different section at the same time - week is valid
-    return 0
+    return 1
 
 class Constraint:
 
