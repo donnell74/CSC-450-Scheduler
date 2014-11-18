@@ -357,7 +357,7 @@ class InstructorConstraint(Page):
             self.computer_frame.pack_forget()
             self.break_frame.pack_forget()
             self.max_course_frame.pack()
-        elif time_day == "Instructor Break":
+        elif constraint_type == "Instructor Break":
             self.time_frame.pack_forget()
             self.day_frame.pack_forget()
             self.computer_frame.pack_forget()
