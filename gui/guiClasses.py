@@ -688,6 +688,7 @@ class MainWindow(Frame):
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
 
+        # ToolTips does not work well on non-Windows platforms
         if sys.platform.startswith('win'):
             ToolTips(root)
 
