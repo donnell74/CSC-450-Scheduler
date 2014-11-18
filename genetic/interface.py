@@ -25,7 +25,6 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
                                 int(time_slot_divide))
     return_schedule.weeks.append( structures.Week(rooms, return_schedule) )
     return_schedule.weeks[0].fill_week(setCourses)
-    return_schedule.weeks[0].print_concise()
     return_schedule.weeks[0].update_sections(return_schedule.courses)
     return return_schedule
 

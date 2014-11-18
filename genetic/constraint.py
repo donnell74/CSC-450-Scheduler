@@ -456,7 +456,7 @@ def instructor_max_courses(this_week, args):
     for key in instr_courses_by_day.keys():
         if len(instr_courses_by_day[key]) > max_courses:
             if is_mandatory:
-                this_week.is_valid = False
+                this_week.valid = False
             return 0
 
     return 1
