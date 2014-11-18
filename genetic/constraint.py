@@ -112,7 +112,7 @@ def instructor_time_pref_before(this_week, args):
     for each_course in this_instructor.courses:
         #section object for course
         each_section = this_week.find_section( each_course.code )
-        if each_section.time_slots[0].start_time > time_slot:
+        if each_section.time_slots[0].start_time >= time_slot:
             #case 1: a course fails
             holds.append(0)
         else:
@@ -124,9 +124,9 @@ def instructor_time_pref_before(this_week, args):
                 return 0
             else:
                 return 1
-        else: # not mandatory, treat it like normal
-            partial_weight = get_partial_credit(holds)
-            return partial_weight
+    # not mandatory, treat it like normal
+    partial_weight = get_partial_credit(holds)
+    return partial_weight
 
 
 
@@ -154,9 +154,9 @@ def instructor_time_pref_after(this_week, args):
                 return 0
             else:
                 return 1
-        else: # not mandatory, treat it like normal
-            partial_weight = get_partial_credit(holds)
-            return partial_weight
+    # not mandatory, treat it like normal
+    partial_weight = get_partial_credit(holds)
+    return partial_weight
 
 
 
