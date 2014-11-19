@@ -402,7 +402,7 @@ class Scheduler:
         self.weeks = []
         time_limit = now.time() + 60 * minutes_to_run
         while True:
-            print('Generation counter:', counter + 1)
+            # print('Generation counter:', counter + 1)
             # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
 
             self.weeks = filter(lambda x: x.complete, self.weeks)
@@ -422,19 +422,19 @@ class Scheduler:
             #print([i.fitness for i in self.weeks])
 
             valid_weeks = week_slice_helper()
-            print("Calculated fitness")
-            print("Time left for evolution loop: %d seconds" % (time_limit - floor(now.time())))
+            # print("Calculated fitness")
+            # print("Time left for evolution loop: %d seconds" % (time_limit - floor(now.time())))
             if now.time() > time_limit:
-                print('Time limit reached; final output found')
-                print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
+                # print('Time limit reached; final output found')
+                # print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
-            print("Minimum fitness of the top schedules of the generation:",
-                  min(i.fitness for i in self.weeks))
+            # print("Minimum fitness of the top schedules of the generation:",
+                  # min(i.fitness for i in self.weeks))
             # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
             #                          str(min(i.fitness for i in self.weeks))
 
-            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # print("Number of valid weeks for the generation:", str(len(valid_weeks)))
             # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
             #                          str(len(valid_weeks))
 
@@ -453,15 +453,14 @@ class Scheduler:
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
                 break
 
-            print("Breed started with ", len(self.weeks), " weeks.")
+            # print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
-            print("Breed complete")
+            # print("Breed complete")
 
             total_iterations += 1
             counter += 1
-            print("Number of weeks:", str(len(self.weeks)))
-            print()
-
+            # print("Number of weeks:", str(len(self.weeks)))
+            # print()
         print("Final number of generations: ", total_iterations + 1)
 
     def time_slot_available(self, day, first_time_slot):

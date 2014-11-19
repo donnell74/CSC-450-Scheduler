@@ -738,7 +738,11 @@ class MiscPage(Page):
 
     def update(self):
 
-        self.load_bar['width'] += 1
+        print(self.load_bar['width'])
+        if self.load_bar['width'] <= 40:
+            self.load_bar['width'] += 1
+        else:
+            print("bar is overflowing! this shouldn't be happening!")
         # part 1 of the genetic algorithm
 
         # if self.past == "":
@@ -897,7 +901,7 @@ class MainWindow(Frame):
             current_time = time()
 
             if (current_time - last_time) >= seconds_per_update:
-                print("updating")
+                # print("updating")
                 # update loading bar on misc_page
                 self.misc_page.update()
                 last_time = current_time
