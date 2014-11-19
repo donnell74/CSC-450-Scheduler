@@ -882,7 +882,7 @@ class MainWindow(Frame):
                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.view_btn.pack(fill=X, side="top", pady=2)
 
-        self.misc_btn = Button(self.menu, text='Misc', command=self.show_misc, \
+        self.misc_btn = Button(self.menu, text='Splash', command=self.show_misc, \
                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.misc_btn.pack(fill=X, side="top", pady=2)
 
