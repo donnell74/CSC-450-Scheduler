@@ -169,7 +169,8 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
-            this_week.constraints[each_constraint.name] = each_fitness
+            this_week.constraints[each_constraint.name] = [each_fitness,
+                    each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness

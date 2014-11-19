@@ -127,7 +127,7 @@ class ViewPage(Page):
         #button to show if constraints were accepted or rejected
         self.constraint_acceptance = Button(self,
                                             command = lambda : self.toggle_constraint_acceptance(),
-                                            text = 'Toggle Constriant',
+                                            text = 'View Constraints',
                                             padx =10, pady = 3,
                                             cursor = 'hand2')
         self.constraint_acceptance.place(x = 533, y = 1)
@@ -686,7 +686,9 @@ class ViewPage(Page):
         """ Formats the compact schedules """                
         for key in constraints_dict.keys():
             self.table_labels.append(Label(self,
-                                           text = str(constraints_dict[key]).ljust(5) + key.rjust(100),
+                                           text = (str(constraints_dict[key][0]) + '/' +\
+                                                   str(constraints_dict[key][1]))\
+                                               .ljust(5) + key.rjust(100),
                                            font=(font_style, size_l),
                                            width = 66,
                                            bg = 'white',
