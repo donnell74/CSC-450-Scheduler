@@ -122,7 +122,7 @@ class Scheduler:
         self.max_fitness = 0
 
         # default message to be displayed on the loading screen
-        self.gui_loading_info = "Generating schedules, please wait."
+        self.gui_loading_info = ""
         self.gui_loading_info1 = self.gui_loading_info2 = self.gui_loading_info3 = ""
 
         #Courses separated by credit hours
@@ -403,7 +403,7 @@ class Scheduler:
         time_limit = now.time() + 60 * minutes_to_run
         while True:
             print('Generation counter:', counter + 1)
-            self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
+            # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
 
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
@@ -431,12 +431,12 @@ class Scheduler:
 
             print("Minimum fitness of the top schedules of the generation:",
                   min(i.fitness for i in self.weeks))
-            self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
-                                     str(min(i.fitness for i in self.weeks))
+            # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
+            #                          str(min(i.fitness for i in self.weeks))
 
             print("Number of valid weeks for the generation:", str(len(valid_weeks)))
-            self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
-                                     str(len(valid_weeks))
+            # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
+            #                          str(len(valid_weeks))
 
             #insufficient valid weeks
             """
@@ -802,7 +802,7 @@ class Scheduler:
             #print("Schedule", counter, "generated")
 
             # update message to be shown on the gui loading screen
-            self.gui_loading_info = "Schedule " + str(counter) + " generated"
+            # self.gui_loading_info = "Schedule " + str(counter) + " generated"
 
         if len(self.weeks) == 0:
             print("Could not schedule")

@@ -711,15 +711,17 @@ class MiscPage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Misc Page", \
-                                font =(font_style, size_h2))
-        self.head_label.pack()
+        self.head_label = Label(self, text="Generating schedules...",
+                                font = (font_style, size_h2))
+        self.head_label.pack(pady = 80)
 
         self.load_bar_bg = Label(self, width = 40, height = 2)
-        self.load_bar_bg.place(x = 207, y = 70)
+        self.load_bar_bg['bg'] = 'gray'
+        self.load_bar_bg.place(x = 207, y = 120)
 
         self.load_bar = Label(self, width = 0, height = 2)
-        self.load_bar.place(x = 207, y = 70)
+        self.load_bar['bg'] = 'green'
+        self.load_bar.place(x = 207, y = 120)
 
         self.info_label = Label(self, text='', \
                           font =(font_style, size_l))
@@ -736,39 +738,41 @@ class MiscPage(Page):
 
     def update(self):
 
+        self.load_bar['width'] += 1
         # part 1 of the genetic algorithm
-        if self.past == "":
-            info = globs.mainScheduler.gui_loading_info
-            self.info_label['text'] = info
 
-            if not self.is_loading:
-                if info.split(' ')[0] == "Schedule" and info.split(' ')[2] == "generated":
-                    self.load_bar['bg'] = 'green'
-                    self.is_loading = True
-                else:
-                    self.load_bar_bg['bg'] = 'gray'
-                    self.load_bar['bg'] = 'gray'
-            else:
-                if info != self.prev_text:
-                    self.load_bar['width'] += 2
-                    self.prev_text = info
-        # part 2 of the genetic algorithm
-        else:
-            info1 = globs.mainScheduler.gui_loading_info1
-            #info2 = globs.mainScheduler.gui_loading_info2
-            #info3 = globs.mainScheduler.gui_loading_info3
-            info2 = info3 = ''
+        # if self.past == "":
+        #     info = globs.mainScheduler.gui_loading_info
+        #     self.info_label['text'] = info
 
-            temp = [info1, info2, info3]
+        #     if not self.is_loading:
+        #         if info.split(' ')[0] == "Schedule" and info.split(' ')[2] == "generated":
+        #             self.load_bar['bg'] = 'green'
+        #             self.is_loading = True
+        #         else:
+        #             self.load_bar_bg['bg'] = 'gray'
+        #             self.load_bar['bg'] = 'gray'
+        #     else:
+        #         if info != self.prev_text:
+        #             self.load_bar['width'] += 2
+        #             self.prev_text = info
+        # # part 2 of the genetic algorithm
+        # else:
+        #     info1 = globs.mainScheduler.gui_loading_info1
+        #     #info2 = globs.mainScheduler.gui_loading_info2
+        #     #info3 = globs.mainScheduler.gui_loading_info3
+        #     info2 = info3 = ''
 
-            if info1 != self.prev_text:
-                self.load_bar['width'] += 2
-                self.prev_text = info1
+        #     temp = [info1, info2, info3]
 
-                for i in xrange(3):
-                    self.labels[i]['text'] = temp[i]
+        #     if info1 != self.prev_text:
+        #         self.load_bar['width'] += 2
+        #         self.prev_text = info1
 
-        self.past = globs.mainScheduler.gui_loading_info1
+        #         for i in xrange(3):
+        #             self.labels[i]['text'] = temp[i]
+
+        # self.past = globs.mainScheduler.gui_loading_info1
 
     def finish_loading(self):
         self.load_bar['width'] = 40
@@ -859,8 +863,8 @@ class MainWindow(Frame):
         globs.mainScheduler.evolution_loop(runtime_var)
         globs.mainScheduler.evolution_loop()
 
-        interface.export_schedules(globs.mainScheduler.weeks)
         self.run_finished = True
+        self.root.after(250, interface.export_schedules(globs.mainScheduler.weeks)) #does not work
         return
 
     def finished_running(self):
@@ -879,18 +883,24 @@ class MainWindow(Frame):
     def loading_bar(self):
         self.root.after(250, self.show_misc)
 
-        prev = time()
+        last_time = time()
+        total_runtime = self.home_page.runtime_selected_var.get()
+        runtime_sec = total_runtime * 60
+        bar_width = 40.0
 
-        fps = 5.0   # update misc_page this many times a second
-        fps = 1/fps
+        seconds_per_update = runtime_sec / bar_width
+        print("runtime_sec", runtime_sec)
+        print("bar_width", bar_width)
+        print("seconds_per_update", seconds_per_update)
 
         while not self.run_finished:
-            curr = time()
+            current_time = time()
 
-            if (curr - prev) >= fps:
+            if (current_time - last_time) >= seconds_per_update:
+                print("updating")
                 # update loading bar on misc_page
                 self.misc_page.update()
-                prev = curr
+                last_time = current_time
 
         self.misc_page.finish_loading()
         self.root.after(100, self.finished_running)
