@@ -419,7 +419,7 @@ class Scheduler:
             number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
             print(number_of_segments_to_add)
             while number_of_segments_to_add > 1:
-                print("*****************UPDATING*******************")
+                print("Updating the loading bar")
                 main_window_object.go_to_loading_screen()
                 loading_screen.update_loading_bar()
                 number_of_segments_to_add -= 1
@@ -476,7 +476,7 @@ class Scheduler:
             print("Number of weeks:", str(len(self.weeks)))
             print()
         print("Final number of generations: ", total_iterations + 1)
-        #loading_screen.finish_loading()
+        main_window_object.finished_running()
 
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:

@@ -933,11 +933,11 @@ class MainWindow(Frame):
         globs.mainScheduler.evolution_loop(self, runtime_var)
 
         self.run_finished = True
-        self.root.after(250, interface.export_schedules(globs.mainScheduler.weeks)) #does not work
         return
 
     def finished_running(self):
         """ Display view_page after run_scheduler is finished running. """
+        self.misc_page.finish_loading()
 
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.view_page.is_run_clicked = True
@@ -969,11 +969,6 @@ class MainWindow(Frame):
         return
 
 
-    def nothing(self):
-        while True:
-            self.after(250, self.show_misc)
-
-
     def run_scheduler(self):
 
         if not self.run_clicked:
@@ -985,5 +980,11 @@ class MainWindow(Frame):
             # RUN SCHEDULER METHOD
             # Add hard/obvious constraints before running
             self.thread_run_scheduler()
+
+            # only export schedules if it is possible
+            try:
+                interface.export_schedules(globs.mainScheduler.weeks)
+            except:
+                print("Could not export schedules")
 
         return
