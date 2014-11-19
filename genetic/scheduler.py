@@ -7,7 +7,7 @@ from math import floor
 from datetime import time, timedelta
 from structures import *
 from constraint import *
-import time as now
+from time import clock
 import gc
 
 #import interface # uncomment to use export_schedule_xml
@@ -373,6 +373,7 @@ class Scheduler:
 
     def evolution_loop(self, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
+        clock() #stopwatch starts
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
@@ -400,18 +401,15 @@ class Scheduler:
 
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
-        time_limit = now.time() + 60 * minutes_to_run
+        time_limit = 60 * minutes_to_run 
         while True:
-            # print('Generation counter:', counter + 1)
+            print('Generation counter:', counter + 1)
             # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
 
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
-                time_to_run_gsp = now.time()
                 self.generate_starting_population()
-                time_to_run_gsp = now.time() - time_to_run_gsp
-                time_limit = time_limit + time_to_run_gsp
                 total_iterations += 1
                 counter += 1
                 continue
@@ -419,48 +417,36 @@ class Scheduler:
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
-            #print([i.fitness for i in self.weeks])
 
             valid_weeks = week_slice_helper()
-            # print("Calculated fitness")
-            # print("Time left for evolution loop: %d seconds" % (time_limit - floor(now.time())))
-            if now.time() > time_limit:
-                # print('Time limit reached; final output found')
-                # print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
+            print("Calculated fitness")
+            print("Time left for evolution loop: %d seconds" % (time_limit - clock()))
+            if clock() > time_limit:
+                print('Time limit reached; final output found')
+                print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
-            # print("Minimum fitness of the top schedules of the generation:",
-                  # min(i.fitness for i in self.weeks))
+            print("Minimum fitness of the top schedules of the generation:",
+                  min(i.fitness for i in self.weeks))
             # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
             #                          str(min(i.fitness for i in self.weeks))
 
-            # print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
             # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
             #                          str(len(valid_weeks))
-
-            #insufficient valid weeks
-            """
-            if len(valid_weeks) == 0:
-                print("Generating a new population")
-                self.weeks = []
-                self.generate_starting_population()
-                total_iterations += 1
-                counter += 1
-                continue
-                """
 
             if min(i.fitness for i in self.weeks) == self.max_fitness and \
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
                 break
 
-            # print("Breed started with ", len(self.weeks), " weeks.")
+            print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
-            # print("Breed complete")
+            print("Breed complete")
 
             total_iterations += 1
             counter += 1
-            # print("Number of weeks:", str(len(self.weeks)))
-            # print()
+            print("Number of weeks:", str(len(self.weeks)))
+            print()
         print("Final number of generations: ", total_iterations + 1)
 
     def time_slot_available(self, day, first_time_slot):

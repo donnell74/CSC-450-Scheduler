@@ -738,7 +738,7 @@ class MiscPage(Page):
 
     def update(self):
 
-        print(self.load_bar['width'])
+        # print(self.load_bar['width'])
         if self.load_bar['width'] <= 40:
             self.load_bar['width'] += 1
         else:
