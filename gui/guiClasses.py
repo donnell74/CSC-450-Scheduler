@@ -860,6 +860,7 @@ class MainWindow(Frame):
 
     def thread_run_scheduler(self):
         instructors = globs.instructors
+        self.misc_page.load_bar['width'] = 0 # make sure loading bar starts at 0 each run
         # RUN SCHEDULER METHOD
         # Add hard/obvious constraints before running
         runtime_var = self.home_page.runtime_selected_var.get()
