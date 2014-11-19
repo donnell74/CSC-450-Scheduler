@@ -11,14 +11,71 @@ import tkMessageBox
 
 
 class Page(Frame):
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root):
         Frame.__init__(self, root)
 
     def show(self):
         self.lift()
 
-class HomeConstraintPage(Page):
+class AddedConstraintsScreen(Page):
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
+    def __init__(self, root, constraints):
+        Frame.__init__(self, root, width = 30, height = 50)
+        
+        # list that holds Constraint objects
+        self.constraints = constraints
 
+        # holds the scrollbox output text for the added constraints
+        self.constraint_output = []
+        
+        textL = " Constraints Added: "
+        self.text = Label(self, text = textL)
+        self.text.pack(anchor = NW, expand = YES)
+        
+        # scrollbox
+        self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
+        self.scroll['font'] = ('Courier New', '11')
+        self.scroll.pack(fill = BOTH, padx = 5, pady = 5)
+
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #     
+    def view_constraints(self, constraint):
+        output = constraint[0]
+        #output = output.strip("Constraint Conflict")
+        
+        if constraint[1] == 10:
+            output += 'Low'
+        elif constraint[1] == 25:
+            output += 'Medium'
+        elif constraint[1] == 50:
+            output += 'High'
+        elif constraint[1] == 100:
+            output += 'Mandatory'
+            
+        output += '\n'
+        self.constraint_output.append(output)
+
+        # clear scrollbox
+        self.scroll.delete('1.0', END)
+
+        # insert constraint output to scrollbox
+        for constraint in self.constraint_output:
+            self.scroll.insert(INSERT, constraint)
+        
+class HomeConstraintPage(Page):
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root):
         Frame.__init__(self, root)
 
@@ -27,7 +84,10 @@ class HomeConstraintPage(Page):
         self.description_label.pack()
 
 class InstructorConstraint(Page):
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
 
@@ -155,7 +215,7 @@ class InstructorConstraint(Page):
 
         self.submit_computer = Button(self.computer_frame, text = "Add Constraint", command = self.add_instr_computer)
         self.submit_computer.pack(side = TOP, pady = 25)
-
+        
         # ADD MAX PER DAY STUFFS HERE
         self.max_course_frame = Frame(self, width=100)
 
@@ -253,7 +313,10 @@ class InstructorConstraint(Page):
         create_instr_break(instructor, gap_start, gap_end, priority, self.constraints)
         return
 
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def add_instr_time(self):
         instructor = self.str_instr_name_default.get()
         before_after = self.when_default.get()
@@ -277,7 +340,10 @@ class InstructorConstraint(Page):
         create_day_pref_constraint(instructor, day_code, priority, self.constraints)
         return
 
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def add_instr_computer(self):
         instructor = self.str_instr_name_default.get()
         radiobutton = self.computer_radiobutton
@@ -336,7 +402,10 @@ class InstructorConstraint(Page):
                 menu.add_command(label=time, command=lambda value=time : self.time_default.set(value))
         self.time_default.set(t[0])
 
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def constraint_type_toggle(self, *args):
         constraint_type = self.constraint_type_choice.get()
         if constraint_type == "Day":
@@ -371,7 +440,10 @@ class InstructorConstraint(Page):
             self.time_frame.pack()
 
 class CourseConstraint(Page):
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
 
@@ -418,6 +490,10 @@ class CourseConstraint(Page):
         self.button_go = Button(self, text="Add Constraint", command=self.go)
         self.button_go.pack(side = RIGHT, pady = 25)
 
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #      
     def go(self):
         course = self.str_course_default.get()
         time =  self.str_time_default.get()
@@ -425,6 +501,10 @@ class CourseConstraint(Page):
         priority = self.course_time_priority_default.get()
         create_course_time_constraint(course, time, when, priority, self.constraints)
 
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def callbackWhen(self, *args):
         when = self.str_when_default.get()
         menu = self.option_time["menu"]
@@ -438,7 +518,10 @@ class CourseConstraint(Page):
         self.str_time_default.set(t[0])
 
 class ConstraintPage(Page):
-
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
         self.head_label = Label(self, text="Constraint Page", \
@@ -473,14 +556,26 @@ class ConstraintPage(Page):
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
 
+    ## Adding a instructor constraint 
+    #  @param self
+    #  @param add_instructor A instructor object 
+    #       
     def add_instructor_constraint(self):
         self.instructor_page.pack(side = LEFT, padx = 50)
         self.course_page.pack_forget()
 
+    ## Adding a course constraint 
+    #  @param self
+    #  @param add_instructor A course object 
+    #           
     def add_course_constraint(self):
         self.course_page.pack(side = LEFT, padx = 50)
         self.instructor_page.pack_forget()
 
+    ## Creating a widget  
+    #  @param self
+    #  @param create_widget Adding a widget 
+    #           
     def create_widgets(self):
 
         self.button_course = Button(self, text="Add Course Constraint", command=self.add_course_constraint)
@@ -488,8 +583,11 @@ class ConstraintPage(Page):
 
         self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
         self.button_instructor.pack(anchor = NW, padx = 50)
-
-
+        
+## Looking for a priority value
+#  
+#  @param get_priority_object A priority object 
+#  @return get_priority_value Priority levels
 def get_priority_value(priority):
     priorities = {"Low": 10,
                   "Medium": 25,
@@ -500,6 +598,10 @@ def get_priority_value(priority):
     return priority
 
 
+## Looking for a particular instructor
+#  
+#  @param pull_instructor_object A instructor object 
+#  @return pull_instructor Instructors 
 def pull_instructor_obj(instructor):
     for i in range(len(globs.instructors)):
         if instructor == globs.instructors[i].name:  # look for appropriate instructor object
@@ -507,7 +609,10 @@ def pull_instructor_obj(instructor):
             break
     return instructor
 
-
+## Creates a course_time constraint
+#  
+#  @param create_course_time_constrainst A course is set to be taught at specific times
+#  @return List_of_course_times A list of times in a day a course is taught  
 def okay_to_add_constraint(name):
     """
     Checks if constraint is nonduplicate and nonconflicting.
@@ -644,6 +749,10 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
     return
 
 
+## Creates a time preference constraint
+#  
+#  @param create_time_preference A instructor will have the option on what times to lecture
+#  @return List_of_times A list of times in a day  
 def create_time_pref_constraint(instructor, before_after, timeslot, priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
@@ -672,7 +781,11 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
     added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
-
+## Creates a day preference constraint
+#  
+#
+#  @param create_day_preference A instructor will have the option on what days to lecture
+#  @return List_of_days A list of days in a week  
 def create_day_pref_constraint(instructor, day_code, priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
