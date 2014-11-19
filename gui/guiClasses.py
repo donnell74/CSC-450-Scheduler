@@ -942,7 +942,8 @@ class MainWindow(Frame):
 
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.view_page.is_run_clicked = True
-        self.view_page.insert_schedule(0)  # show the first schedule in the view page
+        if globs.mainScheduler.weeks[0].valid:
+            self.view_page.insert_schedule(0)  # show the first schedule in the view page
         self.view_page.show_nav()
 
         # DISPLAY VIEW PAGE

@@ -3,12 +3,12 @@ from guiClasses import *
 from guiConstraintsView import *
 from datetime import time
 import sys
+from genetic.structures.course import Course
 sys.path.append("../")
 import globs
 from genetic import constraint
 from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
 import tkMessageBox
-
 
 class Page(Frame):
     ## 
@@ -171,6 +171,7 @@ class InstructorConstraint(Page):
             box = Checkbutton(self.day_frame, text = self.days[i], variable = self.value)
             box.pack(side = TOP, anchor = CENTER)
 
+        
         self.priority_label = Label(self.day_frame, text = "Priority: ")
         self.priority_label.pack()
         self.instr_day_priority_default = StringVar(self)
@@ -437,19 +438,75 @@ class InstructorConstraint(Page):
             self.computer_frame.pack_forget()
             self.max_course_frame.pack_forget()
             self.break_frame.pack_forget()
-            self.time_frame.pack()
+
+#constants
+PARTIAL_SCHEDULING = "Partial Scheduling"
+TIME = "Time"
+MANUAL_CONCURRENCY = "Manual Concurrency"
 
 class CourseConstraint(Page):
+    """Course constraint frame"""
+
     ## 
     #  @param self
     #  @param __init__ Building a constriant page
     #  
-    def __init__(self, root, constraints):
+    def __init__(self, root, constraints_view_obj):
         Frame.__init__(self, root)
 
-        globs.init()
+        #globs.init()
 
-        self.constraints = constraints
+        message_type = Label(self, text="Type:")
+        message_type.pack(side = TOP)
+
+        self.str_type_default = StringVar(self)
+        self.str_type_default.set(TIME)
+        self.str_type_default.trace("w", self.callback_type)
+        self.option_type = OptionMenu(self, self.str_type_default, TIME, PARTIAL_SCHEDULING,\
+                              MANUAL_CONCURRENCY)
+        self.option_type.pack(side = TOP)
+
+        self.course_container = Frame(self)
+        self.course_container.pack(fill=BOTH, side = TOP)
+
+        # PAGES
+        self.type_time_page = TypeTime(self.course_container, constraints_view_obj)
+        self.type_time_page.pack()
+
+        self.type_partial_scheduling_page = TypePartialScheduling(self.course_container,\
+                                                                  constraints_view_obj)
+
+        self.type_manual_concurrency_page = TypeManualConcurrency(self.course_container,\
+                                                                 constraints_view_obj)
+
+        # INITIALIZE WITH type time
+        self.type_time_page.lift()
+
+    def callback_type(self, *args):
+        constraint_type_str = self.str_type_default.get()
+
+        if constraint_type_str == TIME:
+            self.type_time_page.pack()
+
+            self.type_partial_scheduling_page.pack_forget()
+            self.type_manual_concurrency_page.pack_forget()
+
+        elif constraint_type_str == MANUAL_CONCURRENCY:
+            self.type_manual_concurrency_page.pack()
+
+            self.type_time_page.pack_forget()
+            self.type_partial_scheduling_page.pack_forget()
+
+        elif constraint_type_str == PARTIAL_SCHEDULING:
+            self.type_partial_scheduling_page.pack()
+            self.type_time_page.pack_forget()
+            self.type_manual_concurrency_page.pack_forget()
+
+class TypeTime(Frame):
+    def __init__(self, root, constraints_view_obj):
+        Frame.__init__(self, root)
+
+        self.constraints_view_obj = constraints_view_obj
 
         message_course = Label(self, text="Course code:")
         message_course.pack(side = TOP)
@@ -460,19 +517,19 @@ class CourseConstraint(Page):
         self.str_course_default.set(list_of_courses[0])
         self.option_course = OptionMenu(self, self.str_course_default, *list_of_courses)
         self.option_course.pack(side = TOP)
-
+    
         message_when = Label(self, text="When:")
         message_when.pack(side = TOP)
-
+    
         self.str_when_default = StringVar(self)
         self.str_when_default.set("Before")
-        self.str_when_default.trace("w", self.callbackWhen)
+        self.str_when_default.trace("w", self.callback_after_before)
         self.option_when = OptionMenu(self, self.str_when_default, "Before", "After")
         self.option_when.pack(side = TOP)
-
+    
         message_time = Label(self, text="Time:")
         message_time.pack(side = TOP)
-
+    
         self.str_time_default = StringVar(self)
         self.str_time_default.set(globs.start_times[1]) #set the second element
         self.option_time = OptionMenu(self, self.str_time_default, *globs.start_times[1:])
@@ -484,38 +541,257 @@ class CourseConstraint(Page):
         self.course_time_priority_default = StringVar(self)
         self.course_time_priority_default.set("Low") # initial value
         self.option_priority = OptionMenu(self, \
-            self.course_time_priority_default, "Low", "Medium", "High", "Mandatory")
+        self.course_time_priority_default, "Low", "Medium", "High", "Mandatory")
         self.option_priority.pack(side = TOP)
 
-        self.button_go = Button(self, text="Add Constraint", command=self.go)
-        self.button_go.pack(side = RIGHT, pady = 25)
+        self.button_add_course_constraint = Button(self, text="Add Constraint",\
+                                            command=self.add_course_constraint)
+        self.button_add_course_constraint.pack(side = RIGHT, pady = 25)
 
     ## 
     #  @param self
     #  @param __init__ Building a constriant page
     #      
-    def go(self):
+    def add_course_constraint(self):
+        """Adds course constraint"""
         course = self.str_course_default.get()
-        time =  self.str_time_default.get()
+        time_str =  self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.course_time_priority_default.get()
-        create_course_time_constraint(course, time, when, priority, self.constraints)
+        create_course_time_constraint(course, time_str, when, priority, self.constraints_view_obj)
 
-    ## 
+    ##
     #  @param self
     #  @param __init__ Building a constriant page
     #  
-    def callbackWhen(self, *args):
+    def callback_after_before(self, *args):
+        """Toggles changes in the when field"""
         when = self.str_when_default.get()
         menu = self.option_time["menu"]
         menu.delete(0, "end")
-        if(when == "After"):
-            t = globs.start_times[:-1]
+        if when == "After":
+            start_times = globs.start_times[:-1]
         else:
-             t = globs.start_times[1:]
-        for time in t :
-                menu.add_command(label=time, command=lambda value=time : self.str_time_default.set(value))
-        self.str_time_default.set(t[0])
+            start_times = globs.start_times[1:]
+        for start_time in start_times :
+            menu.add_command(label=start_time,\
+                              command=lambda value=start_time : self.str_time_default.set(value))
+        self.str_time_default.set(start_times[0])
+
+class TypeManualConcurrency(Frame):
+    def __init__(self, root, constraints_view_obj):
+        Frame.__init__(self, root)
+
+        self.constraints_view_obj = constraints_view_obj
+
+        message_course = Label(self, text="Select courses:")
+        message_course.pack(side = TOP)
+        
+        self.listbox_frame = Frame(self)
+        self.listbox_frame.pack(side = TOP)
+        
+        self.scrollbar = Scrollbar(self.listbox_frame, orient=VERTICAL)
+        self.listbox = Listbox(self.listbox_frame, yscrollcommand = self.scrollbar.set,\
+                                selectmode = MULTIPLE)
+
+        self.scrollbar.config(command=self.listbox.yview)
+
+        self.listbox.pack(side=LEFT, fill=X, expand=1)
+        self.scrollbar.pack(side=RIGHT, fill=Y)
+        
+        self.list_of_courses = []
+        for course in globs.courses:
+            if isinstance(course, Course):
+                self.list_of_courses.append(course)
+
+
+        for item in self.list_of_courses:
+            self.listbox.insert(END, item)
+        
+        priority_options = ["Low", "Medium", "High", "Mandatory"]
+        self.priority_label = Label(self, text = "Priority: ")
+        self.priority_label.pack()
+        self.str_priority_default = StringVar(self)
+        self.str_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self,
+                                          self.str_priority_default,
+                                          *priority_options)
+        self.option_priority.pack(side = TOP)
+ 
+        self.button_add_course_constraint = Button(self, text="Add Constraint",\
+                                            command=self.add_course_constraint)
+        self.button_add_course_constraint.pack(side = BOTTOM, pady = 25)
+
+    def add_course_constraint(self):
+        """Adds course constraint"""
+        selection = self.listbox.curselection()
+        if len(selection) > 1:
+            list_courses_obj = []
+            for i in selection :
+                list_courses_obj.append(self.list_of_courses[i])
+
+            self.listbox.selection_clear(0, END)
+            
+            priority = self.str_priority_default.get()
+            
+            create_manual_concurrency_constraint(list_courses_obj, priority, self.constraints_view_obj)
+        else:
+            tkMessageBox.showerror(title="Error", message="Select more than 1 course")
+
+def create_manual_concurrency_constraint(list_courses_obj, priority, constraints_view_obj):
+    #Cameron
+    constraint_name = "manual_concurrency"
+    for course_obj in list_courses_obj:
+        constraint_name += "_" + course_obj.code 
+    constraints_view_obj.add_constraint_listbox(constraint_name, priority)
+
+def create_course_partial_scheduling_constraint(course_str, room_str, days_str, when,\
+                                                constraints_view_obj, time_initial_str,\
+                                                time_end_str):
+    #Cameron
+    constraint_name = "partial_scheduling" + "_" + course_str + "_" + room_str + "_" + days_str + "_" + when 
+    
+    priority = get_priority_value("Mandatory")
+    constraints_view_obj.add_constraint_listbox(constraint_name, priority)
+
+class TypePartialScheduling(Frame):
+    def __init__(self, root, constraints_view_obj):
+        Frame.__init__(self, root)
+
+        self.constraints_view_obj = constraints_view_obj
+
+        message_course = Label(self, text="Course code:")
+        message_course.pack(side = TOP)
+
+        self.str_course_default = StringVar(self)
+        list_of_courses = []
+        for course in globs.courses:
+            if isinstance(course, Course):
+                list_of_courses.append(course)
+
+        self.str_course_default.set(list_of_courses[0])
+        self.str_course_default.trace("w", self.callback_course_change)
+        self.option_course = OptionMenu(self, self.str_course_default, *list_of_courses)
+        self.option_course.pack(side = TOP)
+     
+        message_room = Label(self, text="Room:")
+        message_room.pack(side = TOP)
+     
+        rooms_list_tuple = globs.rooms
+
+        room_str_list = []
+        for building, number, capacity, has_computer in rooms_list_tuple:
+            room_str_list.append(building + " " + number)
+        
+        self.str_room_default = StringVar(self)
+        self.str_room_default.set(room_str_list[0])
+        self.option_room = OptionMenu(self, self.str_room_default, *room_str_list)
+        self.option_room.pack(side = TOP)
+     
+        label_days = Label(self, text="Days:")
+        label_days.pack(side = TOP)
+        
+        list_days_str = self.match_days_by_course(list_of_courses[0])
+        
+        self.str_day_default = StringVar(self)
+        self.str_day_default.set(list_days_str[0])
+        #self.str_day_default.trace("w", self.callback_after_before)
+        self.option_day = OptionMenu(self, self.str_day_default, *list_days_str)
+        self.option_day.pack(side = TOP)
+
+        message_when = Label(self, text="When:")
+        message_when.pack(side = TOP)
+    
+        self.str_when_default = StringVar(self)
+        self.str_when_default.set("Before")
+        self.str_when_default.trace("w", self.callback_after_before_between)
+        self.option_when = OptionMenu(self, self.str_when_default, "Before", "After", "Between")
+        self.option_when.pack(side = TOP)
+        
+        self.start_time_list = globs.start_times
+        self.end_time_list = globs.end_times
+
+        self.start_time_label = Label(self, text = "Time:")
+        self.start_time_label.pack(side = TOP)
+        self.time_start_default = StringVar()
+        self.time_start_default.set(self.start_time_list[0])
+ 
+        self.start_option = OptionMenu(self, \
+                                           self.time_start_default, *self.start_time_list)
+        self.start_option.pack(side = TOP)
+  
+        self.time_between_frame = Frame(self)
+
+        self.and_time_label = Label(self.time_between_frame, text = "And")
+        self.and_time_label.pack(side = TOP)
+
+        self.end_default = StringVar()
+        self.end_default.set(self.end_time_list[0]) 
+ 
+        self.and_option = OptionMenu(self.time_between_frame, \
+                                         self.end_default, *self.end_time_list)
+        self.and_option.pack(side = TOP)
+        
+
+        self.button_add_course_constraint = Button(self, text="Add Constraint",\
+                                            command=self.add_course_constraint)
+        self.button_add_course_constraint.pack(side = BOTTOM, pady = 25)
+
+    def add_course_constraint(self):
+        """Adds course constraint"""
+        course_str = self.str_course_default.get()
+        room_str = self.str_room_default.get()
+        days_str = self.str_day_default.get()
+        when = self.str_when_default.get()
+        time_initial_str = self.time_start_default.get()
+        time_end_str = None
+        if when == "Between":
+            time_end_str = self.end_default.get()
+
+        create_course_partial_scheduling_constraint(course_str,\
+                                                    room_str,\
+                                                    days_str,\
+                                                    when,\
+                                                    self.constraints_view_obj,\
+                                                    time_initial_str, \
+                                                    time_end_str)
+
+    def match_days_by_course(self, course_obj):
+        if course_obj.credit == 4:
+            list_days_str = ["MTWF", "MWRF"]
+            return list_days_str
+        elif course_obj.credit == 3:
+            list_days_str = ["MWF", "TR"]
+            return list_days_str
+        elif course_obj.credit == 1:
+            list_days_str = ["M", "T", "W", "R", "F"]
+            return list_days_str
+
+    def callback_course_change(self, *args):
+        course_str = self.str_course_default.get()
+        
+        for course_obj in globs.courses:
+            if isinstance(course_obj, Course):
+                if course_obj.code == course_str:
+                    list_days_str = self.match_days_by_course(course_obj)
+                    break
+
+        menu_days = self.option_day["menu"]
+        
+        menu_days.delete(0, "end")
+        for day_str in list_days_str:
+            menu_days.add_command(label=day_str,\
+                              command=lambda value=day_str : self.str_day_default.set(value))
+        self.str_day_default.set(list_days_str[0])
+    
+    def callback_after_before_between(self, *args):
+        """Toggles changes in the when field"""
+        when = self.str_when_default.get()
+
+        if when == "Between":
+            self.time_between_frame.pack(side = TOP)
+        else:
+            self.time_between_frame.pack_forget()
 
 class ConstraintPage(Page):
     ## 
