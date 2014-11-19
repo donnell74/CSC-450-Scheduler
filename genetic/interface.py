@@ -391,9 +391,6 @@ def export_schedules(weeks, export_dir="./"):
             os.remove(filename)
         counter += 1
 
-#parse has_lab
-def has_lab(path_to_xml, courses):
-    pass
 
 def get_prereqs(path_to_xml, courses):
     """Determine first-level prereqs from xml and list of all courses
