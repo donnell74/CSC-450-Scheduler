@@ -3,13 +3,21 @@ from copy import deepcopy
 from copy import copy
 from random import randint
 from random import choice
+from math import floor
 from datetime import time, timedelta
 from structures import *
 from constraint import *
+from time import time as now
+import gc
+import sys
+sys.path.append("../")
+import gui
 
-#import interface # uncomment to use export_schedule_xml 
+#import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
 import os.path
+
+#gc.set_debug(gc.DEBUG_LEAK)
 
 
 class SchedulerInitError(Exception):
@@ -54,7 +62,7 @@ class Scheduler:
             if len(courses) != 0:
                 if not all(isinstance(each_course, Course) for \
                         each_course in courses):
-                   raise SchedulerInitError("Courses - Not all of type Course") 
+                   raise SchedulerInitError("Courses - Not all of type Course")
             else:
                 raise SchedulerInitError("Courses - List has no elements")
         else:
@@ -102,7 +110,7 @@ class Scheduler:
         self.time_slots = time_slots_mwf + time_slots_tr
         if type(time_slot_divide) == int:
             if time_slot_divide < 0 and \
-                time_slot_divide >= min(len(self.time_slots_mwf), 
+                time_slot_divide >= min(len(self.time_slots_mwf),
                                         len(self.time_slots_tr)):
                 raise SchedulerInitError("Time Slot Divide - Not valid number")
         else:
@@ -116,9 +124,17 @@ class Scheduler:
         self.constraints = []
         self.max_fitness = 0
 
+        # default message to be displayed on the loading screen
+        self.gui_loading_info = ""
+        self.gui_loading_info1 = self.gui_loading_info2 = self.gui_loading_info3 = ""
+
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
 
+    ## Groups courses based on credits
+    #  @param self
+    #  @param credit A credit object
+    #  @return courses_by_credits 
     def separate_by_credit(self, courses_list):
         """Groups the courses based on number of credit hours.
         IN: list of course objects
@@ -133,22 +149,47 @@ class Scheduler:
                 courses_by_credits[each_course.credit].append(each_course)
         return courses_by_credits
 
+    ## Adds constraint to schedule
+    #  @param self
+    #  @param constraint A constraint object
+    #  @return none
     def add_constraint(self, name, weight, func, *args):
         """Adds an constraint to the schedule"""
-        self.constraints.append(Constraint(name, weight, func, *args))
-        self.max_fitness += weight
+        exists = False
+        for constraint in self.constraints:
+            if constraint.name == name:
+                exists = True
+        if not exists:
+            self.constraints.append(Constraint(name, weight, func, *args))
+            self.max_fitness += weight
 
+    ## Clears constraints from list
+    #  @param self
+    #  @param  A constraint object
+    #  @return none 
     def clear_constraints(self):
         """Removes all constraints from list"""
         self.constraints = []
         self.max_fitness = 0
-        
-    def delete_list_constraints(self, items):
-        """Removes some constraints from list"""
-        for i in range(len(sorted(items, reverse=True))):
-            self.max_fitness -= self.constraints[i].weight
-            del self.constraints[i]
 
+        
+    ## Removes list constraint from schedule
+    #  @param self
+    #  @param  A constraint object
+    #  @return none     
+    def delete_list_constraints(self, constraint_name_list):
+        """Removes list constraints from schedule"""
+        for constraint_name in constraint_name_list:
+            for constraint_obj in self.constraints:
+                if constraint_name == constraint_obj.name:
+                    self.max_fitness -= constraint_obj.weight
+                    self.constraints.remove(constraint_obj)
+                    break
+
+    ## Calculate the fitness score of a schedule
+    #  @param self
+    #  @param  A constraint object
+    #  @return none 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
         total_fitness = 0
@@ -156,6 +197,8 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
+            this_week.constraints[each_constraint.name] = [each_fitness,
+                    each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness
@@ -166,7 +209,12 @@ class Scheduler:
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
 
+        #print(this_week.constraints)
 
+    ## Mutates a schedule by changing the courses time
+    #  @param self
+    #  @param  A function that modifies week  in a random way 
+    #  @return this_week
     def mutate(self, this_week):
         """Mutates a schedule by changing a course's time"""
         empty_slots = this_week.find_empty_time_slots()
@@ -184,6 +232,10 @@ class Scheduler:
         self.randomly_fill_schedule(this_week, [random_course], empty_slots)
 
 
+    ## Provides all time slots matching in a given week
+    #  @param self
+    #  @param  A Function that finds all matching time slots
+    #  @return matching_slots
     def find_time_slots_from_cuts(self, this_week, slots_list):
         """For a given week, returns all time slots matching the slots list"""
         matching_slots = []
@@ -196,12 +248,12 @@ class Scheduler:
             start = start.split(':')
             start = list(map(int, start))
             start = time(start[0], start[1])
-            start_times.append(start)  
+            start_times.append(start)
 
             end = end.split(':')
             end = list(map(int, end))
             end = time(end[0], end[1])
-            end_times.append(end) 
+            end_times.append(end)
 
         full_list = this_week.list_time_slots()
         for each_slot in full_list:
@@ -211,6 +263,10 @@ class Scheduler:
 
         return matching_slots
 
+    ## Swaps courses when a match is found in a given week
+    #  @param self
+    #  @param  A Function that swaps all matching time slots
+    #  @return none
     def replace_time_slots(self, slotsA, slotsB):
         """Change all courses for matching time slots ("swaps")
         IN: two lists of time slots (cuts) for 2 weeks
@@ -225,6 +281,10 @@ class Scheduler:
                     j.set_course(courseA)
         return
 
+    ## Returns a dictionary for of reminder and lacking courses
+    #  @param  self 
+    #  @param  A Function that enables the user to see any inconsistencies
+    #  @return inconsistencies
     def assess_inconsistencies(self, this_week):
         """Returns a dictionary of surplus and lacking courses for a schedule/week
         IN: week object
@@ -245,6 +305,10 @@ class Scheduler:
         return inconsistencies
 
 
+    ## Removes excess courses and adds lacking courses to week 
+    #  @param self
+    #  @param  A Function that finds all matching time slots
+    #  @return none
     def resolve_inconsistencies(self, this_week, inconsistencies):
         """Removes excess courses and adds lacking courses to week.
         IN: (crossed) week object, inconsistencies dict with surplus and lacking
@@ -269,6 +333,10 @@ class Scheduler:
         self.randomly_fill_schedule(
             this_week, inconsistencies['lacking'], open_list)
 
+    ## combines weeks(schedules) P1 and P2 to create 2 child weeks then corrects if necessary
+    #  @param self
+    #  @param A Function that takes 2 parent schedules and produces a perfect schedule
+    #  @return output
     def crossover(self, P1, P2):
         """Mixes weeks (schedules) P1 and P2 to create 2 children weeks, then corrects
         the children weeks as necessary
@@ -305,8 +373,25 @@ class Scheduler:
             output.append(i)
         return output
 
+    ## Produces a set of schedules based off the current set of schedules 
+    #  @param self
+    #  @param  A Function that creates more schedules based off the schedules that is passed in 
+    #  @return none
     def breed(self):
-        """Produces a set of schedules based of the current set of schedules"""
+        """Produces a set of schedules based off the current set of schedules"""
+        def decide_prob_crossover(week1, week2, tilt = .1):
+            valid_prob_crossover = (week1.valid + week2.valid) * .5
+            if valid_prob_crossover == 0:
+                valid_prob_crossover = .1
+
+            if self.max_fitness == 0:
+                return valid_prob_crossover
+
+            total_fitness = (week1.fitness + week2.fitness) / 2.0
+            fitness_prob_crossover = (total_fitness + (tilt *\
+                     (self.max_fitness - total_fitness))) / self.max_fitness
+            return valid_prob_crossover * fitness_prob_crossover
+
         if len(self.weeks) < 2:
             raise BreedError("Weeks is not the correct length")
 
@@ -315,44 +400,88 @@ class Scheduler:
             raise BreedError("An element in weeks is not a Week object")
 
 
-
+        list_of_children = []
         # combinations...(ex) 5 choose 2
-        for each_week in range(0, len(self.weeks) - 1, 2):
-            for each_other_week in range(each_week + 1, len(self.weeks), 2):
-                children = self.crossover(self.weeks[each_week],
-                    self.weeks[each_other_week])
-                if len(children) > 0:
-                    # Chance of mutation for each child
-                    for each_child in children:
-                        roll = randint(1, 3)
-                        if roll == 2:
-                            #self.mutate(each_child)
-                            pass
-                    # add to list of weeks
-                    self.weeks.extend(children)
+        for each_week in range(len(self.weeks) - 1):
+            for each_other_week in range(each_week + 1, len(self.weeks)):
+                # decide if we are crossing over
+                prob_crossover = decide_prob_crossover(self.weeks[each_week],
+                                                       self.weeks[each_other_week])
+                roll = randint(0, 100)
+                if int(prob_crossover * 100) > roll:
+                    children = self.crossover(self.weeks[each_week],
+                                              self.weeks[each_other_week])
+                    if len(children) > 0:
+                        # Chance of mutation for each child
+                        for each_child in children:
+                            roll = randint(1, 3)
+                            if roll == 2:
+                                #self.mutate(each_child)
+                                pass
+                        # add to list of weeks
+                    list_of_children.extend(children)
+        self.weeks.extend(list_of_children)
 
 
-    def evolution_loop(self):
+    ## Main loop that evolves and produces more schedules when run 
+    #  @param self
+    #  @param main tkinter window object
+    #  @param number of minutes to run, int
+    #  @return side-effect: self.weeks are filled out
+    def evolution_loop(self, main_window_object, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
+        start_time = now() #stopwatch starts
+        time_limit = 60 * minutes_to_run
+        one_increment = time_limit/40.0
+
+        main_window_object.setup_loading_screen()
+        main_window_object.go_to_loading_screen()
+        loading_screen = main_window_object.misc_page
+
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        MAX_TRIES = 5
+        weeks_to_keep = 5
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
             valid_weeks = filter(lambda x: x.valid, self.weeks)
             valid_weeks.sort(key=lambda x: x.fitness, reverse=True)
             if len(valid_weeks) > 0:
-                temp = filter(lambda x: not x.valid, self.weeks)[:5 - len(valid_weeks)]
+                temp = filter(lambda x: not x.valid, self.weeks)[:weeks_to_keep \
+                                                                    - len(valid_weeks)]
                 temp.sort(key=lambda x: x.fitness, reverse=True)
-                self.weeks = valid_weeks + temp
+                self.weeks = (valid_weeks + temp)[:weeks_to_keep]
+            else:
+                for each_week in self.weeks:
+                    if not each_week.valid:
+                        del each_week
 
-            self.weeks = self.weeks[:5]
+                self.weeks = valid_weeks[:weeks_to_keep]
+                for each_week in valid_weeks[weeks_to_keep:]:
+                    del each_week
+
             return valid_weeks
+
+        def loading_bar_helper(one_increment, current_elapsed_seconds, max_runtime):
+            """Increments the loading bar by as much as it should if and when it should"""
+            #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
+            num_segments_displayed = loading_screen.load_bar['width']
+            number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
+            print(number_of_segments_to_add)
+            while number_of_segments_to_add > 1:
+                print("Updating the loading bar")
+                loading_screen.update_loading_bar()
+                number_of_segments_to_add -= 1
+            return
+
+        # Resetting self.weeks will trigger generate_starting_population() below
+        self.weeks = []
 
         while True:
             print('Generation counter:', counter + 1)
+            # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
+
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
@@ -364,46 +493,45 @@ class Scheduler:
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
-            #print([i.fitness for i in self.weeks])
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
-            if counter == MAX_TRIES - 1:
-                print('Max tries reached; final output found')
+            time_elapsed = now() - start_time
+            loading_bar_helper(one_increment, time_elapsed, time_limit)
+            print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
+            if time_elapsed > time_limit:
+                print('Time limit reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
             print("Minimum fitness of the top schedules of the generation:",
                   min(i.fitness for i in self.weeks))
-            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
+            #                          str(min(i.fitness for i in self.weeks))
 
-            #insufficient valid weeks
-            """
-            if len(valid_weeks) == 0:
-                print("Generating a new population")
-                self.weeks = []
-                self.generate_starting_population()
-                total_iterations += 1
-                counter += 1
-                continue
-                """
+            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
+            #                          str(len(valid_weeks))
 
             if min(i.fitness for i in self.weeks) == self.max_fitness and \
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
                 break
 
+            print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
             print("Breed complete")
-            week_slice_helper()
-            self.weeks = self.weeks[:4]
-            self.generate_starting_population(1)
+
             total_iterations += 1
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
             print()
-
         print("Final number of generations: ", total_iterations + 1)
+        main_window_object.finished_running()
 
+    ## Provides all time slots matching in a given week
+    #  @param self
+    #  @param  A Function that finds all available time slots
+    #  @return none
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
             if room.number != first_time_slot.room.number:
@@ -415,7 +543,10 @@ class Scheduler:
 
         return (None, False)
 
-
+    ## Finds index of time slot object in list of time slots for week
+    #  @param self
+    #  @param  A time object that finds the index of time slots in a week
+    #  @return none
     def find_index(self, time_slot, time_slot_list):
         """Finds index of time slot object in list of time slots for week"""
         counter = 0
@@ -430,6 +561,10 @@ class Scheduler:
         return
 
 
+    ## Generates a dictionary describing the trends of the list of the time slots
+    #  @param self
+    #  @param  a dictionary object that list the time slot objects
+    #  @return row_dict
     def assess_time_slot_row_for_open_slots(self, time_slots):
         """Generates a dictionary describing the trends of the list of time slots
         IN: list of time slot objects
@@ -460,6 +595,10 @@ class Scheduler:
         return row_dict
 
 
+    ## Assigns courses to the time slot and removes time slot from list of time slots
+    #  @param self
+    #  @param  a function that deletes time slot from list of time slots
+    #  @return none
     def assign_and_remove(self, course, time_slot, slots_list, week):
         """Assigns course to time slot and removes time slot from list of time slots"""
         #i = self.find_index(time_slot, slots_list)
@@ -469,6 +608,10 @@ class Scheduler:
         del(slots_list[i])
 
 
+    ## Filters tr slots, mwf slots, prescheduled courses, and regular courses
+    #  @param self
+    #  @param  a function that returns time slot
+    #  @return filtered_input
     def filter_for_generator(self, courses_list, list_of_slots_to_fill):
         """Filters tr slots, mwf slots, prescheduled courses, and regular courses"""
         filtered_input = {}
@@ -478,7 +621,10 @@ class Scheduler:
         filtered_input['regular'] = regular
         return filtered_input
 
-
+    ## Manually schedules a course at its designated time
+    #  @param self
+    #  @param  
+    #  @return none
     def preschedule(self, week_to_fill, course):
         """Manually schedules a course at its designated time"""
         if not course.is_prescheduled:
@@ -523,13 +669,17 @@ class Scheduler:
         return not done'''
 
 
+    ## Randomly schedules 4 hour courses
+    #  @param self
+    #  @param  A function that generates 4 hour classes with list of time slots  
+    #  @return not done
     def schedule_4_hour_course(self, course, list_of_time_slots, this_week):
         """Randomly schedule a 4 hour course"""
         if course.credit != 4:
             raise FilterError("Schedule 4 hour course")
 
         random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        current_pool = copy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -586,13 +736,17 @@ class Scheduler:
         return not done
 
 
+    ## Randomly schedules 3 hour courses
+    #  @param self
+    #  @param  A function that generates 3 hour classes with list of time slots  
+    #  @return not done
     def schedule_3_hour_course(self, course, list_of_time_slots, this_week):
         """Randomly schedule a 3 hour course"""
         if course.credit != 3:
             raise FilterError("Schedule 3 hour course")
 
         random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        current_pool = copy(list_of_time_slots)
         done = False
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
@@ -639,36 +793,45 @@ class Scheduler:
         return not done
 
 
+    ## Randomly schedules 1 hour courses
+    #  @param self
+    #  @param  A function that generates 1 hour classes with list of time slots  
+    #  @return not done
     def schedule_1_hour_course(self, course, list_of_slots, this_week):
         """Randomly schedule a 1 hour course"""
-        #COME BACK TO
         if course.credit != 1:
             raise FilterError("Schedule 1 hour course")
 
-        random_slot = choice(list_of_time_slots)
-        current_pool = deepcopy(list_of_time_slots)
+        random_slot = choice(list_of_slots)
+        current_pool = copy(list_of_slots)
         done = False
-        while len(temp_pool) > 0 and not done:
-            possibilities = self.week_helper(random_slot, temp_pool)
+        while len(current_pool) > 0 and not done:
+            possibilities = this_week.find_matching_time_slot_row(random_slot)
+            possibilities = self.assess_time_slot_row_for_open_slots(possibilities)
             # each day open for that time and room
-            if len(possibilities['unoccupied']) > 0:
-                for each_assignee in possibilities['in_order']:
-                    assign_and_remove(
-                        course, each_assignee, list_of_time_slots, this_week)
+            if possibilities['type'] == 2:
+                chosen = random.choice(possibilities['time_slots'])
+                self.assign_and_remove(
+                        course, chosen, list_of_slots, this_week)
                 done = True
+
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
                 # week from temp pool
-                for to_remove in possibilities['unoccupied']:
+                for to_remove in possibilities['time_slots']:
                     i = self.find_index(to_remove, current_pool)
-                    del(temp_pool[i])
+                    del(current_pool[i])
                 # get a new random time slot
                 random_slot = choice(current_pool)
         #status
-        return len(current_pool) == 0 and not done
+        return not done
 
 
+    ## Randomly Fills in schedules 
+    #  @param self
+    #  @param  A function that generates random classes with list of slots time slots  
+    #  @return none
     def randomly_fill_schedule(self, week_to_fill, courses_list, list_of_slots_to_fill):
         """Fills in random schedule for given week, courses, and time slots"""
         filtered = self.filter_for_generator(courses_list, list_of_slots_to_fill)
@@ -718,7 +881,11 @@ class Scheduler:
                 week_to_fill.complete = False
 
 
-    def generate_starting_population(self, num_to_generate = 15, just_one = False):
+    ## Randomly generates starting population
+    #  @param self
+    #  @param  A function that generates random population  
+    #  @return not done
+    def generate_starting_population(self, num_to_generate = 1000, just_one = False):
         """Generates starting population"""
         #Quick case for getting to GUI
         if just_one and len(self.weeks) == 0:
@@ -737,7 +904,12 @@ class Scheduler:
             counter += 1
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
-            print("Schedule", counter, "generated")
+
+            #print("Schedule", counter, "generated")
+
+            # update message to be shown on the gui loading screen
+            # self.gui_loading_info = "Schedule " + str(counter) + " generated"
+
         if len(self.weeks) == 0:
             print("Could not schedule")
         return None

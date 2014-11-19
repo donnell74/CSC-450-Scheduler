@@ -1,7 +1,7 @@
 from __future__ import print_function
 from copy import copy
 import structures
-
+from weakref import ref
 
 class Day:
 
@@ -11,25 +11,25 @@ class Day:
         if test:
             self.week = this_week
         else:
-            self.week = copy(this_week)
+            self.week = ref(this_week)
         if day_code.lower() in 'mtwrf':
             self.day_code = day_code
         else:
             print("Day code was not recognized")
             return
-        
+
         room_list = []
-        # 'rooms' is now a list of tuples. [0]: building, [1]: number. 
+        # 'rooms' is now a list of tuples. [0]: building, [1]: number.
                                          # [2]: capacity. [3]: has_computers
         for room in rooms:
             new_room = structures.Room(building         = room[0],
                                        number           = room[1],
-                                       capacity         = room[2],
-                                       has_computers    = room[3],
+                                       capacity         = int(room[2]),
+                                       has_computers    = bool(int(room[3])),
                                        this_day         = self,
                                        test             = test)
             room_list.append(new_room)
-        
+
         self.rooms = room_list
 
     def info(self, query):
@@ -41,9 +41,9 @@ class Day:
             print("Invalid query for Day")
             return
         elif query == "Week":
-            return self.week
+            return self.week()
         elif query == "Schedule":
-            return self.week.schedule
+            return self.week().schedule()
 
     def get_room(self, query_number):
         for each_room in self.rooms:

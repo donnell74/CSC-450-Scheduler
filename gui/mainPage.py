@@ -15,6 +15,7 @@ def main():
                         '+' + str(screen_x_pos) + '+' + str(screen_y_pos))
 
     main.pack()
+
     root.mainloop()
 
 
