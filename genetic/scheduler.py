@@ -7,7 +7,7 @@ from math import floor
 from datetime import time, timedelta
 from structures import *
 from constraint import *
-import time as now
+from time import clock
 import gc
 
 #import interface # uncomment to use export_schedule_xml 
@@ -369,6 +369,7 @@ class Scheduler:
 
     def evolution_loop(self, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
+        clock() #stopwatch starts
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
@@ -396,16 +397,13 @@ class Scheduler:
 
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
-        time_limit = now.time() + 60 * minutes_to_run 
+        time_limit = 60 * minutes_to_run 
         while True:
             print('Generation counter:', counter + 1)
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
-                time_to_run_gsp = now.time()
                 self.generate_starting_population()
-                time_to_run_gsp = now.time() - time_to_run_gsp
-                time_limit = time_limit + time_to_run_gsp
                 total_iterations += 1
                 counter += 1
                 continue
@@ -417,8 +415,8 @@ class Scheduler:
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
-            print("Time left for evolution loop: %d seconds" % (time_limit - floor(now.time())))
-            if now.time() > time_limit:
+            print("Time left for evolution loop: %d seconds" % (time_limit - clock()))
+            if clock() > time_limit:
                 print('Time limit reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
