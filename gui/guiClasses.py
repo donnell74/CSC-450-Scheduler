@@ -400,7 +400,9 @@ class ViewPage(Page):
             # delete previous canvas items
             self.canv.delete("all")
 
-            self.format_graphical_schedule(globs.mainScheduler.weeks[n].print_concise())
+            if self.is_run_clicked:
+                self.format_graphical_schedule(globs.mainScheduler.weeks[n].print_concise())
+
             self.bg_label['fg'] = 'white'
 
         else:
@@ -499,6 +501,9 @@ class ViewPage(Page):
 
         y_times.sort()
 
+        if len(y_times) == 0:
+            return
+        
         a = y_times[0]
         b = y_times[len(y_times) - 1]
         n = 0
@@ -873,6 +878,7 @@ class MainWindow(Frame):
     def finished_running(self):
         """ Display view_page after run_scheduler is finished running. """
 
+        print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
         self.view_page.is_run_clicked = True
         self.view_page.insert_schedule(0)  # show the first schedule in the view page
         self.view_page.show_nav()
@@ -913,7 +919,9 @@ class MainWindow(Frame):
 
         if not self.run_clicked:
             self.run_clicked = True
-
+            self.view_page.is_run_clicked = False
+            self.run_finished = False
+            
             instructors = globs.instructors
             # RUN SCHEDULER METHOD
             # Add hard/obvious constraints before running
