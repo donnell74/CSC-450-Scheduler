@@ -8,7 +8,7 @@ import sys
 sys.path.append("../")
 import globs
 from threading import Thread
-from time import time, sleep
+from time import time
 from genetic import constraint, interface
 import tkMessageBox
 
@@ -845,6 +845,7 @@ class MiscPage(Page):
 
     def finish_loading(self):
         self.load_bar['width'] = 40
+        self.update()
 
 class MainWindow(Frame):
 
@@ -966,11 +967,12 @@ class MainWindow(Frame):
     def go_to_loading_screen(self):
         #self.root.after(250, self.show_misc)
         self.show_misc()
+        self.update()
+
         return
 
 
     def run_scheduler(self):
-
         if not self.run_clicked:
             self.run_clicked = True
             self.view_page.is_run_clicked = False

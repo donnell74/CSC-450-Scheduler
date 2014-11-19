@@ -730,7 +730,7 @@ def create_max_course_constraint(instructor, max_courses, priority, added_constr
     globs.mainScheduler.add_constraint(constraint_name, priority,
                                        constraint.instructor_max_courses,
                                        [instructor, max_courses, is_mandatory])
-    added_constraints.view_constraints((constraint_name + " Priority = ", priority))
+    added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 def create_instr_break(instructor, gap_start, gap_end, priority, added_constraints):

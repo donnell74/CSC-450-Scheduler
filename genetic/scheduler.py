@@ -8,12 +8,10 @@ from datetime import time, timedelta
 from structures import *
 from constraint import *
 from time import time as now
-from time import sleep
 import gc
 import sys
 sys.path.append("../")
 import gui
-from threading import Thread
 
 #import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
@@ -420,7 +418,6 @@ class Scheduler:
             print(number_of_segments_to_add)
             while number_of_segments_to_add > 1:
                 print("Updating the loading bar")
-                main_window_object.go_to_loading_screen()
                 loading_screen.update_loading_bar()
                 number_of_segments_to_add -= 1
             return

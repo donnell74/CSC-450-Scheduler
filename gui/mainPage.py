@@ -1,6 +1,5 @@
 from Tkinter import *
 from guiClasses import *
-from threading import Thread
 
 def main():
     root = Tk()
@@ -17,9 +16,7 @@ def main():
 
     main.pack()
 
-    t = Thread(target = root.mainloop())
-    t.start()
-    #root.mainloop()
+    root.mainloop()
 
 
 if __name__ == "__main__":
