@@ -10,12 +10,12 @@ from constraint import *
 from time import time as now
 import gc
 
-#import interface # uncomment to use export_schedule_xml 
+#import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
 import os.path
 
 #gc.set_debug(gc.DEBUG_LEAK)
-    
+
 
 class SchedulerInitError(Exception):
     def __init__(self, value):
@@ -59,7 +59,7 @@ class Scheduler:
             if len(courses) != 0:
                 if not all(isinstance(each_course, Course) for \
                         each_course in courses):
-                   raise SchedulerInitError("Courses - Not all of type Course") 
+                   raise SchedulerInitError("Courses - Not all of type Course")
             else:
                 raise SchedulerInitError("Courses - List has no elements")
         else:
@@ -107,7 +107,7 @@ class Scheduler:
         self.time_slots = time_slots_mwf + time_slots_tr
         if type(time_slot_divide) == int:
             if time_slot_divide < 0 and \
-                time_slot_divide >= min(len(self.time_slots_mwf), 
+                time_slot_divide >= min(len(self.time_slots_mwf),
                                         len(self.time_slots_tr)):
                 raise SchedulerInitError("Time Slot Divide - Not valid number")
         else:
@@ -120,6 +120,10 @@ class Scheduler:
 
         self.constraints = []
         self.max_fitness = 0
+
+        # default message to be displayed on the loading screen
+        self.gui_loading_info = ""
+        self.gui_loading_info1 = self.gui_loading_info2 = self.gui_loading_info3 = ""
 
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
@@ -152,7 +156,7 @@ class Scheduler:
         """Removes all constraints from list"""
         self.constraints = []
         self.max_fitness = 0
-        
+
     def delete_list_constraints(self, constraint_name_list):
         """Removes list constraints from schedule"""
         for constraint_name in constraint_name_list:
@@ -212,12 +216,12 @@ class Scheduler:
             start = start.split(':')
             start = list(map(int, start))
             start = time(start[0], start[1])
-            start_times.append(start)  
+            start_times.append(start)
 
             end = end.split(':')
             end = list(map(int, end))
             end = time(end[0], end[1])
-            end_times.append(end) 
+            end_times.append(end)
 
         full_list = this_week.list_time_slots()
         for each_slot in full_list:
@@ -373,7 +377,7 @@ class Scheduler:
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        weeks_to_keep = 5 
+        weeks_to_keep = 5
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
@@ -400,6 +404,8 @@ class Scheduler:
         time_limit = 60 * minutes_to_run 
         while True:
             print('Generation counter:', counter + 1)
+            # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
+
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
@@ -411,7 +417,6 @@ class Scheduler:
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
-            #print([i.fitness for i in self.weeks])
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
@@ -424,18 +429,12 @@ class Scheduler:
 
             print("Minimum fitness of the top schedules of the generation:",
                   min(i.fitness for i in self.weeks))
-            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
+            #                          str(min(i.fitness for i in self.weeks))
 
-            #insufficient valid weeks
-            """
-            if len(valid_weeks) == 0:
-                print("Generating a new population")
-                self.weeks = []
-                self.generate_starting_population()
-                total_iterations += 1
-                counter += 1
-                continue
-                """
+            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
+            #                          str(len(valid_weeks))
 
             if min(i.fitness for i in self.weeks) == self.max_fitness and \
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
@@ -444,11 +443,11 @@ class Scheduler:
             print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
             print("Breed complete")
+
             total_iterations += 1
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
             print()
-
         print("Final number of generations: ", total_iterations + 1)
 
     def time_slot_available(self, day, first_time_slot):
@@ -703,7 +702,7 @@ class Scheduler:
                 self.assign_and_remove(
                         course, chosen, list_of_slots, this_week)
                 done = True
-            
+
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
@@ -785,7 +784,12 @@ class Scheduler:
             counter += 1
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
-            print("Schedule", counter, "generated")
+
+            #print("Schedule", counter, "generated")
+
+            # update message to be shown on the gui loading screen
+            # self.gui_loading_info = "Schedule " + str(counter) + " generated"
+
         if len(self.weeks) == 0:
             print("Could not schedule")
         return None
