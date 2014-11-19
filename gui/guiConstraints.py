@@ -447,7 +447,6 @@ MANUAL_CONCURRENCY = "Manual Concurrency"
 class CourseConstraint(Page):
     """Course constraint frame"""
 
-    def __init__(self, root, constraints_view_obj):
     ## 
     #  @param self
     #  @param __init__ Building a constriant page
@@ -559,20 +558,14 @@ class TypeTime(Frame):
         time_str =  self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.course_time_priority_default.get()
-<<<<<<< HEAD
         create_course_time_constraint(course, time_str, when, priority, self.constraints_view_obj)
-    
-    def callback_after_before(self, *args):
-        """Toggles changes in the when field"""
-=======
-        create_course_time_constraint(course, time, when, priority, self.constraints)
 
-    ## 
+    ##
     #  @param self
     #  @param __init__ Building a constriant page
     #  
-    def callbackWhen(self, *args):
->>>>>>> 2a6cb4cd410c8dc031d8597e0d11b2dd150f9c01
+    def callback_after_before(self, *args):
+        """Toggles changes in the when field"""
         when = self.str_when_default.get()
         menu = self.option_time["menu"]
         menu.delete(0, "end")

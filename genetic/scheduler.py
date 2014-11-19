@@ -453,13 +453,7 @@ class Scheduler:
                 temp.sort(key=lambda x: x.fitness, reverse=True)
                 self.weeks = (valid_weeks + temp)[:weeks_to_keep]
             else:
-                for each_week in self.weeks:
-                    if not each_week.valid:
-                        del each_week
-
-                self.weeks = valid_weeks[:weeks_to_keep]
-                for each_week in valid_weeks[weeks_to_keep:]:
-                    del each_week
+                self.weeks = self.weeks[:weeks_to_keep]
 
             return valid_weeks
 
@@ -490,6 +484,9 @@ class Scheduler:
                 counter += 1
                 continue
                 #todo: error out if never have a complete week
+            else:
+                self.generate_starting_population(5)
+
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
@@ -525,6 +522,7 @@ class Scheduler:
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
             print()
+
         print("Final number of generations: ", total_iterations + 1)
         main_window_object.finished_running()
 
