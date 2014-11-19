@@ -1,5 +1,6 @@
 from Tkinter import *
 from guiClasses import *
+from threading import Thread
 
 def main():
     root = Tk()
@@ -15,7 +16,10 @@ def main():
                         '+' + str(screen_x_pos) + '+' + str(screen_y_pos))
 
     main.pack()
-    root.mainloop()
+
+    t = Thread(target = root.mainloop())
+    t.start()
+    #root.mainloop()
 
 
 if __name__ == "__main__":
