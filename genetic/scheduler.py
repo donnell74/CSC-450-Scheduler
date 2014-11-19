@@ -124,6 +124,10 @@ class Scheduler:
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
 
+    ## Groups courses based on credits
+    #  @param self
+    #  @param credit A credit object
+    #  @return courses_by_credits 
     def separate_by_credit(self, courses_list):
         """Groups the courses based on number of credit hours.
         IN: list of course objects
@@ -138,6 +142,10 @@ class Scheduler:
                 courses_by_credits[each_course.credit].append(each_course)
         return courses_by_credits
 
+    ## Adds constraint to schedule
+    #  @param self
+    #  @param constraint A constraint object
+    #  @return none
     def add_constraint(self, name, weight, func, *args):
         """Adds an constraint to the schedule"""
         exists = False
@@ -148,11 +156,19 @@ class Scheduler:
             self.constraints.append(Constraint(name, weight, func, *args))
             self.max_fitness += weight
 
+    ## Clears constraints from list
+    #  @param self
+    #  @param  A constraint object
+    #  @return none 
     def clear_constraints(self):
         """Removes all constraints from list"""
         self.constraints = []
         self.max_fitness = 0
-        
+
+    ## Removes list constraint from schedule
+    #  @param self
+    #  @param  A constraint object
+    #  @return none     
     def delete_list_constraints(self, constraint_name_list):
         """Removes list constraints from schedule"""
         for constraint_name in constraint_name_list:
@@ -162,6 +178,10 @@ class Scheduler:
                     self.constraints.remove(constraint_obj)
                     break
 
+    ## Calculate the fitness score of a schedule
+    #  @param self
+    #  @param  A constraint object
+    #  @return none 
     def calc_fitness(self, this_week):
         """Calculates the fitness score of a schedule"""
         total_fitness = 0
@@ -182,7 +202,10 @@ class Scheduler:
 
         #print(this_week.constraints)
 
-
+    ## Mutates a schedule by changing the courses time
+    #  @param self
+    #  @param  A function that modifies week  in a random way 
+    #  @return this_week
     def mutate(self, this_week):
         """Mutates a schedule by changing a course's time"""
         empty_slots = this_week.find_empty_time_slots()
@@ -200,6 +223,10 @@ class Scheduler:
         self.randomly_fill_schedule(this_week, [random_course], empty_slots)
 
 
+    ## Provides all time slots matching in a given week
+    #  @param self
+    #  @param  A Function that finds all matching time slots
+    #  @return matching_slots
     def find_time_slots_from_cuts(self, this_week, slots_list):
         """For a given week, returns all time slots matching the slots list"""
         matching_slots = []
@@ -227,6 +254,10 @@ class Scheduler:
 
         return matching_slots
 
+    ## Swaps courses when a match is found in a given week
+    #  @param self
+    #  @param  A Function that swaps all matching time slots
+    #  @return none
     def replace_time_slots(self, slotsA, slotsB):
         """Change all courses for matching time slots ("swaps")
         IN: two lists of time slots (cuts) for 2 weeks
@@ -241,6 +272,10 @@ class Scheduler:
                     j.set_course(courseA)
         return
 
+    ## Returns a dictionary for of reminder and lacking courses
+    #  @param  self 
+    #  @param  A Function that enables the user to see any inconsistencies
+    #  @return inconsistencies
     def assess_inconsistencies(self, this_week):
         """Returns a dictionary of surplus and lacking courses for a schedule/week
         IN: week object
@@ -261,6 +296,10 @@ class Scheduler:
         return inconsistencies
 
 
+    ## Removes excess courses and adds lacking courses to week 
+    #  @param self
+    #  @param  A Function that finds all matching time slots
+    #  @return none
     def resolve_inconsistencies(self, this_week, inconsistencies):
         """Removes excess courses and adds lacking courses to week.
         IN: (crossed) week object, inconsistencies dict with surplus and lacking
@@ -285,6 +324,10 @@ class Scheduler:
         self.randomly_fill_schedule(
             this_week, inconsistencies['lacking'], open_list)
 
+    ## combines weeks(schedules) P1 and P2 to create 2 child weeks then corrects if necessary
+    #  @param self
+    #  @param A Function that takes 2 parent schedules and produces a perfect schedule
+    #  @return output
     def crossover(self, P1, P2):
         """Mixes weeks (schedules) P1 and P2 to create 2 children weeks, then corrects
         the children weeks as necessary
@@ -321,8 +364,12 @@ class Scheduler:
             output.append(i)
         return output
 
+    ## Produces a set of schedules based off the current set of schedules 
+    #  @param self
+    #  @param  A Function that creates more schedules based off the schedules that is passed in 
+    #  @return none
     def breed(self):
-        """Produces a set of schedules based of the current set of schedules"""
+        """Produces a set of schedules based off the current set of schedules"""
         def decide_prob_crossover(week1, week2, tilt = .1):
             valid_prob_crossover = (week1.valid + week2.valid) * .5
             if valid_prob_crossover == 0:
@@ -367,6 +414,10 @@ class Scheduler:
         self.weeks.extend(list_of_children)
 
 
+    ## Main loop that evolves and produces more schedules when run 
+    #  @param self
+    #  @param  Main loop of the genetic algorithm 
+    #  @return valid_weeks
     def evolution_loop(self, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         clock() #stopwatch starts
@@ -450,6 +501,10 @@ class Scheduler:
 
         print("Final number of generations: ", total_iterations + 1)
 
+    ## Provides all time slots matching in a given week
+    #  @param self
+    #  @param  A Function that finds all available time slots
+    #  @return none
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
             if room.number != first_time_slot.room.number:
@@ -461,7 +516,10 @@ class Scheduler:
 
         return (None, False)
 
-
+    ## Finds index of time slot object in list of time slots for week
+    #  @param self
+    #  @param  A time object that finds the index of time slots in a week
+    #  @return none
     def find_index(self, time_slot, time_slot_list):
         """Finds index of time slot object in list of time slots for week"""
         counter = 0
@@ -476,6 +534,10 @@ class Scheduler:
         return
 
 
+    ## Generates a dictionary describing the trends of the list of the time slots
+    #  @param self
+    #  @param  a dictionary object that list the time slot objects
+    #  @return row_dict
     def assess_time_slot_row_for_open_slots(self, time_slots):
         """Generates a dictionary describing the trends of the list of time slots
         IN: list of time slot objects
@@ -506,6 +568,10 @@ class Scheduler:
         return row_dict
 
 
+    ## Assigns courses to the time slot and removes time slot from list of time slots
+    #  @param self
+    #  @param  a function that deletes time slot from list of time slots
+    #  @return none
     def assign_and_remove(self, course, time_slot, slots_list, week):
         """Assigns course to time slot and removes time slot from list of time slots"""
         #i = self.find_index(time_slot, slots_list)
@@ -515,6 +581,10 @@ class Scheduler:
         del(slots_list[i])
 
 
+    ## Filters tr slots, mwf slots, prescheduled courses, and regular courses
+    #  @param self
+    #  @param  a function that returns time slot
+    #  @return filtered_input
     def filter_for_generator(self, courses_list, list_of_slots_to_fill):
         """Filters tr slots, mwf slots, prescheduled courses, and regular courses"""
         filtered_input = {}
@@ -524,7 +594,10 @@ class Scheduler:
         filtered_input['regular'] = regular
         return filtered_input
 
-
+    ## Manually schedules a course at its designated time
+    #  @param self
+    #  @param  
+    #  @return none
     def preschedule(self, week_to_fill, course):
         """Manually schedules a course at its designated time"""
         if not course.is_prescheduled:
@@ -569,6 +642,10 @@ class Scheduler:
         return not done'''
 
 
+    ## Randomly schedules 4 hour courses
+    #  @param self
+    #  @param  A function that generates 4 hour classes with list of time slots  
+    #  @return not done
     def schedule_4_hour_course(self, course, list_of_time_slots, this_week):
         """Randomly schedule a 4 hour course"""
         if course.credit != 4:
@@ -632,6 +709,10 @@ class Scheduler:
         return not done
 
 
+    ## Randomly schedules 3 hour courses
+    #  @param self
+    #  @param  A function that generates 3 hour classes with list of time slots  
+    #  @return not done
     def schedule_3_hour_course(self, course, list_of_time_slots, this_week):
         """Randomly schedule a 3 hour course"""
         if course.credit != 3:
@@ -685,6 +766,10 @@ class Scheduler:
         return not done
 
 
+    ## Randomly schedules 1 hour courses
+    #  @param self
+    #  @param  A function that generates 1 hour classes with list of time slots  
+    #  @return not done
     def schedule_1_hour_course(self, course, list_of_slots, this_week):
         """Randomly schedule a 1 hour course"""
         if course.credit != 1:
@@ -716,6 +801,10 @@ class Scheduler:
         return not done
 
 
+    ## Randomly Fills in schedules 
+    #  @param self
+    #  @param  A function that generates random classes with list of slots time slots  
+    #  @return none
     def randomly_fill_schedule(self, week_to_fill, courses_list, list_of_slots_to_fill):
         """Fills in random schedule for given week, courses, and time slots"""
         filtered = self.filter_for_generator(courses_list, list_of_slots_to_fill)
@@ -765,6 +854,10 @@ class Scheduler:
                 week_to_fill.complete = False
 
 
+    ## Randomly generates starting population
+    #  @param self
+    #  @param  A function that generates random population  
+    #  @return not done
     def generate_starting_population(self, num_to_generate = 1000, just_one = False):
         """Generates starting population"""
         #Quick case for getting to GUI
