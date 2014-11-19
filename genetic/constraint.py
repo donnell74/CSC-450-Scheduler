@@ -147,6 +147,8 @@ def instructor_time_pref_after(this_week, args):
         if each_section.time_slots[0].start_time < time_slot:
             #case 1: a course fails
             holds.append(0)
+        else:
+            holds.append(1)
 
         if is_mandatory:
             if len(holds) >= 1: # at least one failure
@@ -473,6 +475,9 @@ def get_partial_credit(results_list):
         if value == True:
                 count += 1
 
+    #avoid dividing by zero; shouldn't happen if constraint is set up right
+    if len(results_list) == 0:
+        return 0
     count = float(count)/len(results_list)
     partial_weight = round(count, 1)
 

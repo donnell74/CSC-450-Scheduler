@@ -7,15 +7,18 @@ from math import floor
 from datetime import time, timedelta
 from structures import *
 from constraint import *
-from time import clock
+from time import time as now
 import gc
+import sys
+sys.path.append("../")
+import gui
 
-#import interface # uncomment to use export_schedule_xml 
+#import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
 import os.path
 
 #gc.set_debug(gc.DEBUG_LEAK)
-    
+
 
 class SchedulerInitError(Exception):
     def __init__(self, value):
@@ -59,7 +62,7 @@ class Scheduler:
             if len(courses) != 0:
                 if not all(isinstance(each_course, Course) for \
                         each_course in courses):
-                   raise SchedulerInitError("Courses - Not all of type Course") 
+                   raise SchedulerInitError("Courses - Not all of type Course")
             else:
                 raise SchedulerInitError("Courses - List has no elements")
         else:
@@ -107,7 +110,7 @@ class Scheduler:
         self.time_slots = time_slots_mwf + time_slots_tr
         if type(time_slot_divide) == int:
             if time_slot_divide < 0 and \
-                time_slot_divide >= min(len(self.time_slots_mwf), 
+                time_slot_divide >= min(len(self.time_slots_mwf),
                                         len(self.time_slots_tr)):
                 raise SchedulerInitError("Time Slot Divide - Not valid number")
         else:
@@ -120,6 +123,10 @@ class Scheduler:
 
         self.constraints = []
         self.max_fitness = 0
+
+        # default message to be displayed on the loading screen
+        self.gui_loading_info = ""
+        self.gui_loading_info1 = self.gui_loading_info2 = self.gui_loading_info3 = ""
 
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
@@ -165,6 +172,7 @@ class Scheduler:
         self.constraints = []
         self.max_fitness = 0
 
+        
     ## Removes list constraint from schedule
     #  @param self
     #  @param  A constraint object
@@ -189,7 +197,8 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
-            this_week.constraints[each_constraint.name] = each_fitness
+            this_week.constraints[each_constraint.name] = [each_fitness,
+                    each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness
@@ -239,12 +248,12 @@ class Scheduler:
             start = start.split(':')
             start = list(map(int, start))
             start = time(start[0], start[1])
-            start_times.append(start)  
+            start_times.append(start)
 
             end = end.split(':')
             end = list(map(int, end))
             end = time(end[0], end[1])
-            end_times.append(end) 
+            end_times.append(end)
 
         full_list = this_week.list_time_slots()
         for each_slot in full_list:
@@ -416,15 +425,23 @@ class Scheduler:
 
     ## Main loop that evolves and produces more schedules when run 
     #  @param self
-    #  @param  Main loop of the genetic algorithm 
-    #  @return valid_weeks
-    def evolution_loop(self, minutes_to_run = 1):
+    #  @param main tkinter window object
+    #  @param number of minutes to run, int
+    #  @return side-effect: self.weeks are filled out
+    def evolution_loop(self, main_window_object, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
-        clock() #stopwatch starts
+        start_time = now() #stopwatch starts
+        time_limit = 60 * minutes_to_run
+        one_increment = time_limit/40.0
+
+        main_window_object.setup_loading_screen()
+        main_window_object.go_to_loading_screen()
+        loading_screen = main_window_object.misc_page
+
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
-        weeks_to_keep = 5 
+        weeks_to_keep = 5
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
@@ -446,11 +463,25 @@ class Scheduler:
 
             return valid_weeks
 
+        def loading_bar_helper(one_increment, current_elapsed_seconds, max_runtime):
+            """Increments the loading bar by as much as it should if and when it should"""
+            #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
+            num_segments_displayed = loading_screen.load_bar['width']
+            number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
+            print(number_of_segments_to_add)
+            while number_of_segments_to_add > 1:
+                print("Updating the loading bar")
+                loading_screen.update_loading_bar()
+                number_of_segments_to_add -= 1
+            return
+
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
-        time_limit = 60 * minutes_to_run 
+
         while True:
             print('Generation counter:', counter + 1)
+            # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
+
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
@@ -462,30 +493,25 @@ class Scheduler:
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
-            #print([i.fitness for i in self.weeks])
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
-            print("Time left for evolution loop: %d seconds" % (time_limit - clock()))
-            if clock() > time_limit:
+            time_elapsed = now() - start_time
+            loading_bar_helper(one_increment, time_elapsed, time_limit)
+            print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
+            if time_elapsed > time_limit:
                 print('Time limit reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
             print("Minimum fitness of the top schedules of the generation:",
                   min(i.fitness for i in self.weeks))
-            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
+            #                          str(min(i.fitness for i in self.weeks))
 
-            #insufficient valid weeks
-            """
-            if len(valid_weeks) == 0:
-                print("Generating a new population")
-                self.weeks = []
-                self.generate_starting_population()
-                total_iterations += 1
-                counter += 1
-                continue
-                """
+            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+            # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
+            #                          str(len(valid_weeks))
 
             if min(i.fitness for i in self.weeks) == self.max_fitness and \
               len(self.weeks) >= 5 and len(valid_weeks) >= 5:
@@ -494,12 +520,13 @@ class Scheduler:
             print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
             print("Breed complete")
+
             total_iterations += 1
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
             print()
-
         print("Final number of generations: ", total_iterations + 1)
+        main_window_object.finished_running()
 
     ## Provides all time slots matching in a given week
     #  @param self
@@ -787,7 +814,7 @@ class Scheduler:
                 self.assign_and_remove(
                         course, chosen, list_of_slots, this_week)
                 done = True
-            
+
             # case that cannot schedule for this time and room
             else:
                 # remove this timeslot and the other unoccupied in its
@@ -877,7 +904,12 @@ class Scheduler:
             counter += 1
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
-            print("Schedule", counter, "generated")
+
+            #print("Schedule", counter, "generated")
+
+            # update message to be shown on the gui loading screen
+            # self.gui_loading_info = "Schedule " + str(counter) + " generated"
+
         if len(self.weeks) == 0:
             print("Could not schedule")
         return None
