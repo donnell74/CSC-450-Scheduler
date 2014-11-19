@@ -200,18 +200,19 @@ class ViewPage(Page):
                 
         # default is to display accepted constraints first
         if not self.toggle_constraint_acceptance_flag:
+            print ("______")
             if self.is_run_clicked:
                 self.toggle_constraint_acceptance_flag = True
                 #self.create_graphical_constraints()
                 #self.insert_schedule(self.last_viewed_schedule)
                 
-            else:
                 self.create_compact_schedules()
                 
         else:
             if self.is_run_clicked:
                 self.toggle_constraint_acceptance_flag = True
-                
+
+            print ("+++++")
             self.create_compact_constraint()
 
     def show_nav(self):
