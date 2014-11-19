@@ -112,6 +112,7 @@ class InstructorConstraint(Page):
             box = Checkbutton(self.day_frame, text = self.days[i], variable = self.value)
             box.pack(side = TOP, anchor = CENTER)
 
+        
         self.priority_label = Label(self.day_frame, text = "Priority: ")
         self.priority_label.pack()
         self.instr_day_priority_default = StringVar(self)
@@ -503,21 +504,43 @@ class TypeManualConcurrency(Frame):
 
         self.constraints_view_obj = constraints_view_obj
 
-        message_course = Label(self, text="Course code:")
+        message_course = Label(self, text="Select courses:")
         message_course.pack(side = TOP)
-# 
-#         message_priority = Label(self, text="Priority:")
-#         message_priority.pack(side = TOP)
-# 
-#         self.course_time_priority_default = StringVar(self)
-#         self.course_time_priority_default.set("Low") # initial value
-#         self.option_priority = OptionMenu(self, \
-#         self.course_time_priority_default, "Low", "Medium", "High", "Mandatory")
-#         self.option_priority.pack(side = TOP)
-# 
+        
+        self.listbox_frame = Frame(self)
+        self.listbox_frame.pack(side = TOP)
+        
+        self.scrollbar = Scrollbar(self.listbox_frame, orient=VERTICAL)
+        self.listbox = Listbox(self.listbox_frame, yscrollcommand = self.scrollbar.set,\
+                                selectmode = MULTIPLE)
+
+        self.scrollbar.config(command=self.listbox.yview)
+
+        self.listbox.pack(side=LEFT, fill=X, expand=1)
+        self.scrollbar.pack(side=RIGHT, fill=Y)
+        
+        list_of_courses = []
+        for course in globs.courses:
+            if isinstance(course, Course):
+                list_of_courses.append(course)
+
+
+        for item in list_of_courses:
+            self.listbox.insert(END, item)
+        
+        priority_options = ["Low", "Medium", "High", "Mandatory"]
+        self.priority_label = Label(self, text = "Priority: ")
+        self.priority_label.pack()
+        self.instr_time_priority_default = StringVar(self)
+        self.instr_time_priority_default.set("Low") # initial value
+        self.option_priority = OptionMenu(self,
+                                          self.instr_time_priority_default,
+                                          *priority_options)
+        self.option_priority.pack(side = TOP)
+ 
         self.button_add_course_constraint = Button(self, text="Add Constraint",\
                                             command=self.add_course_constraint)
-        self.button_add_course_constraint.pack(side = RIGHT, pady = 25)
+        self.button_add_course_constraint.pack(side = BOTTOM, pady = 25)
 
     def add_course_constraint(self):
         """Adds course constraint"""
