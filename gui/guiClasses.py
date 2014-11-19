@@ -9,7 +9,7 @@ sys.path.append("../")
 import globs
 from threading import Thread
 from time import time
-from genetic import constraint, interface, scheduler
+from genetic import constraint, interface
 import tkMessageBox
 
 font_style = "Helvetica"
@@ -800,10 +800,11 @@ class MiscPage(Page):
         self.prev_text = ''
         self.past = ""
 
-    def update(self):
-
+    def update_loading_bar(self):
+        self.update()
         # print(self.load_bar['width'])
-        if self.load_bar['width'] <= 40:
+        # Stop at "almost done" status; will jump to 100% when finished
+        if self.load_bar['width'] <= 39:
             self.load_bar['width'] += 1
         else:
             print("bar is overflowing! this shouldn't be happening!")
@@ -844,6 +845,7 @@ class MiscPage(Page):
 
     def finish_loading(self):
         self.load_bar['width'] = 40
+        self.update()
 
 class MainWindow(Frame):
 
@@ -881,7 +883,7 @@ class MainWindow(Frame):
                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.view_btn.pack(fill=X, side="top", pady=2)
 
-        self.misc_btn = Button(self.menu, text='Misc', command=self.show_misc, \
+        self.misc_btn = Button(self.menu, text='Splash', command=self.show_misc, \
                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.misc_btn.pack(fill=X, side="top", pady=2)
 
@@ -929,14 +931,14 @@ class MainWindow(Frame):
                 runtime_var = 1
             print(runtime_var)
 
-        globs.mainScheduler.evolution_loop(runtime_var)
+        globs.mainScheduler.evolution_loop(self, runtime_var)
 
         self.run_finished = True
-        self.root.after(250, interface.export_schedules(globs.mainScheduler.weeks)) #does not work
         return
 
     def finished_running(self):
         """ Display view_page after run_scheduler is finished running. """
+        self.misc_page.finish_loading()
 
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.view_page.is_run_clicked = True
@@ -949,34 +951,28 @@ class MainWindow(Frame):
         self.run_clicked = False
         return
 
-    def loading_bar(self):
-        self.root.after(250, self.show_misc)
-
-        last_time = time()
+    def setup_loading_screen(self):
         total_runtime = self.home_page.runtime_selected_var.get()
+
         runtime_sec = total_runtime * 60
         bar_width = 40.0
 
-        seconds_per_update = runtime_sec / bar_width
+        #seconds_per_update = runtime_sec / bar_width
         print("runtime_sec", runtime_sec)
         print("bar_width", bar_width)
-        print("seconds_per_update", seconds_per_update)
+        #print("seconds_per_update", seconds_per_update)
 
-        while not self.run_finished:
-            current_time = time()
-
-            if (current_time - last_time) >= seconds_per_update:
-                # print("updating")
-                # update loading bar on misc_page
-                self.misc_page.update()
-                last_time = current_time
-
-        self.misc_page.finish_loading()
-        self.root.after(100, self.finished_running)
         return
 
-    def run_scheduler(self): # MOVE THIS ELSEWHERE?
+    def go_to_loading_screen(self):
+        #self.root.after(250, self.show_misc)
+        self.show_misc()
+        self.update()
 
+        return
+
+
+    def run_scheduler(self):
         if not self.run_clicked:
             self.run_clicked = True
             self.view_page.is_run_clicked = False
@@ -985,9 +981,12 @@ class MainWindow(Frame):
             instructors = globs.instructors
             # RUN SCHEDULER METHOD
             # Add hard/obvious constraints before running
-            t = Thread(target = self.thread_run_scheduler)
-            t.start()
-            t2 = Thread(target = self.loading_bar)
-            t2.start()
+            self.thread_run_scheduler()
+
+            # only export schedules if it is possible
+            try:
+                interface.export_schedules(globs.mainScheduler.weeks)
+            except:
+                print("Could not export schedules")
 
         return

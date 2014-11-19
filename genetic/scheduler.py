@@ -9,6 +9,9 @@ from structures import *
 from constraint import *
 from time import time as now
 import gc
+import sys
+sys.path.append("../")
+import gui
 
 #import interface # uncomment to use export_schedule_xml
 import xml.etree.ElementTree as ET
@@ -372,9 +375,16 @@ class Scheduler:
         self.weeks.extend(list_of_children)
 
 
-    def evolution_loop(self, minutes_to_run = 1):
+    def evolution_loop(self, main_window_object, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         start_time = now() #stopwatch starts
+        time_limit = 60 * minutes_to_run
+        one_increment = time_limit/40.0
+
+        main_window_object.setup_loading_screen()
+        main_window_object.go_to_loading_screen()
+        loading_screen = main_window_object.misc_page
+
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
@@ -400,9 +410,21 @@ class Scheduler:
 
             return valid_weeks
 
+        def loading_bar_helper(one_increment, current_elapsed_seconds, max_runtime):
+            """Increments the loading bar by as much as it should if and when it should"""
+            #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
+            num_segments_displayed = loading_screen.load_bar['width']
+            number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
+            print(number_of_segments_to_add)
+            while number_of_segments_to_add > 1:
+                print("Updating the loading bar")
+                loading_screen.update_loading_bar()
+                number_of_segments_to_add -= 1
+            return
+
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
-        time_limit = 60 * minutes_to_run 
+
         while True:
             print('Generation counter:', counter + 1)
             # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
@@ -422,6 +444,7 @@ class Scheduler:
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
             time_elapsed = now() - start_time
+            loading_bar_helper(one_increment, time_elapsed, time_limit)
             print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
             if time_elapsed > time_limit:
                 print('Time limit reached; final output found')
@@ -450,6 +473,7 @@ class Scheduler:
             print("Number of weeks:", str(len(self.weeks)))
             print()
         print("Final number of generations: ", total_iterations + 1)
+        main_window_object.finished_running()
 
     def time_slot_available(self, day, first_time_slot):
         for room in day.rooms:
