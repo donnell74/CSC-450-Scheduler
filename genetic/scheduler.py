@@ -7,7 +7,7 @@ from math import floor
 from datetime import time, timedelta
 from structures import *
 from constraint import *
-from time import clock
+from time import time as now
 import gc
 
 #import interface # uncomment to use export_schedule_xml 
@@ -369,7 +369,7 @@ class Scheduler:
 
     def evolution_loop(self, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
-        clock() #stopwatch starts
+        start_time = now() #stopwatch starts
         fitness_baseline = 10
         total_iterations = 0
         counter = 0
@@ -415,8 +415,9 @@ class Scheduler:
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
-            print("Time left for evolution loop: %d seconds" % (time_limit - clock()))
-            if clock() > time_limit:
+            time_elapsed = now() - start_time
+            print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
+            if time_elapsed > time_limit:
                 print('Time limit reached; final output found')
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
