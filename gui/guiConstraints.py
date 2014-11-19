@@ -10,7 +10,6 @@ from genetic import constraint
 from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
 import tkMessageBox
 
-
 class Page(Frame):
     def __init__(self, root):
         Frame.__init__(self, root)
@@ -519,22 +518,22 @@ class TypeManualConcurrency(Frame):
         self.listbox.pack(side=LEFT, fill=X, expand=1)
         self.scrollbar.pack(side=RIGHT, fill=Y)
         
-        list_of_courses = []
+        self.list_of_courses = []
         for course in globs.courses:
             if isinstance(course, Course):
-                list_of_courses.append(course)
+                self.list_of_courses.append(course)
 
 
-        for item in list_of_courses:
+        for item in self.list_of_courses:
             self.listbox.insert(END, item)
         
         priority_options = ["Low", "Medium", "High", "Mandatory"]
         self.priority_label = Label(self, text = "Priority: ")
         self.priority_label.pack()
-        self.instr_time_priority_default = StringVar(self)
-        self.instr_time_priority_default.set("Low") # initial value
+        self.str_priority_default = StringVar(self)
+        self.str_priority_default.set("Low") # initial value
         self.option_priority = OptionMenu(self,
-                                          self.instr_time_priority_default,
+                                          self.str_priority_default,
                                           *priority_options)
         self.option_priority.pack(side = TOP)
  
@@ -544,12 +543,35 @@ class TypeManualConcurrency(Frame):
 
     def add_course_constraint(self):
         """Adds course constraint"""
-        pass
-#         course = self.str_course_default.get()
-#         time_str =  self.str_time_default.get()
-#         when = self.str_when_default.get()
-#         priority = self.course_time_priority_default.get()
-#         create_course_time_constraint(course, time_str, when, priority, self.constraints_view_obj)
+        selection = self.listbox.curselection()
+        if len(selection) > 1:
+            list_courses_obj = []
+            for i in selection :
+                list_courses_obj.append(self.list_of_courses[i])
+
+            self.listbox.selection_clear(0, END)
+            
+            priority = self.str_priority_default.get()
+            
+            create_manual_concurrency_constraint(list_courses_obj, priority, self.constraints_view_obj)
+        else:
+            tkMessageBox.showerror(title="Error", message="Select more than 1 course")
+
+def create_manual_concurrency_constraint(list_courses_obj, priority, constraints_view_obj):
+    #Cameron
+    constraint_name = "manual_concurrency"
+    for course_obj in list_courses_obj:
+        constraint_name += "_" + course_obj.code 
+    constraints_view_obj.add_constraint_listbox(constraint_name, priority)
+
+def create_course_partial_scheduling_constraint(course_str, room_str, days_str, when,\
+                                                constraints_view_obj, time_initial_str,\
+                                                time_end_str):
+    #Cameron
+    constraint_name = "partial_scheduling" + "_" + course_str + "_" + room_str + "_" + days_str + "_" + when 
+    
+    priority = get_priority_value("Mandatory")
+    constraints_view_obj.add_constraint_listbox(constraint_name, priority)
 
 class TypePartialScheduling(Frame):
     def __init__(self, root, constraints_view_obj):
@@ -571,7 +593,7 @@ class TypePartialScheduling(Frame):
         self.option_course = OptionMenu(self, self.str_course_default, *list_of_courses)
         self.option_course.pack(side = TOP)
      
-        message_room = Label(self, text="Course code:")
+        message_room = Label(self, text="Room:")
         message_room.pack(side = TOP)
      
         rooms_list_tuple = globs.rooms
@@ -610,24 +632,24 @@ class TypePartialScheduling(Frame):
 
         self.start_time_label = Label(self, text = "Time:")
         self.start_time_label.pack(side = TOP)
-        self.gap_start_default = StringVar()
-        self.gap_start_default.set(self.start_time_list[0])
+        self.time_start_default = StringVar()
+        self.time_start_default.set(self.start_time_list[0])
  
-        self.gap_start_option = OptionMenu(self, \
-                                           self.gap_start_default, *self.start_time_list)
-        self.gap_start_option.pack(side = TOP)
+        self.start_option = OptionMenu(self, \
+                                           self.time_start_default, *self.start_time_list)
+        self.start_option.pack(side = TOP)
   
-        self.end_time_between_frame = Frame(self)
+        self.time_between_frame = Frame(self)
 
-        self.and_time_label = Label(self.end_time_between_frame, text = "And")
+        self.and_time_label = Label(self.time_between_frame, text = "And")
         self.and_time_label.pack(side = TOP)
 
-        self.gap_end_default = StringVar()
-        self.gap_end_default.set(self.end_time_list[0]) 
+        self.end_default = StringVar()
+        self.end_default.set(self.end_time_list[0]) 
  
-        self.gap_end_option = OptionMenu(self.end_time_between_frame, \
-                                         self.gap_end_default, *self.end_time_list)
-        self.gap_end_option.pack(side = TOP)
+        self.and_option = OptionMenu(self.time_between_frame, \
+                                         self.end_default, *self.end_time_list)
+        self.and_option.pack(side = TOP)
         
 
         self.button_add_course_constraint = Button(self, text="Add Constraint",\
@@ -636,12 +658,22 @@ class TypePartialScheduling(Frame):
 
     def add_course_constraint(self):
         """Adds course constraint"""
-        pass
-#         course = self.str_course_default.get()
-#         #time_str =  self.str_time_default.get()
-#         when = self.str_when_default.get()
-#         priority = self.course_time_priority_default.get()
-#         create_course_time_constraint(course, time_str, when, priority, self.constraints_view_obj)
+        course_str = self.str_course_default.get()
+        room_str = self.str_room_default.get()
+        days_str = self.str_day_default.get()
+        when = self.str_when_default.get()
+        time_initial_str = self.time_start_default.get()
+        time_end_str = None
+        if when == "Between":
+            time_end_str = self.end_default.get()
+
+        create_course_partial_scheduling_constraint(course_str,\
+                                                    room_str,\
+                                                    days_str,\
+                                                    when,\
+                                                    self.constraints_view_obj,\
+                                                    time_initial_str, \
+                                                    time_end_str)
 
     def match_days_by_course(self, course_obj):
         if course_obj.credit == 4:
@@ -676,9 +708,9 @@ class TypePartialScheduling(Frame):
         when = self.str_when_default.get()
 
         if when == "Between":
-            self.end_time_between_frame.pack(side = TOP)
+            self.time_between_frame.pack(side = TOP)
         else:
-            self.end_time_between_frame.pack_forget()
+            self.time_between_frame.pack_forget()
 
 class ConstraintPage(Page):
 
