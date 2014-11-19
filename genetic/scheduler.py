@@ -419,9 +419,9 @@ class Scheduler:
             number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
             print(number_of_segments_to_add)
             while number_of_segments_to_add > 1:
-                a = raw_input("*****************UPDATING*******************")
+                print("*****************UPDATING*******************")
                 main_window_object.go_to_loading_screen()
-                loading_screen.update()
+                loading_screen.update_loading_bar()
                 number_of_segments_to_add -= 1
             return
 

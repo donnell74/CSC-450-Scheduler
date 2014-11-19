@@ -800,8 +800,8 @@ class MiscPage(Page):
         self.prev_text = ''
         self.past = ""
 
-    def update(self):
-
+    def update_loading_bar(self):
+        self.update()
         # print(self.load_bar['width'])
         # Stop at "almost done" status; will jump to 100% when finished
         if self.load_bar['width'] <= 39:
