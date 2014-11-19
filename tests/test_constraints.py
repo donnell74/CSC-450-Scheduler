@@ -44,7 +44,26 @@ class TestConstraints(unittest.TestCase):
                                         constraint.lab_on_tr,
                                         [sample_scheduler.courses[1]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
-        self.assertEquals(sample_scheduler.weeks[0].fitness, 30)        
+        self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
+
+    def test_instructor_time_pref_before(self):
+        volmar_instr = structures.Instructor(name="Volmar")
+        #bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_time_before_test_fail.xml")
+        #bad_time_slot_12 = structures.TimeSlot(start_time="11:00",
+        #                                   end_time="12:00",
+        #                                   this_room=bad_scheduler.rooms[0])
+        good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_time_before_test_pass.xml")
+        good_time_slot_12 = structures.TimeSlot(start_time="11:00",
+                                           end_time="12:00",
+                                           this_room=good_scheduler.rooms[0],
+                                           isTR=False)
+
+        good_scheduler.add_constraint("volmar_time_pref_before_12", 30,
+                                      constraint.instructor_time_pref_before,
+                                      [volmar_instr, good_time_slot_12, False])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        # This schedule should pass, fitness should be 30
+        self.assertEquals(good_scheduler.weeks[0].fitness, 30)
 
 
 if __name__ == "__main__":
