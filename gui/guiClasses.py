@@ -865,7 +865,6 @@ class MainWindow(Frame):
             print(runtime_var)
 
         globs.mainScheduler.evolution_loop(runtime_var)
-        globs.mainScheduler.evolution_loop()
 
         self.run_finished = True
         self.root.after(250, interface.export_schedules(globs.mainScheduler.weeks)) #does not work
