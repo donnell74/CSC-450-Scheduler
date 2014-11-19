@@ -1,3 +1,4 @@
+from __future__ import print_function
 # reorganize!
 from Tkinter import *
 from guiConstraints import *
@@ -128,7 +129,7 @@ class ViewPage(Page):
         #button to show if constraints were accepted or rejected
         self.constraint_acceptance = Button(self,
                                             command = lambda : self.toggle_constraint_acceptance(),
-                                            text = 'Toggle Constriant',
+                                            text = 'View Constraints',
                                             padx =10, pady = 3,
                                             cursor = 'hand2')
         self.constraint_acceptance.place(x = 533, y = 1)
@@ -136,7 +137,7 @@ class ViewPage(Page):
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
 
-        self.toggle_constraint_acceptance_flag = False
+        self.toggle_constraint_acceptance_flag = True
         # holds the rooms
         self.rooms = []
 
@@ -144,12 +145,14 @@ class ViewPage(Page):
         self.room_selection_option = 0  # default to 0
         # dict to hold selection option + room name/number
         self.selections = {}
+        
+        self.table_labels = []  # holds the labels for the schedules
 
+        # dict to hold constraints and fitness score
+        self.constraint_bag = {}
+        
         # display schedules
         self.toggle_schedules()
-
-
-
 
 
     def toggle_schedules(self):
@@ -181,29 +184,28 @@ class ViewPage(Page):
         """ Switch between the acceptance and rejected constraints """
 
         # delete previous canvas
-        self.delete(self.canvas)
+        self.delete(self.canvas_items)
 
         # delete old labels to make room for new ones
         self.delete(self.table_labels)
 
         # delete drop downs
-        self.delete(self.drop_down)
+        self.delete(self.drop_down_items)
 
         # default is to display accepted constraints first
         if not self.toggle_constraint_acceptance_flag:
+            print ("______")
             if self.is_run_clicked:
                 self.toggle_constraint_acceptance_flag = True
-                self.create_graphical_schedules()
-                self.insert_schedule(self.last_viewed_schedule)
-
-            else:
+                #self.create_graphical_constraints()
+                #self.insert_schedule(self.last_viewed_schedule)
                 self.create_compact_schedules()
 
         else:
             if self.is_run_clicked:
-                self.toggle_constraint_acceptance_flag = False
+                self.toggle_constraint_acceptance_flag = True
 
-            self.create_compact_schedules()
+            self.create_compact_constraint()
 
     def show_nav(self):
         """ show buttons so user can click toggle between schedules """
@@ -226,6 +228,23 @@ class ViewPage(Page):
         if self.is_run_clicked:
             self.insert_schedule(self.last_viewed_schedule)
 
+    def create_compact_constraint(self):
+        """ Creates a more compact graphical schedule
+            respresentation of the valid schedules """
+        
+        # background place holder for the schedules
+        self.bg_label = Label(self, width = 37, height= 13,
+                              font=(font_style, size_h1),
+                              text = 'Click RUN to generate schedules.',
+                              bg = 'white')
+        self.bg_label.place(x = 50, y = 107)
+
+        # initial color of the schedule labels
+        self.color = [255, 255, 255]
+
+        if self.is_run_clicked:
+            self.insert_constraint(self.last_viewed_schedule)
+    
     def create_room_selection(self):
         """ Creates a drop down menu for room selection """
 
@@ -291,7 +310,8 @@ class ViewPage(Page):
 
         # listen for mouse wheel
         self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
-
+    
+        
     def on_mouse_wheel(self, event):
         """ Update the canvas vertical scrollbar """
 
@@ -413,6 +433,27 @@ class ViewPage(Page):
             self.canv.delete("all")
 
             self.format_compact_schedule(globs.mainScheduler.weeks[n].print_concise())
+
+    def insert_constraint(self, n):
+        """Insert constraints on the view page"""
+
+        self.last_viewed_schedule = n
+
+        self.delete(self.drop_down_items)
+
+        if self.toggle_constraint_acceptance_flag:
+            self.format_compact_constraint(globs.mainScheduler.weeks[n].constraints)
+            self.bg_label['fg'] = 'white'
+
+        else:
+            # destroy old labels to make room for new ones
+            self.delete(self.table_labels)
+            
+            # hide bg_label text
+            self.bg_label['fg'] = 'white'
+
+        self.toggle_constraint_acceptance_flag = not self.toggle_constraint_acceptance_flag
+            
 
     def format_graphical_schedule(self, schedule_text):
         """ Formats the graphical schedules """
@@ -704,6 +745,24 @@ class ViewPage(Page):
 
             yt += 29
 
+    def format_compact_constraint(self, constraints_dict):
+        """ Formats the compact schedules """                
+        for key in constraints_dict.keys():
+            self.table_labels.append(Label(self,
+                                           text = (str(constraints_dict[key][0]) + '/' +\
+                                                   str(constraints_dict[key][1]))\
+                                               .ljust(5) + key.rjust(100),
+                                           font=(font_style, size_l),
+                                           width = 66,
+                                           bg = 'white',
+                                           fg = 'black',
+                                           anchor = NW))
+        # position the labels
+        yt = 103
+        for i in xrange(len(self.table_labels)):
+            self.table_labels[i].place(x = 50, y = yt)
+            yt += 24
+
     def delete(self, labels):
         """ Delete dynamically created objects from memory """
 
@@ -879,7 +938,7 @@ class MainWindow(Frame):
     def finished_running(self):
         """ Display view_page after run_scheduler is finished running. """
 
-        print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.view_page.is_run_clicked = True
         self.view_page.insert_schedule(0)  # show the first schedule in the view page
         self.view_page.show_nav()
@@ -926,22 +985,6 @@ class MainWindow(Frame):
             instructors = globs.instructors
             # RUN SCHEDULER METHOD
             # Add hard/obvious constraints before running
-            globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, [instructors])
-            globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
-                                               constraint.sequential_time_different_building_conflict, [instructors])
-            globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
-
-            globs.mainScheduler.add_constraint("capacity checking", 0, constraint.ensure_course_room_capacity, [])
-            globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
-            globs.mainScheduler.add_constraint("computer requirement", 0, constraint.ensure_computer_requirement, [])
-            globs.mainScheduler.add_constraint("course sections at different times", \
-                                               0, constraint.course_sections_at_different_times, \
-                                               [globs.courses[:-1]])  # the last item is "All", ignore it
-
-            for each_course in globs.mainScheduler.courses:
-                globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
-                                                   constraint.lab_on_tr, [each_course])
-
             t = Thread(target = self.thread_run_scheduler)
             t.start()
             t2 = Thread(target = self.loading_bar)
