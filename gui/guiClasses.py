@@ -5,7 +5,8 @@ from readFile import *
 import sys
 sys.path.append("../")
 import globs
-from genetic import constraint, interface
+from genetic import constraint, interface, scheduler
+import tkMessageBox
 
 font_style = "Helvetica"
 size_h1 = 20
@@ -24,7 +25,7 @@ class HomePage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="CSC-450-Scheduler", font=(font_style, size_h1))
+        self.head_label = Label(self, text="CSC Department Scheduler", font=(font_style, size_h1))
         self.head_label.pack(pady=10)
 
         paragraph_text = "User Guide: step-by-step\n\n" +\
@@ -35,8 +36,65 @@ class HomePage(Page):
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
-        self.version_label = Label(self, text="<version info?>")
-        self.version_label.pack(side=BOTTOM, pady=5)
+        runtime_option_text = "Choose a run speed:"
+        self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
+        self.runtime_label.pack()
+        self.runtime_disclaimer = Label(self, text = "The scheduler may finish earlier"\
+                                        " if it finds 5 valid schedules.", font = (font_style, 10))
+        self.runtime_disclaimer.pack(pady = 5)
+                                        
+
+        runtime_modes = [
+            ("Quick (~1 minute)", 1),
+            ("Moderate (~10 minutes)", 10),
+            ("High (~1 hour)", 60),
+            ("Overnight (~8 hours)", 480),
+            ("Custom", 0)
+            ]
+
+        self.runtime_selected_var = IntVar()
+        self.runtime_selected_var.set(1)
+        self.runtime_selected_var.trace("w", self.check_if_custom)
+
+        for mode, val in runtime_modes:
+            b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
+                            value = val, font = (font_style, size_l))
+            b.pack(anchor = W, padx = 225)
+
+
+        self.custom_input = Frame(self, width = 50, height = 20)
+        self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
+                                 font = (font_style, size_l))
+        self.input_label.pack()
+
+        self.runtime_custom_input = StringVar() #will be converted to int later, prevents type errors
+        self.runtime_custom_input.set("5")
+        self.runtime_custom_input.trace("w", self.check_if_digit)
+        
+        self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)
+        self.input_box.pack()
+        # self.custom_input.pack() # uncomment to show this by default
+
+
+    def check_if_digit(self, *args):
+        self.input_box.config(state = DISABLED) # disabled so tkMessageBox doesn't corrupt input field
+        entered_value = self.runtime_custom_input.get()
+        for c in entered_value:
+            if not c.isdigit():
+                self.runtime_custom_input.set(entered_value[:-1]) # remove the non-digit character
+                tkMessageBox.showerror(title = "Error", message = "Time must only contain numbers.")
+                self.input_box.config(state = NORMAL)
+                return 0
+        self.input_box.config(state = NORMAL)
+        return 1
+        
+
+    def check_if_custom(self, *args):
+        runtime_var_value = self.runtime_selected_var.get()
+        if runtime_var_value == 0: # custom is selected
+            self.custom_input.pack()
+        else:
+            self.custom_input.pack_forget()
 
 # Constraint page is located in guiConstraints.py
 
@@ -65,9 +123,18 @@ class ViewPage(Page):
                                       cursor = 'hand2')
         self.toggle_graphics.place(x = 533, y = 47)
 
+        #button to show if constraints were accepted or rejected
+        self.constraint_acceptance = Button(self,
+                                            command = lambda : self.toggle_constraint_acceptance(),
+                                            text = 'Toggle Constriant',
+                                            padx =10, pady = 3,
+                                            cursor = 'hand2')
+        self.constraint_acceptance.place(x = 533, y = 1)
+
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
 
+        self.toggle_constraint_acceptance_flag = False
         # holds the rooms
         self.rooms = []
         
@@ -80,6 +147,10 @@ class ViewPage(Page):
         
         # display schedules
         self.toggle_schedules()
+
+        
+
+        
     
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
@@ -106,6 +177,34 @@ class ViewPage(Page):
         else:
             if self.is_run_clicked:
                 self.toggle_schedules_flag = False
+                
+            self.create_compact_schedules()
+
+    def toggle_constraint_acceptance(self):
+        """ Switch between the acceptance and rejected constraints """
+        
+        # delete previous canvas
+        self.delete(self.canvas)
+        
+        # delete old labels to make room for new ones
+        self.delete(self.table_labels)
+
+        # delete drop downs
+        self.delete(self.drop_down)
+                
+        # default is to display accepted constraints first
+        if not self.toggle_constraint_acceptance_flag:
+            if self.is_run_clicked:
+                self.toggle_constraint_acceptance_flag = True
+                self.create_graphical_schedules()
+                self.insert_schedule(self.last_viewed_schedule)
+                
+            else:
+                self.create_compact_schedules()
+                
+        else:
+            if self.is_run_clicked:
+                self.toggle_constraint_acceptance_flag = False
                 
             self.create_compact_schedules()
 
@@ -589,8 +688,10 @@ class MainWindow(Frame):
         Frame.__init__(self, root)
         self.pack(side = TOP, fill = "both")
 
-        ToolTips(root)
-        
+        # ToolTips does not work well on non-Windows platforms
+        if sys.platform.startswith('win'):
+            ToolTips(root)
+
         # MENU AND CONTENT SECTIONS
         self.menu = Frame(self, width="500", height="600")
         self.menu.pack(side=LEFT, fill="both")
@@ -651,25 +752,15 @@ class MainWindow(Frame):
         instructors = globs.instructors
         # RUN SCHEDULER METHOD
         # Add hard/obvious constraints before running
-        globs.mainScheduler.add_constraint("instructor conflict", 0, constraint.instructor_conflict, [instructors])
-        globs.mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
-                                           constraint.sequential_time_different_building_conflict, [instructors])
-        globs.mainScheduler.add_constraint("subsequent courses", 0, constraint.num_subsequent_courses, [instructors])
+        runtime_var = self.home_page.runtime_selected_var.get()
+        if runtime_var not in [1, 10, 60, 480]:
+            runtime_var = int(self.home_page.runtime_custom_input.get()) # convert from DoubleVar
+            if runtime_var < 1:
+                runtime_var = 1
+            print(runtime_var)
 
-        globs.mainScheduler.add_constraint("capacity checking", 0, constraint.ensure_course_room_capacity, [])
-        globs.mainScheduler.add_constraint("no overlapping courses", 0, constraint.no_overlapping_courses, [])
-        globs.mainScheduler.add_constraint("computer requirement", 0, constraint.ensure_computer_requirement, [])
-        globs.mainScheduler.add_constraint("course sections at different times", \
-                                           0, constraint.course_sections_at_different_times, \
-                                           [globs.courses[:-1]])  # the last item is "All", ignore it
+        globs.mainScheduler.evolution_loop(runtime_var)
 
-        for each_course in globs.mainScheduler.courses:
-            globs.mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
-                                               constraint.lab_on_tr, [each_course])
-
-        globs.mainScheduler.generate_starting_population()
-
-        globs.mainScheduler.evolution_loop()
         interface.export_schedules(globs.mainScheduler.weeks)
         self.view_page.is_run_clicked = True
         self.view_page.show_nav()

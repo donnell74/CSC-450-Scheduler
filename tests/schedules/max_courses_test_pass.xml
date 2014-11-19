@@ -6,7 +6,7 @@
           <item code="CSC 131 001" credit="1" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="1"></item>
           <item code="CSC 131 A" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="0"></item>
           <item code="CSC 232 A" credit="3" instructor="Vollmar" prereq="CSC131" capacity="10" needs_computers="0" is_lab="0"></item>
-          <item code="CSC 232 001" credit="1" instructor="Vollmar" prereq="CSC131" capacity="10" needs_computers="0" is_lab="1"></item>
+          <item code="CSC 232 001" credit="1" instructor="Saquer" prereq="CSC131" capacity="10" needs_computers="0" is_lab="1"></item>
         </courseList>
         <roomList>
           <item building="CHEK" number="209" capacity="30" has_computers="1"></item>
@@ -19,6 +19,7 @@
         <timeListTR>
             <item>08:00-09:15</item>
             <item>09:30-10:45</item>
+            <item>11:00-12:15</item>
         </timeListTR>
         <timeSlotDivide>2</timeSlotDivide>
     </schedule>

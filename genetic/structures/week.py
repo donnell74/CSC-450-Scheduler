@@ -3,7 +3,7 @@ import structures
 from copy import copy
 from copy import deepcopy
 from datetime import time
-
+from weakref import ref
 
 class MalformedWeekError(Exception):
     def __init__(self, value):
@@ -30,7 +30,7 @@ class Week:
         if test:
             self.schedule = this_scheduler
         else:
-            self.schedule = copy(this_scheduler)
+            self.schedule = ref(this_scheduler)
         self.days = [structures.Day(rooms, day_code, self, test)
                      for day_code in 'mtwrf']
         self.fitness = 0
@@ -39,6 +39,7 @@ class Week:
         self.complete = True
         #Week's copy of courses
         self.sections = []
+        self.constraints = {}
 
     ## Finds objects for a given week
     #  @param self
@@ -53,7 +54,7 @@ class Week:
             print("Invalid query for Week")
             return
         elif query == "Schedule":
-            return self.schedule
+            return self.schedule()
 
     ## Updates a list of sections
     #  @param self
@@ -72,7 +73,6 @@ class Week:
                 self.sections.append(each_section)
         except:
             print(each_course)
-            print(self)
 
     ## Finds sections for a given course
     #  @param self
@@ -245,7 +245,7 @@ class Week:
                         for each_slot in each_day.get_room(each_course["room"].split()[1]):
                             if each_slot.start_time == startTime and \
                                each_slot.end_time == endTime:
-                                for each_s_course in self.schedule.courses:
+                                for each_s_course in self.schedule().courses:
                                     if each_s_course.code == each_course["code"]:
                                         each_slot.course = each_s_course
                                         each_slot.instructor = each_s_course.instructor
@@ -293,6 +293,7 @@ class Week:
         print ("Fitness score: ", self.fitness)
         print ("Is Valid: ", self.valid)
         print (concise_schedule_str)
+        [print(key, self.constraints[key]) for key in self.constraints.keys()]
         print ("=" * 25)
         return concise_schedule_str
 
