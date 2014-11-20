@@ -1,6 +1,7 @@
 from __future__ import print_function
 from copy import copy
 import structures
+from weakref import ref
 
 class Day:
     """ Represents a single day, consisting of a list of room objects """
@@ -9,7 +10,7 @@ class Day:
         if test:
             self.week = this_week
         else:
-            self.week = copy(this_week)
+            self.week = ref(this_week)
         if day_code.lower() in 'mtwrf':
             self.day_code = day_code
         else:
@@ -43,9 +44,9 @@ class Day:
             print("Invalid query for Day")
             return
         elif query == "Week":
-            return self.week
+            return self.week()
         elif query == "Schedule":
-            return self.week.schedule
+            return self.week().schedule()
 
     def get_room(self, query_number):
         for each_room in self.rooms:

@@ -43,8 +43,8 @@
     <course 
         code="CSC 131 A"
         credit="4"
-        startTime="10:00"
-        endTime="11:00"
+        startTime="13:00"
+        endTime="14:00"
         days="MWF"
         room="CHEK 209"
         instructor="Saquer">
@@ -61,8 +61,8 @@
     <course
         code="CSC 232 A"
         credit="5"
-        startTime="13:00"
-        endTime="14:00"
+        startTime="10:00"
+        endTime="11:00"
         days="MWF"
         room="CHEK 209"
         instructor="Volmar">

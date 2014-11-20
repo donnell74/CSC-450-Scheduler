@@ -1,15 +1,26 @@
 from genetic import interface, scheduler, constraint
+import os
 
 def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
 
-    # Get all courses and instructors from file
-    input_path = "genetic/seeds/Input.xml"
-    instructors = interface.create_instructors_list_from_courses_from_file(input_path)
+    yaml_input_path = "genetic/seeds/Input.yaml"
+
+    # Create XML input from YAMl (Input.yaml)
+    if os.path.isfile(yaml_input_path) == False:
+        print("No valid input found. Please put put an input seed named 'Input.yaml' or " +
+                  "'Input.xml' in ./genetic/seeds/ and try again")
+        return
+    else:
+        interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
+
+    # Now that we have valid XML input, create requisite objects from file
+    xml_input_path = "genetic/seeds/Input.xml"
+    instructors = interface.create_instructors_list_from_courses_from_file(xml_input_path)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
-    courses = interface.create_course_list_from_file(input_path, instructors_dict)
-    rooms = interface.create_room_string_list_from_file(input_path)
-    time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(input_path)
+    courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
+    rooms = interface.create_room_string_list_from_file(xml_input_path)
+    time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(xml_input_path)
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
@@ -22,7 +33,7 @@ def init(): # call globals.init() from main
         mainScheduler.generate_starting_population(just_one = True)
 
         #prereqs computation and display
-        prereqs = interface.get_prereqs(input_path, courses)
+        prereqs = interface.get_prereqs(xml_input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
         '''for prereq in prereqs:
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
@@ -49,7 +60,13 @@ def init(): # call globals.init() from main
                                     [])
         mainScheduler.add_constraint("course sections at different times", 0,
                                     constraint.course_sections_at_different_times,
-                                    [courses[:-1]])  # the last item is "All", ignore it
+                                    [courses])
+
+        for each_course in mainScheduler.courses:
+            if each_course.is_lab:
+                mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
+                                             constraint.lab_on_tr, [each_course])
+
 
     # used for gui strings
     # must be in military time

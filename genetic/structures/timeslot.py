@@ -2,7 +2,7 @@ from __future__ import print_function
 import structures
 from copy import copy
 from datetime import time, timedelta
-
+from weakref import ref
 
 class TimeSlot:
     """ Represents a single time slot, consisting of a time range and a course object """
@@ -41,9 +41,9 @@ class TimeSlot:
         elif query == "Day":
             return self.room.day
         elif query == "Week":
-            return self.room.day.week
+            return self.room.day.week()
         elif query == "Schedule":
-            return self.room.day.week.schedule
+            return self.room.day.week().schedule()
 
     def set_indices(self, day, room, slot):
         """Sets indices to refer to this object by cascading down"""
@@ -73,6 +73,8 @@ class TimeSlot:
                 self.duration) +"\n"
 
     def __eq__(self, other):
+        if isinstance(other, ref):
+            other = other()
         return self.start_time == other.start_time and self.room == other.room and \
                self.day == other.day and self.end_time == other.end_time and \
                self.instructor == other.instructor and self.course == other.course

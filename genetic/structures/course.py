@@ -4,6 +4,7 @@ class Course:
     def __init__(self, code, credit, instructor, capacity,
                  needs_computers, prescheduled_time=None,
                  is_prescheduled=False, is_lab=False):
+
         self.code = code
         self.credit = credit
         self.instructor = instructor
