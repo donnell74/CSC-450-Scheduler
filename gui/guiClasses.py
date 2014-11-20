@@ -719,10 +719,10 @@ class ViewPage(Page):
                                 font = (font_style, size_l))
 
         # draw AM times down the y-axis of the canvas
-        for i in xrange(len(times)):
+        for this_time in times.keys():
             self.canvas.create_text(xstart + xpad - 25,
-                                    ystart + ypad + 40 + (i * 100),
-                                    text = times[i],
+                                    ystart + ypad + 40 + (this_time * 100),
+                                    text = times[this_time],
                                     font = (font_style, size_l))
 
         if self.is_run_clicked:
