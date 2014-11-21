@@ -372,10 +372,11 @@ def export_schedules(weeks, export_dir="./"):
     counter = 0
     num_to_export = len(weeks)
     for each_week in weeks:
-        if counter > 5:
-            break
         if each_week.valid:
             counter += 1
+            if counter > 5:
+                counter = 5
+                break
             filename = os.path.join(export_dir, "schedule_" + str(counter) + ".csv")
             if os.path.isfile(filename):
                 os.remove(filename)

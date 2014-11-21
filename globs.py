@@ -62,7 +62,7 @@ def init(): # call globals.init() from main
                                     [])
         mainScheduler.add_constraint("course sections at different times", 0,
                                     constraint.course_sections_at_different_times,
-                                    [courses[:-1]])  # the last item is "All", ignore it
+                                    [courses])
 
         for each_course in mainScheduler.courses:
             if each_course.is_lab:
