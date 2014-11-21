@@ -5,9 +5,10 @@ from datetime import time, timedelta
 from weakref import ref
 
 class TimeSlot:
-    """ Represents a single time slot, consisting of a time range and a course object """
 
-    def __init__(self, start_time, end_time, this_room, is_tr, course = None, static = False):
+    """A particular time slot, consisting of a time range and a course object"""
+
+    def __init__(self, start_time, end_time, this_room, isTR, course=None, static=False):
         try:
             # make sure we are given 4 integers for times
             start_time = list(map(int, start_time))
@@ -17,22 +18,20 @@ class TimeSlot:
             return
 
         self.room = this_room
-        self.day = self.room.day.day_code
+        self.day = self.room.day.day_code 
         self.start_time = time(start_time[0], start_time[1])
         self.end_time = time(end_time[0], end_time[1])
-        self.is_tr = is_tr
+        self.isTR = isTR
         self.static = static
         self.course = course
         self.duration = self.find_duration(start_time, end_time)
         self.instructor = None
 
     def info(self, query):
-        """
-        Goes up the object hierarchy to find object for given time slot
-        Possible queries: Room, Day, Week, Schedule
+        """Goes up the object hierarchy to find object for given time slot
+        Possible queries: Room, day, week, schedule
         IN: query string
-        OUT: object of query's type for given time slot
-        """
+        OUT: object of query's type for given time slot"""
         if query not in ["Room", "Day", "Week", "Schedule"]:
             print("Invalid query for TimeSlot")
             return

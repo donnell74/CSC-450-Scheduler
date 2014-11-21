@@ -52,12 +52,12 @@ class MalformedTimeslotError(Exception):
         return repr(self.value)
 
 
+
 class Scheduler:
 
     """Schedules all courses for a week"""
 
     def __init__(self, courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide, test = False):
-
         if type(courses) == list:
             if len(courses) != 0:
                 if not all(isinstance(each_course, Course) for \
@@ -172,6 +172,7 @@ class Scheduler:
         self.constraints = []
         self.max_fitness = 0
 
+        
     ## Removes list constraint from schedule
     #  @param self
     #  @param  A constraint object
@@ -201,12 +202,14 @@ class Scheduler:
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
                 number_valid += each_fitness
+                #print(each_constraint.name)
             else:
                 total_fitness += each_fitness
 
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
 
+        #print(this_week.constraints)
 
     ## Mutates a schedule by changing the courses time
     #  @param self
@@ -468,6 +471,7 @@ class Scheduler:
 
         # Resetting self.weeks will trigger generate_starting_population() below
         self.weeks = []
+
         while True:
             print('Generation counter:', counter + 1)
             # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
@@ -571,20 +575,20 @@ class Scheduler:
                 row_dict['time_slots'].append(each_time_slot)
                 row_dict['days'] += each_time_slot.day
 
-                if each_time_slot.is_tr and row_dict['type'] == 0:
+                if each_time_slot.isTR and row_dict['type'] == 0:
                     row_dict['type'] = 2
-                elif not each_time_slot.is_tr and row_dict['type'] == 0:
+                elif not each_time_slot.isTR and row_dict['type'] == 0:
                     row_dict['type'] = 1
-                elif (each_time_slot.is_tr and row_dict['type'] == 1) or \
-                     (not each_time_slot.is_tr and row_dict['type'] == 2):
+                elif (each_time_slot.isTR and row_dict['type'] == 1) or \
+                     (not each_time_slot.isTR and row_dict['type'] == 2):
                     row_dict['type'] = 3
-                elif (not each_time_slot.is_tr and row_dict['type'] == 1) or \
-                     (each_time_slot.is_tr and row_dict['type'] == 2):
+                elif (not each_time_slot.isTR and row_dict['type'] == 1) or \
+                     (each_time_slot.isTR and row_dict['type'] == 2):
                     pass
                 else:
-                    print(each_time_slot.is_tr)
+                    print(each_time_slot.isTR)
                     print(row_dict['type'])
-                    raise MalformedTimeslotError("Timeslot does not have a is_tr attribute")
+                    raise MalformedTimeslotError("Timeslot does not have a isTR attribute")
 
         return row_dict
 
@@ -748,7 +752,7 @@ class Scheduler:
             # each day open for that time and room
             if len(possibilities['time_slots']) == 5:
                 # MWF
-                if not random_slot.is_tr:
+                if not random_slot.isTR:
                     for each_slot in possibilities['time_slots']:
                         if each_slot.day in 'mwf':
                             self.assign_and_remove(
@@ -854,29 +858,8 @@ class Scheduler:
                 week_to_fill.complete = False
                 return
 
-            func_dict = {
-                1: self.schedule_1_hour_course,
-                3: self.schedule_3_hour_course,
-                4: self.schedule_4_hour_course
-            }
-            try:
-                schedule_func = func_dict[each_course.credit]
-                failure = schedule_func(each_course, course_slots, week_to_fill)
-            except KeyError:
-                # If KeyError occurs, each_course.credit is an invalid value
-                print("!!!Tried to schedule for an invalid number of credit hours!!!")
-                week_to_fill.valid = False
-                week_to_fill.complete = False
-                return
-
-            if failure:
-                #cannot schedule in present situation
-                print("failure: incomplete schedule")
-                week_to_fill.valid = False
-                week_to_fill.complete = False
-
             '''if each_course.credit == 5:
-                failure = self.schedule_5_hour_course(each_course, course_slots, week_to_fill)
+                failure = self.schedule_5_hour_course(each_course, course_slots, week_to_fill)'''
             if each_course.credit == 4:
                 failure = self.schedule_4_hour_course(each_course, course_slots, week_to_fill)
             elif each_course.credit == 3:
@@ -893,7 +876,7 @@ class Scheduler:
                 #cannot schedule in present situation
                 print("failure: incomplete schedule")
                 week_to_fill.valid = False
-                week_to_fill.complete = False'''
+                week_to_fill.complete = False
 
 
     ## Randomly generates starting population
