@@ -16,17 +16,15 @@ def init(): # call globals.init() from main
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"
-    instructors = interface.create_instructors_from_courses(xml_input_path)
+    instructors = interface.create_instructors_list_from_courses_from_file(xml_input_path)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
     courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
-    rooms = interface.create_room_list_from_file(xml_input_path)
+    rooms = interface.create_room_string_list_from_file(xml_input_path)
     time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(xml_input_path)
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
     time_slot_divide = 2 #todo: remove this from xml
-    #DO NOT DO THIS AGAIN
-    #GREG IS SORRY
     try:
         mainScheduler
     except:
