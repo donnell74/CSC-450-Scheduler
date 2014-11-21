@@ -18,6 +18,12 @@ size_h2 = 18
 size_p = 14
 size_l = 12
 
+class Page(Frame):
+    def __init__(self, root):
+        Frame.__init__(self, root)
+
+    def show(self):
+        self.lift()
 
 class HomePage(Page):
 
@@ -37,11 +43,10 @@ class HomePage(Page):
         runtime_option_text = "Choose a run speed:"
         self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
         self.runtime_label.pack()
-        self.runtime_disclaimer = Label(self,
-                                        text = "The scheduler may finish earlier"\
-                                        " if it finds 5 valid schedules.",
-                                        font = (font_style, 10))
+        self.runtime_disclaimer = Label(self, text = "The scheduler may finish earlier"\
+                                        " if it finds 5 valid schedules.", font = (font_style, 10))
         self.runtime_disclaimer.pack(pady = 5)
+
 
         runtime_modes = [
             ("Quick (~1 minute)", 1),
@@ -56,46 +61,41 @@ class HomePage(Page):
         self.runtime_selected_var.trace("w", self.check_if_custom)
 
         for mode, val in runtime_modes:
-            radio_btn = Radiobutton(self,
-                                    text = mode,
-                                    variable = self.runtime_selected_var,
-                                    value = val,
-                                    font = (font_style, size_l))
-            radio_btn.pack(anchor = W, padx = 225)
+            b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
+                            value = val, font = (font_style, size_l))
+            b.pack(anchor = W, padx = 225)
 
 
         self.custom_input = Frame(self, width = 50, height = 20)
-        self.input_label = Label(self.custom_input,
-                                 text = "Insert a time (in minutes):",
+        self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
                                  font = (font_style, size_l))
         self.input_label.pack()
 
-        # Will be type-checked for Int's, but init as Str for simplicity
-        self.runtime_custom_input_value = StringVar()
-        self.runtime_custom_input_value.set("0")
-        self.runtime_custom_input_value.trace("w", self.check_if_digit)
+        self.runtime_custom_input = StringVar() #will be converted to int later, prevents type errors
+        self.runtime_custom_input.set("5")
+        self.runtime_custom_input.trace("w", self.check_if_digit)
 
-        self.custom_runtime_input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input_value)
-        self.custom_runtime_input_box.pack()
+        self.input_box = Entry(self.custom_input, textvariable = self.runtime_custom_input)
+        self.input_box.pack()
+        # self.custom_input.pack() # uncomment to show this by default
+
 
     def check_if_digit(self, *args):
-        # disabled so tkMessageBox doesn't corrupt input field
-        self.custom_runtime_input_box.config(state = DISABLED)
-        entered_value = self.runtime_custom_input_value.get()
+        self.input_box.config(state = DISABLED) # disabled so tkMessageBox doesn't corrupt input field
+        entered_value = self.runtime_custom_input.get()
         for c in entered_value:
             if not c.isdigit():
-                self.runtime_custom_input_value.set(entered_value[:-1]) # remove the non-digit character
+                self.runtime_custom_input.set(entered_value[:-1]) # remove the non-digit character
                 tkMessageBox.showerror(title = "Error", message = "Time must only contain numbers.")
-                self.custom_runtime_input_box.config(state = NORMAL)
+                self.input_box.config(state = NORMAL)
                 return 0
-        self.custom_runtime_input_box.config(state = NORMAL)
+        self.input_box.config(state = NORMAL)
         return 1
 
 
     def check_if_custom(self, *args):
         runtime_var_value = self.runtime_selected_var.get()
-        if runtime_var_value == 0:
-            # custom is selected
+        if runtime_var_value == 0: # custom is selected
             self.custom_input.pack()
         else:
             self.custom_input.pack_forget()
@@ -107,8 +107,7 @@ class ViewPage(Page):
     def __init__(self, root):
         Frame.__init__(self, root)
 
-        self.head_label = Label(self,
-                                text = "View Schedules",
+        self.head_label = Label(self, text="View Schedules",
                                 font = (font_style, size_h2))
         self.head_label.pack()
 
@@ -120,13 +119,12 @@ class ViewPage(Page):
         self.canvas_items = []
 
         # button to allow user to toggle between old and new style of graphical schedules
-        self.toggle_graphics_btn = Button(self,
+        self.toggle_graphics = Button(self,
                                       command = lambda : self.toggle_schedules(),
                                       text = 'Toggle View',
-                                      padx = 10,
-                                      pady = 10,
+                                      padx = 10, pady = 10,
                                       cursor = 'hand2')
-        self.toggle_graphics_btn.place(x = 555, y = 47)
+        self.toggle_graphics.place(x = 555, y = 47)
 
         #button to show if constraints were accepted or rejected
         self.constraint_acceptance = Button(self,
@@ -143,28 +141,28 @@ class ViewPage(Page):
         # holds the rooms
         self.rooms = []
 
-        # Current selection
-        # Default to 0
-        self.room_selection_option = 0
+        # current selection
+        self.room_selection_option = 0  # default to 0
         # dict to hold selection option + room name/number
         self.selections = {}
-        # Holds the labels for the schedules
-        self.table_labels = []
-        # Display schedules
-        self.toggle_schedules()
+        
+        self.table_labels = []  # holds the labels for the schedules
+
         # dict to hold constraints and fitness score
         self.constraint_bag = {}
+        
         # display schedules
         self.toggle_schedules()
+
 
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
 
         # delete drop downs
-        self.delete_objects(self.drop_down_items)
+        self.delete(self.drop_down_items)
 
         # delete previous canvas
-        self.delete_objects(self.canvas_items)
+        self.delete(self.canvas_items)
 
         # default is to display graphical schedules first
         if not self.toggle_schedules_flag:
@@ -186,13 +184,13 @@ class ViewPage(Page):
         """ Switch between the acceptance and rejected constraints """
 
         # delete previous canvas
-        self.delete_objects(self.canvas_items)
+        self.delete(self.canvas_items)
 
         # delete old labels to make room for new ones
-        self.delete_objects(self.table_labels)
+        self.delete(self.table_labels)
 
         # delete drop downs
-        self.delete_objects(self.drop_down_items)
+        self.delete(self.drop_down_items)
 
         # default is to display accepted constraints first
         if not self.toggle_constraint_acceptance_flag:
@@ -210,7 +208,8 @@ class ViewPage(Page):
             self.create_compact_constraint()
 
     def show_nav(self):
-        """ Show buttons so user can click toggle between schedules """
+        """ show buttons so user can click toggle between schedules """
+
         if self.is_run_clicked:
             self.create_buttons()
             self.place_buttons()
@@ -220,9 +219,7 @@ class ViewPage(Page):
             respresentation of the valid schedules """
 
         # background place holder for the schedules
-        self.bg_label = Label(self,
-                              width = 37,
-                              height= 13,
+        self.bg_label = Label(self, width = 37, height= 13,
                               font=(font_style, size_h1),
                               text = 'Click RUN to generate schedules.',
                               bg = 'white')
@@ -234,10 +231,9 @@ class ViewPage(Page):
     def create_compact_constraint(self):
         """ Creates a more compact graphical schedule
             respresentation of the valid schedules """
+        
         # background place holder for the schedules
-        self.bg_label = Label(self,
-                              width = 37,
-                              height= 13,
+        self.bg_label = Label(self, width = 37, height= 13,
                               font=(font_style, size_h1),
                               text = 'Click RUN to generate schedules.',
                               bg = 'white')
@@ -248,32 +244,34 @@ class ViewPage(Page):
 
         if self.is_run_clicked:
             self.insert_constraint(self.last_viewed_schedule)
-
+    
     def create_room_selection(self):
         """ Creates a drop down menu for room selection """
-        self.room_label = Label(self,
-                                text = 'Room: ',
-                                font = (font_style, size_p))
+
+        self.room_label = Label(self, text = 'Room: ',
+                            font = (font_style, size_p))
         self.room_label.place(x = 50, y = 10)
 
-        self.room_selection_var = StringVar(self)
-        self.room_selection_var.set(self.rooms[self.room_selection_option]) # default value
+        self.selected_option = StringVar(self)
+        self.selected_option.set(self.rooms[self.room_selection_option]) # default value
 
         self.menu_select = apply(OptionMenu,
-                            (self, self.room_selection_var) + tuple(self.rooms))
+                            (self, self.selected_option) + tuple(self.rooms))
         self.menu_select.place(x = 115, y = 5)
-        self.room_selection_var.trace('w', lambda *args: self.get_selected(self.room_selection_var))
+
+        self.selected_option.trace('w', lambda *args: self.get_selected(self.selected_option))
 
         self.drop_down_items.append(self.menu_select)
         self.drop_down_items.append(self.room_label)
 
-    def get_selected(self, room_selection_var):
+    def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
 
-        room_value = room_selection_var.get()
+        option = selected.get()
         for i in xrange(len(self.selections)):
-            if room_value in self.selections[i]:
+
+            if option in self.selections[i]:
                 self.room_selection_option = i
 
         # update schedule
@@ -281,45 +279,44 @@ class ViewPage(Page):
 
     def create_graphical_schedules(self):
         """ Creates a graphical respresentation of the valid schedules """
-        # delete previous canvas
-        self.delete_objects(self.canvas_items)
 
         # create new canvas to hold the schedules
-        self.canvas = Canvas(self, bg = 'white')
-        self.canvas.config(scrollregion = (0, 0, 600, 1050))
-        self.canvas.pack(expand = TRUE,
-                         fill = BOTH,
-                         padx = 50,
-                         pady = 70)
+        self.canv = Canvas(self, bg = 'white')
+        self.canv.config(scrollregion = (0, 0, 600, 1050))
+        self.canv.pack(expand = TRUE,
+                       fill = BOTH,
+                       padx = 50,
+                       pady = 70)
 
         # vertical scrollbar
-        vert_scroll_bar = Scrollbar(self.canvas,
-                                    orient = VERTICAL,
-                                    command = self.canvas.yview)
-        vert_scroll_bar.pack(side = RIGHT,
-                             fill = Y)
+        vbar = Scrollbar(self.canv,
+                         orient = VERTICAL,
+                         command = self.canv.yview)
+        vbar.pack(side = RIGHT,
+                  fill = Y)
 
         # horizontal scrollbar
-        horiz_scroll_bar = Scrollbar(self.canvas,
-                                     orient = HORIZONTAL,
-                                     command = self.canvas.xview)
-        horiz_scroll_bar.pack(side = BOTTOM,
-                              fill = X)
+        hbar = Scrollbar(self.canv,
+                         orient = HORIZONTAL,
+                         command = self.canv.xview)
+        hbar.pack(side = BOTTOM,
+                  fill = X)
 
-        self.canvas.config(yscrollcommand = vert_scroll_bar.set,
-                           xscrollcommand = horiz_scroll_bar.set)
+        self.canv.config(yscrollcommand = vbar.set,
+                    xscrollcommand = hbar.set)
 
         # keep track of canvas object so it can be deleted
-        self.canvas_items.append(self.canvas)
+        self.canvas_items.append(self.canv)
 
         # listen for mouse wheel
-        self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
-
+        self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
+    
+        
     def on_mouse_wheel(self, event):
         """ Update the canvas vertical scrollbar """
 
         try:
-            self.canvas.yview_scroll(-1 * (event.delta / 120), "units")
+            self.canv.yview_scroll(-1 * (event.delta/120), "units")
         except:
             pass
 
@@ -333,35 +330,30 @@ class ViewPage(Page):
                           'Schedule 4',
                           'Schedule 5']
 
-        self.schedule_btn_0 = Button(self,
-                                     command = lambda n = 0: self.insert_schedule(0),
-                                     text = self.schedules[0],
-                                     padx = 10, pady = 10,
-                                     cursor = 'hand2')
+        self.s0 = Button(self, command = lambda n = 0: self.insert_schedule(0),
+                    text = self.schedules[0],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
 
-        self.schedule_btn_1 = Button(self,
-                                     command = lambda n = 1: self.insert_schedule(1),
-                                     text = self.schedules[1],
-                                     padx = 10, pady = 10,
-                                     cursor = 'hand2')
+        self.s1 = Button(self, command = lambda n = 1: self.insert_schedule(1),
+                    text = self.schedules[1],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
 
-        self.schedule_btn_2 = Button(self,
-                                     command = lambda n = 2: self.insert_schedule(2),
-                                     text = self.schedules[2],
-                                     padx = 10, pady = 10,
-                                     cursor = 'hand2')
+        self.s2 = Button(self, command = lambda n = 2: self.insert_schedule(2),
+                    text = self.schedules[2],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
 
-        self.schedule_btn_3 = Button(self,
-                                     command = lambda n = 3: self.insert_schedule(3),
-                                     text = self.schedules[3],
-                                     padx = 10, pady = 10,
-                                     cursor = 'hand2')
+        self.s3 = Button(self, command = lambda n = 3: self.insert_schedule(3),
+                    text = self.schedules[3],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
 
-        self.schedule_btn_4 = Button(self,
-                                     command = lambda n = 4: self.insert_schedule(4),
-                                     text = self.schedules[4],
-                                     padx = 10, pady = 10,
-                                     cursor = 'hand2')
+        self.s4 = Button(self, command = lambda n = 4: self.insert_schedule(4),
+                    text = self.schedules[4],
+                    padx = 10, pady = 10,
+                    cursor = 'hand2')
 
     def place_buttons(self):
         """ Place the View Schedule Buttons on the view page """
@@ -370,34 +362,34 @@ class ViewPage(Page):
         weeks = self.get_valid_weeks() - 1
 
         if 0 <= weeks:
-            self.schedule_btn_0.pack()
-            self.schedule_btn_0.place(x = 50, y = 47)
+            self.s0.pack()
+            self.s0.place(x = 50, y = 47)
         else:
-            self.delete_objects([self.schedule_btn_0])
+            self.delete([self.s0])
 
         if 1 <= weeks:
-            self.schedule_btn_1.pack()
-            self.schedule_btn_1.place(x = 138, y = 47)
+            self.s1.pack()
+            self.s1.place(x = 138, y = 47)
         else:
-            self.delete_objects([self.schedule_btn_1])
+            self.delete([self.s1])
 
         if 2 <= weeks:
-            self.schedule_btn_2.pack()
-            self.schedule_btn_2.place(x = 226, y = 47)
+            self.s2.pack()
+            self.s2.place(x = 226, y = 47)
         else:
-            self.delete_objects([self.schedule_btn_2])
+            self.delete([self.s2])
 
         if 3 <= weeks:
-            self.schedule_btn_3.pack()
-            self.schedule_btn_3.place(x = 314, y = 47)
+            self.s3.pack()
+            self.s3.place(x = 314, y = 47)
         else:
-            self.delete_objects([self.schedule_btn_3])
+            self.delete([self.s3])
 
         if 4 <= weeks:
-            self.schedule_btn_4.pack()
-            self.schedule_btn_4.place(x = 402, y = 47)
+            self.s4.pack()
+            self.s4.place(x = 402, y = 47)
         else:
-            self.delete_objects([self.schedule_btn_4])
+            self.delete([self.s4])
 
     def get_valid_weeks(self):
         """ Returns the number of valid weeks that were generated """
@@ -415,17 +407,18 @@ class ViewPage(Page):
         self.last_viewed_schedule = n
 
         # delete drop downs
-        self.delete_objects(self.drop_down_items)
+        self.delete(self.drop_down_items)
+
         # format the schedules
         if not self.toggle_schedules_flag:
 
             # delete previous canvas
-            self.delete_objects(self.canvas_items)
+            self.delete(self.canvas_items)
 
             self.create_graphical_schedules()
 
             # delete previous canvas items
-            self.canvas.delete("all")
+            self.canv.delete("all")
 
             if self.is_run_clicked:
                 self.format_graphical_schedule(globs.mainScheduler.weeks[n].print_concise())
@@ -437,7 +430,7 @@ class ViewPage(Page):
             self.bg_label['fg'] = 'white'
 
             # delete previous canvas items
-            self.canvas.delete("all")
+            self.canv.delete("all")
 
             self.format_compact_schedule(globs.mainScheduler.weeks[n].print_concise())
 
@@ -446,21 +439,21 @@ class ViewPage(Page):
 
         self.last_viewed_schedule = n
 
-        self.delete_objects(self.drop_down_items)
+        self.delete(self.drop_down_items)
 
         if self.toggle_constraint_acceptance_flag:
             self.format_compact_constraint(globs.mainScheduler.weeks[n].constraints)
             self.bg_label['fg'] = 'white'
+
         else:
             # destroy old labels to make room for new ones
-            self.delete_objects(self.table_labels)
-
+            self.delete(self.table_labels)
+            
             # hide bg_label text
             self.bg_label['fg'] = 'white'
 
-            self.format_compact_schedule(globs.mainScheduler.weeks[n].print_concise())
-
         self.toggle_constraint_acceptance_flag = not self.toggle_constraint_acceptance_flag
+            
 
     def format_graphical_schedule(self, schedule_text):
         """ Formats the graphical schedules """
@@ -497,6 +490,7 @@ class ViewPage(Page):
 
         # incremet option count when a room is added to drop down
         option = 0
+
         # populate self.rooms for drop down selection
         for i in xrange(len(schedule_text) - 1):
 
@@ -505,6 +499,7 @@ class ViewPage(Page):
 
                 # len(temp) < 7, then course does
                 # not have a section code; e.g. 001, 002, etc.
+
                 if len(temp) < 7:
                     # prevent duplicate room entry into drop down
                     if not (temp[3] + " " + temp[4] in self.rooms):
@@ -549,7 +544,7 @@ class ViewPage(Page):
 
         if len(y_times) == 0:
             return
-
+        
         a = y_times[0]
         b = y_times[len(y_times) - 1]
         n = 0
@@ -591,11 +586,11 @@ class ViewPage(Page):
 
         # draw y-axis values to the canvas
         incr = 0
-        for i in times.keys():
-            self.canvas.create_text(xstart + xpad - 25,
-                                    ystart + ypad + 40 + (incr * 100),
-                                    text = times[i],
-                                    font = (font_style, size_l))
+        for i in times:
+            self.canv.create_text(xstart + xpad - 25,
+                                  ystart + ypad + 40 + (incr * 100),
+                                  text = times[i],
+                                  font = (font_style, size_l))
             incr += 1
 
         # populate graphical schedule with course data
@@ -610,6 +605,7 @@ class ViewPage(Page):
             if not (' ' in schedule_text[i]) and len(schedule_text[i]) > 0:
                 # get instructor name
                 instructor = schedule_text[i]
+
             else:
                 temp = schedule_text[i].split(' ')
                 course_info = ''
@@ -625,6 +621,7 @@ class ViewPage(Page):
                         # output string with course info
                         course_info += temp[0] + \
                                        ' ' + temp[1] + '\n'
+
                 # course has a section number (001, 002, etc.)
                 else:
                     if temp[4] + " " + temp[5] in self.rooms[self.room_selection_option]:
@@ -658,72 +655,65 @@ class ViewPage(Page):
                     n = int(schedule_time.split(':')[0])
 
                     # Monday
-                    if day.lower() == 'm':
-                        self.canvas.create_text(xpos_days['Monday'],
-                                                ypos_times[int(schedule_time.split(':')[0])],
-                                                text = txt,
-                                                width = 100,
-                                                font = (font_style, size_l))
+                    if day == 'm' or day == 'M':
+                        self.canv.create_text(xpos_days['Monday'],
+                                              ypos_times[n],
+                                              text = txt,
+                                              width = 100,
+                                              font = (font_style, size_l))
                     # Tuesday
-                    elif day.lower() == 't':
-                        self.canvas.create_text(xpos_days['Tuesday'],
-                                                ypos_times[int(schedule_time.split(':')[0])],
-                                                text = txt,
-                                                width = 100,
-                                                font = (font_style, size_l))
+                    elif day == 't' or day == 'T':
+                        self.canv.create_text(xpos_days['Tuesday'],
+                                              ypos_times[int(schedule_time.split(':')[0])],
+                                              text = txt,
+                                              width = 100,
+                                              font = (font_style, size_l))
                     # Wednesday
-                    elif day.lower() == 'w':
-                        self.canvas.create_text(xpos_days['Wednesday'],
-                                                ypos_times[int(schedule_time.split(':')[0])],
-                                                text = txt,
-                                                width = 100,
-                                                font = (font_style, size_l))
+                    elif day == 'w' or day == 'W':
+                        self.canv.create_text(xpos_days['Wednesday'],
+                                              ypos_times[int(schedule_time.split(':')[0])],
+                                              text = txt,
+                                              width = 100,
+                                              font = (font_style, size_l))
                     # Thursday
-                    elif day.lower() == 'r':
-                        self.canvas.create_text(xpos_days['Thursday'],
-                                                ypos_times[int(schedule_time.split(':')[0])],
-                                                text = txt,
-                                                width = 100,
-                                                font = (font_style, size_l))
+                    elif day == 'r' or day == 'R':
+                        self.canv.create_text(xpos_days['Thursday'],
+                                              ypos_times[int(schedule_time.split(':')[0])],
+                                              text = txt,
+                                              width = 100,
+                                              font = (font_style, size_l))
                     # Friday
-                    elif day.lower() == 'f':
-                        self.canvas.create_text(xpos_days['Friday'],
-                                                ypos_times[int(schedule_time.split(':')[0])],
-                                                text = txt,
-                                                width = 100,
-                                                font = (font_style, size_l))
+                    elif day == 'f' or day == 'F':
+                        self.canv.create_text(xpos_days['Friday'],
+                                              ypos_times[int(schedule_time.split(':')[0])],
+                                              text = txt,
+                                              width = 100,
+                                              font = (font_style, size_l))
 
         # background for the days of the week
-        self.canvas.create_rectangle(0, 0, 1050, 30, fill = 'cyan', outline = '')
+        self.canv.create_rectangle(0, 0, 1050, 30, fill = 'cyan', outline = '')
 
         # draw days of the week across the x-axis of the canvas
-        self.canvas.create_text(xpad + 55,
-                                ypad,
-                                text = days[0],
-                                font = (font_style, size_l))
-        self.canvas.create_text(xpad + 54 + 100,
-                                ypad,
-                                text = days[1],
-                                font = (font_style, size_l))
-        self.canvas.create_text(xpad + 57 + 200,
-                                ypad,
-                                text = days[2],
-                                font = (font_style, size_l))
-        self.canvas.create_text(xpad + 53 + 300,
-                                ypad,
-                                text = days[3],
-                                font = (font_style, size_l))
-        self.canvas.create_text(xpad + 48 + 400,
-                                ypad,
-                                text = days[4],
-                                font = (font_style, size_l))
-
-        # draw AM times down the y-axis of the canvas
-        for this_time in times.keys():
-            self.canvas.create_text(xstart + xpad - 25,
-                                    ystart + ypad + 40 + (this_time * 100),
-                                    text = times[this_time],
-                                    font = (font_style, size_l))
+        self.canv.create_text(xpad + 55,
+                              ypad,
+                              text = days[0],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 54 + 100,
+                              ypad,
+                              text = days[1],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 57 + 200,
+                              ypad,
+                              text = days[2],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 53 + 300,
+                              ypad,
+                              text = days[3],
+                              font = (font_style, size_l))
+        self.canv.create_text(xpad + 48 + 400,
+                              ypad,
+                              text = days[4],
+                              font = (font_style, size_l))
 
         if self.is_run_clicked:
             self.create_room_selection()
@@ -740,23 +730,23 @@ class ViewPage(Page):
         for i in xrange(len(schedule_text) - 1):
             # teacher labels
             if not (' ' in schedule_text[i]) and len(schedule_text[i]) > 0:
-                self.canvas.create_rectangle(0, yt-12, 1050, yt + 12,
+                self.canv.create_rectangle(0, yt-12, 1050, yt + 12,
                                            fill = 'black',
                                            outline = '')
-                self.canvas.create_text(10, yt, anchor = 'w',
+                self.canv.create_text(10, yt, anchor = 'w',
                                       text = schedule_text[i],
                                       font = (font_style, size_l),
                                       fill = 'white')
 
             else:   # course info labels
-                self.canvas.create_text(10, yt, anchor = 'w',
+                self.canv.create_text(10, yt, anchor = 'w',
                                       text = schedule_text[i],
                                       font = (font_style, size_l))
 
             yt += 29
 
     def format_compact_constraint(self, constraints_dict):
-        """ Formats the compact schedules """
+        """ Formats the compact schedules """                
         for key in constraints_dict.keys():
             self.table_labels.append(Label(self,
                                            text = (str(constraints_dict[key][0]) + '/' +\
@@ -773,55 +763,23 @@ class ViewPage(Page):
             self.table_labels[i].place(x = 50, y = yt)
             yt += 24
 
-        # Set color to white for fade in
-        self.color = [255, 255, 255]
-        for i in xrange(len(self.table_labels)):
-            # Begin fade-in animation
-            self.fade_in(i)
-
-    def delete_objects(self, objects):
+    def delete(self, labels):
         """ Delete dynamically created objects from memory """
 
-        for i in xrange(len(objects)):
-            objects[i].destroy()     # destroy old labels
+        for i in xrange(len(labels)):
+            labels[i].destroy()     # destroy old labels
 
-        del objects[:]
-
-    def fade_in(self, n):
-        """ Fades a schedule in from white to a certain color """
-
-        animation_speed = 50
-
-        # convert rgb values to hex values
-        color = ""  # holds the hex string
-        for i in xrange(3):
-            if i == 0:
-                color += "#%02x" % self.color[i]
-            else:
-                color += ("#%02x" % self.color[i]).strip('#')
-
-        # update rgb values
-        for i in xrange(3):
-            if (self.color[0] >= 0):
-                self.color[i] -= 1
-            else:
-                return # stop recursive fade_in animation
-
-        if len(self.table_labels[n]['text'].split(' ')) == 1:
-            self.table_labels[n].configure(bg = color)
-        else:
-            self.table_labels[n].configure(fg = color)
-
-        self.table_labels[n].after(animation_speed, self.fade_in, n)
-
+        del labels[:]
 
 class MiscPage(Page):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.load_bar_bg = Label(self,
-                                 width = 40,
-                                 height = 2)
+        self.head_label = Label(self, text="Generating schedules...",
+                                font = (font_style, size_h2))
+        self.head_label.pack(pady = 80)
+
+        self.load_bar_bg = Label(self, width = 40, height = 2)
         self.load_bar_bg['bg'] = 'gray'
         self.load_bar_bg.place(x = 207, y = 120)
 
@@ -829,16 +787,13 @@ class MiscPage(Page):
         self.load_bar['bg'] = 'green'
         self.load_bar.place(x = 207, y = 120)
 
-        self.info_label = Label(self,
-                                text='',
-                                font=(font_style, size_l))
+        self.info_label = Label(self, text='', \
+                          font =(font_style, size_l))
         self.info_label.pack()
 
         self.labels = []
         for i in xrange(3):
-            self.labels.append(Label(self,
-                                     text='',
-                                     font =(font_style, size_l)))
+            self.labels.append(Label(self, text='', font =(font_style, size_l)))
             self.labels[i].place(x = 203, y = ((i + 1) * 20) + 100)
 
         self.is_loading = False
@@ -909,92 +864,45 @@ class MainWindow(Frame):
         self.run_clicked = False
 
         # MENU AND CONTENT SECTIONS
-        self.menu_frame = Frame(self,
-                                width="500",
-                                height="600")
-        self.menu_frame.pack(side=LEFT, fill="both")
+        self.menu = Frame(self, width="500", height="600")
+        self.menu.pack(side=LEFT, fill="both")
 
-        self.content_container = Frame(self,
-                                       width="800",
-                                       height="600")
+        self.content_container = Frame(self, width="800", height="600")
         self.content_container.pack(side=LEFT, fill="both")
 
         # MENU BUTTONS
-        self.home_btn = Button(self.menu_frame,
-                               text='Home',
-                               command=self.show_home,
-                               width="10",
-                               height="3",
-                               font=(font_style, size_h2),
-                               cursor='hand2')
+        self.home_btn = Button(self.menu, text='Home', command=self.show_home, \
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2') # specified in characters?
         self.home_btn.pack(fill=X, side="top", pady=2)
 
-        self.constraint_btn = Button(self.menu_frame,
-                                     text='Constraint',
-                                     command=self.show_constraint,
-                                     width="10",
-                                     height="3",
-                                     font=(font_style, size_h2),
-                                     cursor='hand2')
+        self.constraint_btn = Button(self.menu, text='Constraint', command=self.show_constraint, \
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.constraint_btn.pack(fill=X, side="top", pady=2)
 
-        self.view_btn = Button(self.menu_frame,
-                               text='View',
-                               command=self.show_view,
-                               width="10",
-                               height="3",
-                               font=(font_style, size_h2),
-                               cursor='hand2')
+        self.view_btn = Button(self.menu, text='View', command=self.show_view, \
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.view_btn.pack(fill=X, side="top", pady=2)
 
-        self.misc_btn = Button(self.menu_frame,
-                               text='Misc',
-                               command=self.show_misc,
-                               width="10",
-                               height="3",
-                               font=(font_style, size_h2),
-                               cursor='hand2')
+        self.misc_btn = Button(self.menu, text='Splash', command=self.show_misc, \
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.misc_btn.pack(fill=X, side="top", pady=2)
 
-        self.run_btn = Button(self.menu_frame,
-                              text='RUN',
-                              bg='green',
-                              command=self.run_scheduler,
-                              width="10",
-                              height="3",
-                              font=(font_style, size_h2),
-                              cursor='hand2')
+        self.run_btn = Button(self.menu, text='RUN', bg='green', command=self.run_scheduler, \
+                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.run_btn.pack(fill = X, side = "top", pady=2)
 
         # PAGES
         self.home_page = HomePage(self.content_container)
-        self.home_page.place(in_=self.content_container,
-                             x=0,
-                             y=0,
-                             relwidth=1,
-                             relheight=1)
+        self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
 
-        self.constraint_page = ConstraintPage(root=self.content_container,
-                                              constraints=globs.mainScheduler.constraints)
-        self.constraint_page.place(in_=self.content_container,
-                                   x=0,
-                                   y=0,
-                                   relwidth=1,
-                                   relheight=1)
+        self.constraint_page = ConstraintPage(self.content_container, globs.mainScheduler.constraints)
+        self.constraint_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
 
         self.view_page = ViewPage(self.content_container)
-        self.view_page.place(in_=self.content_container,
-                             x=0,
-                             y=0,
-                             relwidth=1,
-                             relheight=1)
+        self.view_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
 
         self.misc_page = MiscPage(self.content_container)
-        self.misc_page.place(in_=self.content_container,
-                             x=0,
-                             y=0,
-                             relwidth=1,
-                             relheight=1)
+        self.misc_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
 
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
@@ -1015,6 +923,7 @@ class MainWindow(Frame):
         instructors = globs.instructors
         self.misc_page.load_bar['width'] = 0 # make sure loading bar starts at 0 each run
         # RUN SCHEDULER METHOD
+        # Add hard/obvious constraints before running
         runtime_var = self.home_page.runtime_selected_var.get()
         if runtime_var not in [1, 10, 60, 480]:
             runtime_var = int(self.home_page.runtime_custom_input.get()) # convert from DoubleVar
@@ -1069,9 +978,10 @@ class MainWindow(Frame):
             self.run_clicked = True
             self.view_page.is_run_clicked = False
             self.run_finished = False
-
+            
             instructors = globs.instructors
             # RUN SCHEDULER METHOD
+            # Add hard/obvious constraints before running
             self.thread_run_scheduler()
 
             # only export schedules if it is possible

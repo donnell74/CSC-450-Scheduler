@@ -1,8 +1,9 @@
 from __future__ import print_function
 import structures
 
+
 class Instructor:
-    """ Represents a single instructor and his/her courses """
+
     def __init__(self, name):
         self.name = name
         self.courses = []
@@ -16,6 +17,7 @@ class Instructor:
     def __eq__(self, other):
         if other == None:
             return False
+
         return self.name == other.name
 
     def __str__(self):

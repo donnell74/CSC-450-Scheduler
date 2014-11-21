@@ -20,21 +20,16 @@ class ConstraintsView(Frame):
         buttons_frame = Frame(self)
         buttons_frame.pack(side = BOTTOM)
 
-        self.delete_all = Button(buttons_frame,
-                                 text="Delete all",
+        self.delete_all = Button(buttons_frame, text="Delete all",\
                                  command=self.delete_all_constraints)
         self.delete_all.pack(side=RIGHT)
 
-        self.delete_selection = Button(buttons_frame,
-                                       text="Delete",
-                                       command=self.delete_selection)
+        self.delete_selection = Button(buttons_frame, text="Delete", command=self.delete_selection)
         self.delete_selection.pack(side = RIGHT, padx = 20)
 
         self.scrollbar = Scrollbar(self, orient=VERTICAL)
-        self.listbox = Listbox(self,
-                               yscrollcommand = self.scrollbar.set,
-                               selectmode = MULTIPLE,
-                               width = 40, height = 15)
+        self.listbox = Listbox(self, yscrollcommand = self.scrollbar.set, selectmode = MULTIPLE,\
+                                width = 40, height = 15)
         self.scrollbar.config(command=self.listbox.yview)
 
         self.listbox.pack(side=LEFT, fill=X, expand=1)
@@ -85,7 +80,7 @@ class ConstraintsView(Frame):
             pos = 0
             for i in selection :
                 real_position = int(i) - pos
-                self.listbox.delete(real_position, real_position)
+                self.listbox.delete( real_position,real_position )
                 pos = pos + 1
 
             # clear constraints from the class
