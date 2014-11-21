@@ -1,7 +1,7 @@
 from Tkinter import Frame, Label, StringVar, OptionMenu, Checkbutton, IntVar, Button, Scrollbar,\
-    Radiobutton, Entry, Listbox
+                    Radiobutton, Entry, Listbox
 from Tkconstants import LEFT, NW, YES, END, INSERT, TOP, BOTH, CENTER, BOTTOM, NORMAL, RIGHT,\
-    DISABLED, MULTIPLE, NE, X, Y, VERTICAL
+                        DISABLED, MULTIPLE, NE, X, Y, VERTICAL
 from guiConstraintsView import ConstraintsView
 from datetime import time
 import sys
@@ -128,11 +128,11 @@ class InstructorConstraint(Page):
             "Day",
             "Computer Preference",
             "Instructor Break",
-            "Max Per Day"]
-        self.constraint_type_menu = OptionMenu(
-            self,
-            self.constraint_type_choice,
-            *self.constraint_type_list)
+            "Max Per Day"
+        ]
+        self.constraint_type_menu = OptionMenu(self,
+                                               self.constraint_type_choice,
+                                               *self.constraint_type_list)
         self.constraint_type_menu.pack(side=TOP)
 
         # time
@@ -145,10 +145,9 @@ class InstructorConstraint(Page):
         self.when_default.set("Before")
         self.when_default.trace("w", self.callbackWhen)
         self.when_options = ["Before", "After"]
-        self.when_menu = OptionMenu(
-            self.time_frame,
-            self.when_default,
-            *self.when_options)
+        self.when_menu = OptionMenu(self.time_frame,
+                                    self.when_default,
+                                    *self.when_options)
         self.when_menu.pack(side=TOP)
 
         self.time_label = Label(self.time_frame, text="Timeslot:")
@@ -158,12 +157,9 @@ class InstructorConstraint(Page):
         self.time_default = StringVar(self)
         self.time_default.set(self.time_slots[1])
 
-        self.time_slot_menu = OptionMenu(
-            self.time_frame,
-            self.time_default,
-            *
-            self.time_slots[
-                1:])
+        self.time_slot_menu = OptionMenu(self.time_frame,
+                                         self.time_default,
+                                         *self.time_slots[1:])
         # default is before so knock out the first slot to avoid invalid
         # constraints
         self.time_slot_menu.pack(side=TOP)
@@ -178,19 +174,17 @@ class InstructorConstraint(Page):
         self.option_priority.pack(side=TOP)
 
         before_after_disclaimer =\
-            "Note: you should not use these constraints to specify a gap (eg, lunch break). \n" \
+            "Note: you should not use these constraints to specify a gap (eg, lunch break). \n" + \
             "If you want a gap, use an Instructor Break constraint."
-        self.disclaimer = Label(
-            self.time_frame,
-            text=before_after_disclaimer,
-            wraplength=180,
-            justify=LEFT)
+        self.disclaimer = Label(self.time_frame,
+                                text=before_after_disclaimer,
+                                wraplength=180,
+                                justify=LEFT)
         self.disclaimer.pack()
 
-        self.submit_time = Button(
-            self.time_frame,
-            text="Add Constraint",
-            command=self.add_instr_time)
+        self.submit_time = Button(self.time_frame,
+                                  text="Add Constraint",
+                                  command=self.add_instr_time)
         self.submit_time.pack(side=RIGHT, pady=25)
 
         # day - CHECKBOXES
@@ -207,10 +201,9 @@ class InstructorConstraint(Page):
         self.boxes = [IntVar() for i in range(5)]
         for i in range(len(self.days)):
             self.value = self.boxes[i]
-            box = Checkbutton(
-                self.day_frame,
-                text=self.days[i],
-                variable=self.value)
+            box = Checkbutton(self.day_frame,
+                              text=self.days[i],
+                              variable=self.value)
             box.pack(side=TOP, anchor=CENTER)
 
         self.priority_label = Label(self.day_frame, text="Priority: ")
@@ -222,10 +215,9 @@ class InstructorConstraint(Page):
                                           *priority_options)
         self.option_priority.pack(side=TOP)
 
-        self.submit_day = Button(
-            self.day_frame,
-            text="Add Constraint",
-            command=self.add_instr_day)
+        self.submit_day = Button(self.day_frame,
+                                 text="Add Constraint",
+                                 command=self.add_instr_day)
         self.submit_day.pack(side=TOP, pady=25)
 
         # computer preference
@@ -234,8 +226,9 @@ class InstructorConstraint(Page):
         # shouldn't be visible
 
         self.label_computer = Label(self.computer_frame,
-                text="Instructor would prefer to teach lecture classes in a classroom with computers:",
-                wraplength=100)
+                                    text="Instructor would prefer to teach " +\
+                                         "lecture classes in a classroom with computers:",
+                                    wraplength=100)
         self.label_computer.pack(side=TOP)
 
         self.computer_options = ["True", "False"]
@@ -259,10 +252,9 @@ class InstructorConstraint(Page):
                                           *priority_options)
         self.option_priority.pack(side=TOP)
 
-        self.submit_computer = Button(
-            self.computer_frame,
-            text="Add Constraint",
-            command=self.add_instr_computer)
+        self.submit_computer = Button(self.computer_frame,
+                                      text="Add Constraint",
+                                      command=self.add_instr_computer)
         self.submit_computer.pack(side=TOP, pady=25)
 
         # ADD MAX PER DAY STUFFS HERE
@@ -316,8 +308,7 @@ class InstructorConstraint(Page):
         self.end_time_label = Label(self.break_frame, text="End Time:")
         self.end_time_label.pack(side=TOP)
         self.gap_end_default = StringVar()
-        self.gap_end_default.set(
-            self.end_time_list[0])  # trace isn't necessary
+        self.gap_end_default.set(self.end_time_list[0])  # trace isn't necessary
 
         self.gap_end_option = OptionMenu(self.break_frame,
                                          self.gap_end_default,
@@ -345,9 +336,8 @@ class InstructorConstraint(Page):
         for char in value:
             if not char.isdigit():
                 self.max_course_value.set(value[:-1])
-                tkMessageBox.showerror(
-                    title="Error",
-                    message="Value must be a number")
+                tkMessageBox.showerror(title="Error",
+                                       message="Value must be a number")
                 self.max_course_input.config(state=NORMAL)
                 return 0
         self.max_course_input.config(state=NORMAL)
@@ -360,12 +350,11 @@ class InstructorConstraint(Page):
         gap_end = self.gap_end_default.get()
         gap_end = self.string_to_time(gap_end)
         priority = self.break_priority_default.get()
-        create_instr_break(
-            instructor,
-            gap_start,
-            gap_end,
-            priority,
-            self.constraints)
+        create_instr_break(instructor,
+                           gap_start,
+                           gap_end,
+                           priority,
+                           self.constraints)
         return
 
     ##
@@ -377,12 +366,11 @@ class InstructorConstraint(Page):
         before_after = self.when_default.get()
         timeslot = self.time_default.get()
         priority = self.instr_time_priority_default.get()
-        create_time_pref_constraint(
-            instructor,
-            before_after,
-            timeslot,
-            priority,
-            self.constraints)
+        create_time_pref_constraint(instructor,
+                                    before_after,
+                                    timeslot,
+                                    priority,
+                                    self.constraints)
         return
 
     def add_instr_day(self):
@@ -398,11 +386,10 @@ class InstructorConstraint(Page):
 
         day_code = ''.join(day_code)
         priority = self.instr_day_priority_default.get()
-        create_day_pref_constraint(
-            instructor,
-            day_code,
-            priority,
-            self.constraints)
+        create_day_pref_constraint(instructor,
+                                   day_code,
+                                   priority,
+                                   self.constraints)
         return
 
     ##
@@ -418,22 +405,20 @@ class InstructorConstraint(Page):
         else:
             prefers_computers = False
         priority = self.instr_computer_priority_default.get()
-        create_computer_pref_constraint(
-            instructor,
-            prefers_computers,
-            priority,
-            self.constraints)
+        create_computer_pref_constraint(instructor,
+                                        prefers_computers,
+                                        priority,
+                                        self.constraints)
         return
 
     def add_max_course(self):
         instructor = self.str_instr_name_default.get()
         max_courses = int(self.max_course_value.get())
         priority = self.max_course_priority_choice.get()
-        create_max_course_constraint(
-            instructor,
-            max_courses,
-            priority,
-            self.constraints)
+        create_max_course_constraint(instructor,
+                                     max_courses,
+                                     priority,
+                                     self.constraints)
         return
 
     def callback_gap_start(self, *args):
@@ -470,9 +455,8 @@ class InstructorConstraint(Page):
         else:
             t = globs.start_times[1:]
         for time in t:
-            menu.add_command(
-                label=time,
-                command=lambda value=time: self.time_default.set(value))
+            menu.add_command(label=time,
+                             command=lambda value=time: self.time_default.set(value))
         self.time_default.set(t[0])
 
     ##
@@ -537,7 +521,10 @@ class CourseConstraint(Page):
         self.str_type_default = StringVar(self)
         self.str_type_default.set(TIME)
         self.str_type_default.trace("w", self.callback_type)
-        self.option_type = OptionMenu(self, self.str_type_default, TIME, PARTIAL_SCHEDULING,
+        self.option_type = OptionMenu(self,
+                                      self.str_type_default,
+                                      TIME,
+                                      PARTIAL_SCHEDULING,
                                       MANUAL_CONCURRENCY)
         self.option_type.pack(side=TOP)
 
@@ -545,9 +532,8 @@ class CourseConstraint(Page):
         self.course_container.pack(fill=BOTH, side=TOP)
 
         # PAGES
-        self.type_time_page = TypeTime(
-            self.course_container,
-            constraints_view_obj)
+        self.type_time_page = TypeTime(self.course_container,
+                                       constraints_view_obj)
         self.type_time_page.pack()
 
         self.type_partial_scheduling_page = TypePartialScheduling(self.course_container,
@@ -594,10 +580,9 @@ class TypeTime(Frame):
         list_of_courses = globs.courses
         list_of_courses.append("All")
         self.str_course_default.set(list_of_courses[0])
-        self.option_course = OptionMenu(
-            self,
-            self.str_course_default,
-            *list_of_courses)
+        self.option_course = OptionMenu(self,
+                                        self.str_course_default,
+                                        *list_of_courses)
         self.option_course.pack(side=TOP)
 
         message_when = Label(self, text="When:")
@@ -606,23 +591,20 @@ class TypeTime(Frame):
         self.str_when_default = StringVar(self)
         self.str_when_default.set("Before")
         self.str_when_default.trace("w", self.callback_after_before)
-        self.option_when = OptionMenu(
-            self,
-            self.str_when_default,
-            "Before",
-            "After")
+        self.option_when = OptionMenu(self,
+                                      self.str_when_default,
+                                      "Before",
+                                      "After")
         self.option_when.pack(side=TOP)
 
         message_time = Label(self, text="Time:")
         message_time.pack(side=TOP)
 
         self.str_time_default = StringVar(self)
-        self.str_time_default.set(
-            globs.start_times[1])  # set the second element
-        self.option_time = OptionMenu(
-            self,
-            self.str_time_default,
-            *globs.start_times[1:])
+        self.str_time_default.set(globs.start_times[1])  # set the second element
+        self.option_time = OptionMenu(self,
+                                      self.str_time_default,
+                                      *globs.start_times[1:])
         self.option_time.pack(side=TOP)
 
         message_priority = Label(self, text="Priority:")
@@ -638,7 +620,8 @@ class TypeTime(Frame):
                                           "Mandatory")
         self.option_priority.pack(side=TOP)
 
-        self.button_add_course_constraint = Button(self, text="Add Constraint",
+        self.button_add_course_constraint = Button(self,
+                                                   text="Add Constraint",
                                                    command=self.add_course_constraint)
         self.button_add_course_constraint.pack(side=RIGHT, pady=25)
 
@@ -652,12 +635,11 @@ class TypeTime(Frame):
         time_str = self.str_time_default.get()
         when = self.str_when_default.get()
         priority = self.course_time_priority_default.get()
-        create_course_time_constraint(
-            course,
-            time_str,
-            when,
-            priority,
-            self.constraints_view_obj)
+        create_course_time_constraint(course,
+                                      time_str,
+                                      when,
+                                      priority,
+                                      self.constraints_view_obj)
 
     ##
     #  @param self
@@ -691,8 +673,10 @@ class TypeManualConcurrency(Frame):
         self.listbox_frame = Frame(self)
         self.listbox_frame.pack(side=TOP)
 
-        self.scrollbar = Scrollbar(self.listbox_frame, orient=VERTICAL)
-        self.listbox = Listbox(self.listbox_frame, yscrollcommand=self.scrollbar.set,
+        self.scrollbar = Scrollbar(self.listbox_frame,
+                                   orient=VERTICAL)
+        self.listbox = Listbox(self.listbox_frame,
+                               yscrollcommand=self.scrollbar.set,
                                selectmode=MULTIPLE)
 
         self.scrollbar.config(command=self.listbox.yview)
@@ -718,7 +702,8 @@ class TypeManualConcurrency(Frame):
                                           *priority_options)
         self.option_priority.pack(side=TOP)
 
-        self.button_add_course_constraint = Button(self, text="Add Constraint",
+        self.button_add_course_constraint = Button(self,
+                                                   text="Add Constraint",
                                                    command=self.add_course_constraint)
         self.button_add_course_constraint.pack(side=BOTTOM, pady=25)
 
@@ -734,14 +719,12 @@ class TypeManualConcurrency(Frame):
 
             priority = self.str_priority_default.get()
 
-            create_manual_concurrency_constraint(
-                list_courses_obj,
-                priority,
-                self.constraints_view_obj)
+            create_manual_concurrency_constraint(list_courses_obj,
+                                                 priority,
+                                                 self.constraints_view_obj)
         else:
-            tkMessageBox.showerror(
-                title="Error",
-                message="Select more than 1 course")
+            tkMessageBox.showerror(title="Error",
+                                   message="Select more than 1 course")
 
 
 def create_manual_concurrency_constraint(list_courses_obj, priority, constraints_view_obj):
@@ -783,10 +766,9 @@ class TypePartialScheduling(Frame):
 
         self.str_course_default.set(list_of_courses[0])
         self.str_course_default.trace("w", self.callback_course_change)
-        self.option_course = OptionMenu(
-            self,
-            self.str_course_default,
-            *list_of_courses)
+        self.option_course = OptionMenu(self,
+                                        self.str_course_default,
+                                        *list_of_courses)
         self.option_course.pack(side=TOP)
 
         message_room = Label(self, text="Room:")
@@ -800,10 +782,9 @@ class TypePartialScheduling(Frame):
 
         self.str_room_default = StringVar(self)
         self.str_room_default.set(room_str_list[0])
-        self.option_room = OptionMenu(
-            self,
-            self.str_room_default,
-            *room_str_list)
+        self.option_room = OptionMenu(self,
+                                      self.str_room_default,
+                                      *room_str_list)
         self.option_room.pack(side=TOP)
 
         label_days = Label(self, text="Days:")
@@ -814,10 +795,9 @@ class TypePartialScheduling(Frame):
         self.str_day_default = StringVar(self)
         self.str_day_default.set(list_days_str[0])
         #self.str_day_default.trace("w", self.callback_after_before)
-        self.option_day = OptionMenu(
-            self,
-            self.str_day_default,
-            *list_days_str)
+        self.option_day = OptionMenu(self,
+                                     self.str_day_default,
+                                     *list_days_str)
         self.option_day.pack(side=TOP)
 
         message_when = Label(self, text="When:")
@@ -826,12 +806,11 @@ class TypePartialScheduling(Frame):
         self.str_when_default = StringVar(self)
         self.str_when_default.set("Before")
         self.str_when_default.trace("w", self.callback_after_before_between)
-        self.option_when = OptionMenu(
-            self,
-            self.str_when_default,
-            "Before",
-            "After",
-            "Between")
+        self.option_when = OptionMenu(self,
+                                      self.str_when_default,
+                                      "Before",
+                                      "After",
+                                      "Between")
         self.option_when.pack(side=TOP)
 
         self.start_time_list = globs.start_times
@@ -843,7 +822,8 @@ class TypePartialScheduling(Frame):
         self.time_start_default.set(self.start_time_list[0])
 
         self.start_option = OptionMenu(self,
-                                       self.time_start_default, *self.start_time_list)
+                                       self.time_start_default,
+                                       *self.start_time_list)
         self.start_option.pack(side=TOP)
 
         self.time_between_frame = Frame(self)
@@ -855,7 +835,8 @@ class TypePartialScheduling(Frame):
         self.end_default.set(self.end_time_list[0])
 
         self.and_option = OptionMenu(self.time_between_frame,
-                                     self.end_default, *self.end_time_list)
+                                     self.end_default,
+                                     *self.end_time_list)
         self.and_option.pack(side=TOP)
 
         self.button_add_course_constraint = Button(self, text="Add Constraint",
@@ -927,14 +908,17 @@ class ConstraintPage(Page):
 
     def __init__(self, root, constraints):
         Frame.__init__(self, root)
-        self.head_label = Label(self, text="Constraint Page",
+        self.head_label = Label(self,
+                                text="Constraint Page",
                                 font=('Helvetica', 18))
         self.head_label.pack()
         self.create_widgets()
         self.pack(side=TOP, fill="both")
 
         # CONTENT
-        self.content_container = Frame(self, width="400", height="300")
+        self.content_container = Frame(self,
+                                       width="400",
+                                       height="300")
         self.content_container.pack(fill="both")
 
         # PAGES
@@ -947,15 +931,13 @@ class ConstraintPage(Page):
         #self.constraints_view.place(in_ = self.course_page, anchor = E)
         self.constraints_view.pack(side=RIGHT, anchor=NE, padx=50)
 
-        self.instructor_page = InstructorConstraint(
-            self.content_container,
-            self.constraints_view)
+        self.instructor_page = InstructorConstraint(self.content_container,
+                                                    self.constraints_view)
         #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.instructor_page.pack(side = LEFT)
 
-        self.course_page = CourseConstraint(
-            self.content_container,
-            self.constraints_view)
+        self.course_page = CourseConstraint(self.content_container,
+                                            self.constraints_view)
         #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         #self.course_page.pack(side = LEFT)
 
@@ -984,16 +966,14 @@ class ConstraintPage(Page):
     #
     def create_widgets(self):
 
-        self.button_course = Button(
-            self,
-            text="Add Course Constraint",
-            command=self.add_course_constraint)
+        self.button_course = Button(self,
+                                    text="Add Course Constraint",
+                                    command=self.add_course_constraint)
         self.button_course.pack(anchor=NW, padx=50, pady=10)
 
-        self.button_instructor = Button(
-            self,
-            text="Add Instructor Constraint",
-            command=self.add_instructor_constraint)
+        self.button_instructor = Button(self,
+                                        text="Add Instructor Constraint",
+                                        command=self.add_instructor_constraint)
         self.button_instructor.pack(anchor=NW, padx=50)
 
 # Looking for a priority value
@@ -1040,13 +1020,12 @@ def okay_to_add_constraint(name):
     """
     all_constraints = globs.mainScheduler.constraints
     if check_constraint_exists(name) == True:
-        tkMessageBox.showerror(
-            "Duplicate Constraint",
-            "This constraint already exists.")
+        tkMessageBox.showerror(title="Duplicate Constraint",
+                               message="This constraint already exists.")
         return False
     if constraint_adding_conflict(name, all_constraints) == True:
-        tkMessageBox.showerror("Constraint Conflict",
-                               "This constraint conflicts with a previously added constraint.")
+        tkMessageBox.showerror(title="Constraint Conflict",
+                               message="This constraint conflicts with a previously added constraint.")
         return False
     return True
 
@@ -1058,8 +1037,8 @@ def check_constraint_exists(name):
     IN:  A string that is the constraint name
     OUT: True if the constraint already exists, False if it does not
     """
-    for constraint in globs.mainScheduler.constraints:
-        if constraint.name == name:
+    for constraint_obj in globs.mainScheduler.constraints:
+        if constraint_obj.name == name:
             return True
     return False
 
@@ -1106,15 +1085,12 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                 return True
                             else:  # check if it overlaps a break constraint
                                 if old_constraint[1] == "break":
-                                    if new_constraint[3] in [
-                                            old_constraint[2], old_constraint[3]]:
+                                    if new_constraint[3] in [old_constraint[2], old_constraint[3]]:
                                         # on edge, not in break, it's fine
                                         continue
                                     else:  # not on edge, check for conflict
-                                        if new_constraint[
-                                                3] < old_constraint[3]:
-                                            if new_constraint[
-                                                    3] > old_constraint[2]:
+                                        if new_constraint[3] < old_constraint[3]:
+                                            if new_constraint[3] > old_constraint[2]:
                                                 # in break, conflict
                                                 return True
                         # computer pref
@@ -1124,8 +1100,7 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                 return True
                         # break constraint
                         elif new_constraint[1] == "break":
-                            if old_constraint[3] in [
-                                    new_constraint[2], new_constraint[3]]:
+                            if old_constraint[3] in [new_constraint[2], new_constraint[3]]:
                                 # if it's on the edge of one of the break
                                 # times, it's fine
                                 continue
@@ -1165,21 +1140,25 @@ def create_course_time_constraint(
                 course = c
                 break
         if when == "Before":
-            globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name,
+                                               priority,
                                                constraint.course_before_time,
                                                [course, time_obj, is_mandatory])
         else:  # one course AFTER a time
-            globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name,
+                                               priority,
                                                constraint.course_after_time,
                                                [course, time_obj, is_mandatory])
     else:  # applies to all courses
         course = globs.mainScheduler.courses
         if when == "Before":
-            globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name,
+                                               priority,
                                                constraint.all_before_time,
                                                [course, time_obj, is_mandatory])
         else:  # all courses AFTER
-            globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name,
+                                               priority,
                                                constraint.all_after_time,
                                                [course, time_obj, is_mandatory])
 
@@ -1192,8 +1171,8 @@ def create_course_time_constraint(
 #
 #  @param create_time_preference A instructor will have the option on what times to lecture
 #  @return List_of_times A list of times in a day
-def create_time_pref_constraint(
-        instructor, before_after, timeslot, priority, added_constraints):
+def create_time_pref_constraint(instructor, before_after, timeslot,
+                                priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
     if priority == 0:
@@ -1202,21 +1181,22 @@ def create_time_pref_constraint(
     instructor = pull_instructor_obj(instructor)
     hour, minute = timeslot.split(":")
     time_obj = time(int(hour), int(minute))
-    constraint_name = "{0}_prefers_{1}_{2}".format(
-        instructor.name,
-        before_after.lower(),
-        str(time_obj))
+    constraint_name = "{0}_prefers_{1}_{2}".format(instructor.name,
+                                                   before_after.lower(),
+                                                   str(time_obj))
 
     if okay_to_add_constraint(constraint_name) == False:
         return
 
     if before_after == "Before":
-        globs.mainScheduler.add_constraint(constraint_name, priority,
+        globs.mainScheduler.add_constraint(constraint_name,
+                                           priority,
                                            constraint.instructor_time_pref_before,
                                            [instructor, time_obj, is_mandatory])
 
     else:  # after a time
-        globs.mainScheduler.add_constraint(constraint_name, priority,
+        globs.mainScheduler.add_constraint(constraint_name,
+                                           priority,
                                            constraint.instructor_time_pref_after,
                                            [instructor, time_obj, is_mandatory])
 
@@ -1231,8 +1211,7 @@ def create_time_pref_constraint(
 #  @return List_of_days A list of days in a week
 
 
-def create_day_pref_constraint(
-        instructor, day_code, priority, added_constraints):
+def create_day_pref_constraint(instructor, day_code, priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
     if priority == 0:
@@ -1241,11 +1220,13 @@ def create_day_pref_constraint(
     instructor = pull_instructor_obj(instructor)
     if len(day_code) > 4:  # can't select every day of the week, bad constraint
         error_message = "Error, a day preference can't be all days of the week, try again."
-        tkMessageBox.showerror("Error", error_message)
+        tkMessageBox.showerror(title="Error",
+                               message=error_message)
         return
     if len(day_code) < 1:  # can't pick no days, instructors have to work
         error_message = "Error, a day preference must include at least one day."
-        tkMessageBox.showerror("Error", error_message)
+        tkMessageBox.showerror(title="Error",
+                               message=error_message)
         return
 
     constraint_name = "{0}_prefers_{1}".format(instructor.name, day_code)
@@ -1254,7 +1235,8 @@ def create_day_pref_constraint(
         return
 
     day_code = day_code.lower()
-    globs.mainScheduler.add_constraint(constraint_name, priority,
+    globs.mainScheduler.add_constraint(constraint_name,
+                                       priority,
                                        constraint.instructor_preference_day,
                                        [instructor, day_code, is_mandatory])
 
@@ -1263,57 +1245,57 @@ def create_day_pref_constraint(
     return
 
 
-def create_computer_pref_constraint(
-        instructor, prefers_computers, priority, added_constraints):
+def create_computer_pref_constraint(instructor, prefers_computers,
+                                    priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
     if priority == 0:
         is_mandatory = True
 
     instructor = pull_instructor_obj(instructor)
-    constraint_name = "{0}_prefers_computers_{1}".format(
-        instructor.name,
-        prefers_computers)
+    constraint_name = "{0}_prefers_computers_{1}".format(instructor.name,
+                                                         prefers_computers)
 
     if okay_to_add_constraint(constraint_name) == False:
         return
 
-    globs.mainScheduler.add_constraint(constraint_name, priority,
-                                       constraint.instructor_preference_computer, [instructor, prefers_computers, is_mandatory])
+    globs.mainScheduler.add_constraint(constraint_name,
+                                       priority,
+                                       constraint.instructor_preference_computer,
+                                       [instructor, prefers_computers, is_mandatory])
 
     # update scrollbox with this created constraint
     added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 
-def create_max_course_constraint(
-        instructor, max_courses, priority, added_constraints):
+def create_max_course_constraint(instructor, max_courses,
+                                 priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = (priority == 0)
     instructor = pull_instructor_obj(instructor)
 
-    constraint_name = "{0}_max_courses_{1}".format(
-        instructor.name,
-        max_courses)
-    globs.mainScheduler.add_constraint(constraint_name, priority,
+    constraint_name = "{0}_max_courses_{1}".format(instructor.name,
+                                                   max_courses)
+    globs.mainScheduler.add_constraint(constraint_name,
+                                       priority,
                                        constraint.instructor_max_courses,
                                        [instructor, max_courses, is_mandatory])
     added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
 
-def create_instr_break(
-        instructor, gap_start, gap_end, priority, added_constraints):
+def create_instr_break(instructor, gap_start, gap_end,
+                       priority, added_constraints):
     priority = get_priority_value(priority)
     is_mandatory = False
     if priority == 0:
         is_mandatory = True
 
     instructor = pull_instructor_obj(instructor)
-    constraint_name = "{0}_break_{1}_{2}".format(
-        instructor,
-        gap_start,
-        gap_end)
+    constraint_name = "{0}_break_{1}_{2}".format(instructor,
+                                                 gap_start,
+                                                 gap_end)
 
     if okay_to_add_constraint(constraint_name) == False:
         return
@@ -1321,10 +1303,6 @@ def create_instr_break(
     globs.mainScheduler.add_constraint(constraint_name,
                                        priority,
                                        constraint.instructor_break_constraint,
-                                       [instructor,
-                                        gap_start,
-                                        gap_end,
-                                        is_mandatory]
-                                       )
+                                       [instructor, gap_start, gap_end, is_mandatory])
     added_constraints.add_constraint_listbox(constraint_name, priority)
     return
