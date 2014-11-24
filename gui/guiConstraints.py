@@ -819,6 +819,12 @@ class ConstraintPage(Page):
         self.constraints_view = ConstraintsView(self.content_container)
         #self.constraints_view.place(in_ = self.instructor_page, anchor = E)
         #self.constraints_view.place(in_ = self.course_page, anchor = E)
+        print(len(globs.mainScheduler.constraints))
+        if len(globs.mainScheduler.constraints) > 10: # there are 10 hard constraints
+            for i in range(len(globs.mainScheduler.constraints) - 10):
+                constraint_name = globs.mainScheduler.constraints[i].name
+                priority = globs.mainScheduler.constraints[i].weight
+                self.constraints_view.add_constraint_listbox(constraint_name, priority)
         self.constraints_view.pack(side = RIGHT, anchor = NE, padx = 50)
 
         self.instructor_page = InstructorConstraint(self.content_container, self.constraints_view)
