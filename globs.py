@@ -5,6 +5,8 @@ def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
 
     yaml_input_path = "genetic/seeds/Input.yaml"
+    yaml_constraint_path = "genetic/seeds/default_constraints.yaml"
+    default_constraints_enabled = False
 
     # Create XML input from YAMl (Input.yaml)
     if os.path.isfile(yaml_input_path) == False:
@@ -13,6 +15,9 @@ def init(): # call globals.init() from main
         return
     else:
         interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
+
+    
+    
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"
@@ -33,6 +38,12 @@ def init(): # call globals.init() from main
         mainScheduler = scheduler.Scheduler(courses, rooms, time_slots_mwf, time_slots_tr, time_slot_divide)
         print "Slot divide is", mainScheduler.slot_divide
         mainScheduler.generate_starting_population(just_one = True)
+
+        # Create list of default constraints from YAML (default_constraints.yaml)
+        if os.path.isfile(yaml_constraint_path):
+            # found default constraint file
+            default_constraints_enabled = True
+            interface.create_constraints_from_yaml(yaml_constraint_path, mainScheduler, instructors)
 
         #prereqs computation and display
         prereqs = interface.get_prereqs(xml_input_path, courses)
