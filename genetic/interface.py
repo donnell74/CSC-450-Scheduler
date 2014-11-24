@@ -172,6 +172,43 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         priority = priorities.get(priority, 0)
         return priority
 
+    def course_time_constraint(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a course
+        time constraint:  course_code, before_after, timeslot, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        constraint_name = constraint_dict["code"] + "_" +\
+                            constraint_dict["before_after"] + "_" \
+                            + constraint_dict["time"]
+
+        if constraint_dict["code"] == "All":
+            course_obj = scheduler.courses
+        else: # find the course object
+            for c in scheduler.courses:
+                if constraint_dict["code"] == c.code: # found it
+                    course_obj = c
+                            
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        timeslot_obj = str_to_time(constraint_dict["time"])
+        
+        # scheduler.courses is course list
+        if constraint_dict["before_after"] == "before":
+            scheduler.add_constraint(constraint_name,
+                                        priority, 
+                                        constraint.course_before_time,
+                                        [course_obj, timeslot_obj, is_mandatory])
+        else: # after constraint
+            scheduler.add_constraint(constraint_name,
+                                        priority, 
+                                        constraint.course_after_time,
+                                        [course_obj, timeslot_obj, is_mandatory])
+
+
     def instructor_time_pref(constraint_dict, scheduler):
         """ This takes in a dictionary of the data required for an
         instructor time preference constraint.  instr_name, before_after, time, priority.
@@ -284,6 +321,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
 
     for course in course_constraints:  ### FUNCTION HERE
         constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
+        course_time_constraint(course, scheduler)
         print constraint_name, "\n"
 
     for type in instr_constraints:
