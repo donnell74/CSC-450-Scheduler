@@ -184,13 +184,15 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                             constraint_dict["before_after"] + "_" \
                             + constraint_dict["time"]
 
-        if constraint_dict["code"] == "All":
+        course_obj = constraint_dict["code"]
+        if course_obj == "All":
             course_obj = scheduler.courses
         else: # find the course object
             for c in scheduler.courses:
-                if constraint_dict["code"] == c.code: # found it
+                if course_obj == c.code: # found it
                     course_obj = c
-                            
+                    break
+        
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
@@ -337,31 +339,34 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                                     constraint.instructor_break_constraint,
                                     [instr_obj, gap_start, gap_end, is_mandatory])
 
-
+    # begin parsing YAML
     input_file = file(path_to_yaml, "r")
     yaml_dict = yaml.load(input_file)
+    
+    if yaml_dict["data"]["constraint_list"]["course_constraints"] is not None:
+        # course constraints exist
+        course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
+        for course in course_constraints:
+            constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
+            course_time_constraint(course, scheduler)
 
-    course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
-    instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
-
-    for course in course_constraints:
-        constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
-        course_time_constraint(course, scheduler)
-        print constraint_name, "\n"
-
-    for type in instr_constraints:
-        for i in range(len(instr_constraints[type])): # create every constraint of each type
-            this_constraint = instr_constraints[type][i]
-            if type == "time_pref":
-                instructor_time_pref(this_constraint, scheduler)
-            elif type == "max_courses":
-                max_courses(this_constraint, scheduler)
-            elif type == "day_pref":
-                day_pref(this_constraint, scheduler)
-            elif type == "computer_pref":
-                computer_pref(this_constraint, scheduler)
-            elif type == "instructor_break":
-                instructor_break(this_constraint, scheduler)
+    if yaml_dict["data"]["constraint_list"]["instructor_constraints"] is not None:
+        instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
+        for type in instr_constraints:
+            if instr_constraints[type] is not None:
+                # instructor constraints exist
+                for i in range(len(instr_constraints[type])): # create every constraint of each type
+                    this_constraint = instr_constraints[type][i]
+                    if type == "time_pref":
+                        instructor_time_pref(this_constraint, scheduler)
+                    elif type == "max_courses":
+                        max_courses(this_constraint, scheduler)
+                    elif type == "day_pref":
+                        day_pref(this_constraint, scheduler)
+                    elif type == "computer_pref":
+                        computer_pref(this_constraint, scheduler)
+                    elif type == "instructor_break":
+                        instructor_break(this_constraint, scheduler)
 
 
 def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):

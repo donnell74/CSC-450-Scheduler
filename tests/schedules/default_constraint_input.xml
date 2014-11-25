@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<data>
+    <schedule name="test">
+        <courseList>
+          <item code="CSC 131 001" credit="1" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="1"></item>
+          <item code="CSC 131 A" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 320 A" credit="3" instructor="Liu" prereq="CSC131" capacity="10" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 320 001" credit="1" instructor="Liu" prereq="CSC131" capacity="10" needs_computers="0" is_lab="1"></item>
+          <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232" capacity="10" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 365" credit="3" instructor="Saquer" prereq="" capacity="80" needs_computers="0" is_lab="0"></item>
+        </courseList>
+        <roomList>
+          <item building="CHEK" number="213" capacity="20" has_computers="1"></item>
+          <item building="CHEK" number="205" capacity="40" has_computers="0"></item>
+          <item building="CHEK" number="105" capacity="70" has_computers="0"></item>
+          <item building="CHEK" number="210" capacity="35" has_computers="0"></item>
+        </roomList>
+        <timeListMWF>
+          <item>12:20-13:10</item>
+          <item>13:25-14:15</item>
+          <item>14:30-15:20</item>
+          <item>15:35-16:25</item>
+        </timeListMWF>
+        <timeListTR>
+          <item>12:30-13:45</item>
+          <item>14:00-15:15</item>
+          <item>15:30-16:45</item>
+       </timeListTR>
+    </schedule>
+</data>
