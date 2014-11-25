@@ -2,8 +2,7 @@
 <data>
     <schedule name="test">
         <courseList>
-          <item code="CSC 131 001" credit="1" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="1"></item>
-          <item code="CSC 131 A" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 232" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="0"></item>
           <item code="CSC 320 A" credit="3" instructor="Liu" prereq="CSC131" capacity="10" needs_computers="0" is_lab="0"></item>
           <item code="CSC 320 001" credit="1" instructor="Liu" prereq="CSC131" capacity="10" needs_computers="0" is_lab="1"></item>
           <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232" capacity="10" needs_computers="0" is_lab="0"></item>
@@ -27,4 +26,49 @@
           <item>15:30-16:45</item>
        </timeListTR>
     </schedule>
+    <course 
+        code = "CSC 232"
+        credit = "3"
+        startTime = "12:20"
+        endTime = "13:10"
+        days = "MWF"
+        room = "CHEK 205"
+        instructor = "Saquer">
+    </course>
+    <course 
+        code = "CSC 320 A"
+        credit = "3"
+        startTime = "13:25"
+        endTime = "14:15"
+        days = "MWF"
+        room = "CHEK 105"
+        instructor = "Liu">
+    </course>
+    <course 
+        code = "CSC 320 001"
+        credit = "1"
+        startTime = "12:30"
+        endTime = "13:45"
+        days = "R"
+        room = "CHEK 213"
+        instructor = "Liu">
+    </course>
+    <course 
+        code = "CSC 325"
+        credit = "3"
+        startTime = "15:35"
+        endTime = "16:25"
+        days = "MWF"
+        room = "CHEK 205"
+        instructor = "Shade">
+    </course>
+        <course 
+        code = "CSC 365"
+        credit = "3"
+        startTime = "15:35"
+        endTime = "16:25"
+        days = "MWF"
+        room = "CHEK 105"
+        instructor = "Saquer">
+    </course>
 </data>

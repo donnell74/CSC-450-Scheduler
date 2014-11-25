@@ -26,11 +26,10 @@ class TestInterface(unittest.TestCase):
                                      default_scheduler, instructors)
         # all default constraints are valid, should be 4
         self.assertEquals(len(default_scheduler.constraints), 4)
-
+        
         bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/default_constraint_input.xml")
-        bad_instructors = [structures.Instructor(name = x) for x in ["Shade", "Saquer", "Liu"] ]
         interface.create_constraints_from_yaml("tests/schedules/test_default_constraints_bad.yaml",
-                                     bad_scheduler, bad_instructors)
+                                     bad_scheduler, instructors)
         # one constraint is bad and should be thrown out, should be 2
         self.assertEquals(len(bad_scheduler.constraints), 2)
         

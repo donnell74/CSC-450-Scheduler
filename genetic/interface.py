@@ -151,7 +151,6 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     screen on the constraint page
     """
 
-
     def pull_instructor_obj(instructor_name):
         """ finds the instructor object for the given name """
         for instr in instructor_objs:
@@ -375,6 +374,7 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     OUT: scheduler object with one week based on the xml input"""
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
+    
     instructors = create_instructors_from_courses(path_to_xml)
     instructors_dict = dict(zip([inst.name for inst in instructors],
                            [inst for inst in instructors]))

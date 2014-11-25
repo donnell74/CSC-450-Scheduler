@@ -6,7 +6,6 @@ def init(): # call globals.init() from main
 
     yaml_input_path = "genetic/seeds/Input.yaml"
     yaml_constraint_path = "genetic/seeds/default_constraints.yaml"
-    default_constraints_enabled = False
 
     # Create XML input from YAMl (Input.yaml)
     if os.path.isfile(yaml_input_path) == False:
@@ -15,9 +14,6 @@ def init(): # call globals.init() from main
         return
     else:
         interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
-
-    
-    
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"
@@ -42,7 +38,6 @@ def init(): # call globals.init() from main
         # Create list of default constraints from YAML (default_constraints.yaml)
         if os.path.isfile(yaml_constraint_path):
             # found default constraint file
-            default_constraints_enabled = True
             interface.create_constraints_from_yaml(yaml_constraint_path, mainScheduler, instructors)
 
         #prereqs computation and display
