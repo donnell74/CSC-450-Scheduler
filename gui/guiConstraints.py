@@ -190,7 +190,7 @@ class InstructorConstraint(Page):
         # don't pack this because Time is the default option so computers shouldn't be visible
 
         self.label_computer = Label(self.computer_frame, \
-            text = "Instructor would prefer to teach lecture classes in a classroom with computers:", wraplength = 100)
+            text = "Instructor would prefer to teach classes not requiring computers in a computer lab:", wraplength = 100)
         self.label_computer.pack(side = TOP)
 
         self.computer_options = ["True", "False"]

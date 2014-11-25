@@ -272,7 +272,8 @@ def instructor_preference_computer(this_week, args):
     holds = []
     
     for section_week in this_week.sections:
-        if section_week.instructor.name == instructor.name:
+        # only applies to courses that do not need computers
+        if section_week.instructor.name == instructor.name and not section_week.course.needs_computers:
             if computer_preference == True:
                 #instructor prefers computers
                 if section_week.room.has_computers == False:
