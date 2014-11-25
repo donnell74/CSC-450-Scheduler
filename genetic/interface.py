@@ -164,6 +164,8 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         return time_obj( int(t_hr), int(t_min) )
 
     def get_priority_value(priority):
+        """ Turns the string value of priority into the
+        appropriate weight (int) value. """
         priorities = {"Low": 10,
                       "Medium": 25,
                       "High": 50
@@ -219,7 +221,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                             "_prefers_" + \
                             constraint_dict["before_after"] + \
                             "_" + constraint_dict["time"]
-        print constraint_name, "\n"
+
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
@@ -242,6 +244,12 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
 
 
     def max_courses(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor_max_courses constraint.
+        IN:  a dictionary of appropriate data
+        OUT: a max_courses constraint is added to the scheduler
+        """
+        
         constraint_name = constraint_dict["instr_name"] + \
                             "_max_courses_" + str(constraint_dict["max_courses"])
         priority = get_priority_value(constraint_dict["priority"])
@@ -257,9 +265,13 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                                     constraint.instructor_max_courses,
                                     [instr_obj, max_courses, is_mandatory])
 
-        print constraint_name, "\n"
 
     def computer_pref(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor computer preference constraint.
+        IN: a dictionary of appropriate data
+        OUT: a computer_pref constraint added to the scheduler
+        """
         constraint_name = constraint_dict["instr_name"] + \
                             "_prefers_computers_" + \
                             str(constraint_dict["prefers_computers"])
@@ -270,13 +282,19 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
             is_mandatory = False
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
         prefers_computers = constraint_dict["prefers_computers"]
-        print constraint_name, "\n"
+
         scheduler.add_constraint(constraint_name,
                                     priority,
                                     constraint.instructor_preference_computer,
                                     [instr_obj, prefers_computers, is_mandatory])
 
+
     def day_pref(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor day preference constraint.
+        IN: a dictionary of appropriate data
+        OUT: a day_pref constraint added to the scheduler
+        """
         constraint_name = constraint_dict["instr_name"] + \
                             "_prefers_" + constraint_dict["day_code"]
         priority = get_priority_value(constraint_dict["priority"])
@@ -285,15 +303,23 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         else:
             is_mandatory = False
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
-        ### dummy proof it here
         day_code = constraint_dict["day_code"].lower()
+
+        if len(day_code) == 0 or len(day_code) == 5:
+            return  # drop silently, bad constraint
+
         scheduler.add_constraint(constraint_name,
                                     priority,
                                     constraint.instructor_preference_day,
                                     [instr_obj, day_code, is_mandatory])
-        print constraint_name, "\n"
+
 
     def instructor_break(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor break constraint.
+        IN: a dictionary of appropriate data
+        OUT: an instructor_break constraint added to the scheduler
+        """
         constraint_name = constraint_dict["instr_name"] + \
                             "_break_" + constraint_dict["break_start"] + \
                             "_" + constraint_dict["break_end"]
@@ -311,7 +337,6 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                                     constraint.instructor_break_constraint,
                                     [instr_obj, gap_start, gap_end, is_mandatory])
 
-        print constraint_name, "\n"
 
     input_file = file(path_to_yaml, "r")
     yaml_dict = yaml.load(input_file)
@@ -319,7 +344,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
     instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
 
-    for course in course_constraints:  ### FUNCTION HERE
+    for course in course_constraints:
         constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
         course_time_constraint(course, scheduler)
         print constraint_name, "\n"
