@@ -967,8 +967,9 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                                 # in break, conflict
                                                 return True
                         elif new_constraint[2] == "computers":          # computer pref
-                            if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
-                                return True
+                            if old_constraint[2] == "computers":
+                                if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
+                                    return True
                         elif new_constraint[1] == "break":              # break constraint
                             if old_constraint[3] in [new_constraint[2], new_constraint[3]]: 
                                 # if it's on the edge of one of the break times, it's fine
