@@ -109,6 +109,12 @@ def instructor_time_pref_before(this_week, args):
     is_mandatory = args[2]
     holds = [] # will contain 0's for all courses that fail constraint
 
+    print(this_week)
+    print("=" * 25)
+    print(this_instructor)
+    print("=" * 25)
+    print(time_slot)
+    print("=" * 25)
     for each_course in this_instructor.courses:
         #section object for course
         each_section = this_week.find_section( each_course.code )

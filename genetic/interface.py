@@ -188,9 +188,9 @@ def create_course_list_from_file_test(path_to_xml):
                                     [inst for inst in instructors]))
         courses = create_course_list_from_file(path_to_xml, instructors_dict)
         return courses
-    except Exception as inst:
-        print(inst)
-        return None
+    except Exception as inst:z
+        #print(inst)
+        #return None
 
 
 def create_course_list_from_file(path_to_xml, instructors_dict):
