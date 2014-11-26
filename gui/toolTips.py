@@ -15,6 +15,7 @@ class ToolTips(object):
         self.buttons = ['Home',
                         'Constraint',
                         'View',
+                        'Misc',
                         'RUN',
                         'Schedule 1',
                         'Schedule 2',
