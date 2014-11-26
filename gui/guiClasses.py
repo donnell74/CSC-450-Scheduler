@@ -259,6 +259,9 @@ class ViewPage(Page):
         self.selected_option = StringVar(self)
         self.selected_option.set(self.rooms[self.room_selection_option]) # default value
 
+        if self.rooms != None:
+            self.rooms.sort()
+            
         self.menu_select = apply(OptionMenu,
                             (self, self.selected_option) + tuple(self.rooms))
         self.menu_select.place(x = 115, y = 5)
@@ -267,7 +270,7 @@ class ViewPage(Page):
 
         self.drop_down_items.append(self.menu_select)
         self.drop_down_items.append(self.room_label)
-
+    
     def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
@@ -955,7 +958,6 @@ class MainWindow(Frame):
         """ Display view_page after run_scheduler is finished running. """
         self.misc_page.finish_loading()
 
-        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.view_page.is_run_clicked = True
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
