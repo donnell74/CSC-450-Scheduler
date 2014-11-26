@@ -15,14 +15,12 @@ class ToolTips(object):
         self.buttons = ['Home',
                         'Constraint',
                         'View',
-                        'Misc',
                         'RUN',
                         'Schedule 1',
                         'Schedule 2',
                         'Schedule 3',
                         'Schedule 4',
                         'Schedule 5',
-                        'View Constraints',
                         'Add Course Constraint',
                         'Add Instructor Constraint',
                         'Add Constraint']
@@ -90,13 +88,14 @@ class ToolTips(object):
         try:
             button = event.widget
             self.btn_name = button['text']
-            if self.btn_name.split(' ')[0] == 'Schedule' or self.btn_name == 'View Constraints':
+            if self.btn_name.split(' ')[0] == 'Schedule':
                 if len(self.buttons_clicked) > 0:
                     self.buttons_clicked[0]['bg'] = 'SystemButtonFace'
                     del self.buttons_clicked[:]
                 
                 button['bg'] = 'green'
                 self.buttons_clicked.append(button)
+
             if self.btn_name == 'RUN':
                 self.buttons_clicked[0]['bg'] = 'SystemButtonFace'
         except:
