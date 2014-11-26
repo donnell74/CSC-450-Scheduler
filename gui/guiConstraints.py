@@ -979,6 +979,10 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                     if old_constraint[3] > new_constraint[2]: 
                                         # in break, conflict
                                         return True
+                        elif new_constraint[1] == "max":                # max courses
+                            if old_constraint[1] == "max":
+                                # duplicates are already caught, so max_courses conflicts
+                                return True
 
     # if no return True by now, the constraint is fine and doesn't conflict
     return False
@@ -1118,6 +1122,9 @@ def create_max_course_constraint(instructor, max_courses, priority, added_constr
     instructor = pull_instructor_obj(instructor)
 
     constraint_name = "{0}_max_courses_{1}".format(instructor.name, max_courses)
+
+    if okay_to_add_constraint(constraint_name) == False: return
+
     globs.mainScheduler.add_constraint(constraint_name, priority,
                                        constraint.instructor_max_courses,
                                        [instructor, max_courses, is_mandatory])
