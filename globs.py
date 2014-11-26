@@ -70,10 +70,14 @@ def init(): # call globals.init() from main
                                     constraint.course_sections_at_different_times,
                                     [courses])
 
+        labs = []
         for each_course in mainScheduler.courses:
             if each_course.is_lab:
-                mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
-                                             constraint.lab_on_tr, [each_course])
+                labs.append(each_course)
+
+        mainScheduler.add_constraint("labs on tr", 0,
+                                     constraint.lab_on_tr,
+                                     [labs])
 
 
     # used for gui strings
