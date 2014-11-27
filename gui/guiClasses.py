@@ -809,7 +809,7 @@ class MiscPage(Page):
         self.load_bar_bg.place(x = 207, y = 120)
 
         self.load_bar = Label(self, width = 0, height = 2)
-        self.load_bar['bg'] = 'green'
+        self.load_bar['bg'] = 'gray'
         self.load_bar.place(x = 207, y = 120)
 
         self.info_label = Label(self, text='', \
@@ -827,6 +827,11 @@ class MiscPage(Page):
 
     def update_loading_bar(self):
         self.update()
+
+        if not self.is_loading:
+            self.load_bar['bg'] = 'green'
+            self.is_loading = True
+            
         # print(self.load_bar['width'])
         # Stop at "almost done" status; will jump to 100% when finished
         if self.load_bar['width'] <= 39:
