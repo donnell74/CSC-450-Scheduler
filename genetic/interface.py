@@ -59,7 +59,7 @@ def create_xml_from_yaml(path_to_yaml):
         return "<?xml version='1.0'?>"
     
     def valid_credit_hour_input():
-        ''' Validates that course credit hours are 1, 3, or 5.
+        ''' Validates that course credit hours are 1, 3, or 4.
             And that a lab is only 1 credit hour.
             Returns False if credit input is invalid.'''
         
@@ -74,7 +74,7 @@ def create_xml_from_yaml(path_to_yaml):
                 error_message = 'The course credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable credit hour.' + \
                                 '\nCredit hours must ' + \
-                                'be 1, 3, or 5.\n' + \
+                                'be 1, 3, or 4.\n' + \
                                 '\nPlease change this in:\n' + \
                                 'genetic\seeds\input.yaml'
                 is_valid_input = False
