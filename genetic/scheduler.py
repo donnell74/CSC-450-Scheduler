@@ -430,6 +430,19 @@ class Scheduler:
         self.weeks.extend(list_of_children)
 
 
+    def loading_bar_update(self, one_increment, current_elapsed_seconds, max_runtime):
+        """Increments the loading bar by as much as it should if and when it should"""
+        #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
+        num_segments_displayed = self.loading_screen.load_bar['width']
+        number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
+        print(number_of_segments_to_add)
+        while number_of_segments_to_add > 1:
+            print("Updating the loading bar")
+            self.loading_screen.update_loading_bar()
+            number_of_segments_to_add -= 1
+        return
+
+
     ## Main loop that evolves and produces more schedules when run 
     #  @param self
     #  @param main tkinter window object
@@ -439,9 +452,11 @@ class Scheduler:
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         start_time = now() #stopwatch starts
 
+        # gui misc page object; for updating the loading bar
+        self.loading_screen = main_window_object.misc_page
+
         main_window_object.setup_loading_screen()
         main_window_object.go_to_loading_screen()
-        loading_screen = main_window_object.misc_page
 
         weeks_to_keep = 5
 
@@ -474,18 +489,6 @@ class Scheduler:
 
             return valid_weeks
 
-        def loading_bar_helper(one_increment, current_elapsed_seconds, max_runtime):
-            """Increments the loading bar by as much as it should if and when it should"""
-            #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
-            num_segments_displayed = loading_screen.load_bar['width']
-            number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
-            print(number_of_segments_to_add)
-            while number_of_segments_to_add > 1:
-                print("Updating the loading bar")
-                loading_screen.update_loading_bar()
-                number_of_segments_to_add -= 1
-            return
-
         if not self.paused:
             # Resetting self.weeks will trigger generate_starting_population() below
             self.weeks = []
@@ -499,7 +502,8 @@ class Scheduler:
             self.weeks = filter(lambda x: x.complete, self.weeks)
             #Case that no schedules are complete
             if len(self.weeks) == 0:
-                self.generate_starting_population()
+                self.generate_starting_population(1000, False, time_limit, 
+                                                  start_time)
                 total_iterations += 1
                 counter += 1
                 continue
@@ -514,7 +518,7 @@ class Scheduler:
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
             time_elapsed = now() - start_time
-            loading_bar_helper(one_increment, time_elapsed, time_limit)
+            self.loading_bar_update(one_increment, time_elapsed, time_limit)
             print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
             if time_elapsed > time_limit:
                 print('Time limit reached; final output found')
@@ -913,7 +917,8 @@ class Scheduler:
     #  @param self
     #  @param  A function that generates random population  
     #  @return not done
-    def generate_starting_population(self, num_to_generate = 1000, just_one = False):
+    def generate_starting_population(self, num_to_generate = 1000, just_one = False,
+                                     time_limit = None, start_time = None):
         """Generates starting population"""
         #Quick case for getting to GUI
         if just_one and len(self.weeks) == 0:
@@ -928,10 +933,16 @@ class Scheduler:
             self.weeks.append(Week(self.rooms, self))
 
         counter = 0
+        if time_limit is not None:
+            one_increment = time_limit/40.0
         for each_week in self.weeks[old_number_of_schedules:]:
             counter += 1
             list_slots = each_week.list_time_slots()
             self.randomly_fill_schedule(each_week, self.courses, list_slots)
+
+            if counter % 50 == 0 and start_time is not None:
+                current_elapsed_seconds = now() - start_time
+                self.loading_bar_update(one_increment, current_elapsed_seconds, time_limit)
 
             #print("Schedule", counter, "generated")
 
