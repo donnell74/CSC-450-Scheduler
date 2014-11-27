@@ -86,7 +86,12 @@ def course_after_time(this_week, args):
 
 
 def lab_on_tr(this_week, args):
-    return int(this_week.find_course(args[0])[0].isTR == True)
+    lab_courses = args[0]
+    for each_lab in lab_courses:
+        if not this_week.find_course(each_lab)[0].isTR:
+            this_week.valid = False
+            return 0
+    return 1
 
 
 def morning_class(this_week, args):
@@ -256,7 +261,7 @@ def instructor_preference_day(this_week, args):
                     
     # if mandatory and it's here, it passed
     if is_mandatory:
-        return 0
+        return 1
     else: # not mandatory, partial credit
         partial_credit = get_partial_credit(holds)
         return partial_credit
@@ -272,7 +277,8 @@ def instructor_preference_computer(this_week, args):
     holds = []
     
     for section_week in this_week.sections:
-        if section_week.instructor.name == instructor.name:
+        # only applies to courses that do not need computers
+        if section_week.instructor.name == instructor.name and not section_week.course.needs_computers:
             if computer_preference == True:
                 #instructor prefers computers
                 if section_week.room.has_computers == False:
@@ -296,7 +302,7 @@ def instructor_preference_computer(this_week, args):
 
     # if mandatory and it's here, it passed
     if is_mandatory:
-        return 0
+        return 1
     else:
         partial_credit = get_partial_credit(holds)
         return partial_credit
@@ -333,7 +339,7 @@ def instructor_break_constraint(this_week, args):
             holds.append(1)
 
     if is_mandatory: # if no fails by here, it passed
-        return 0
+        return 1
     else:
         partial_weight = get_partial_credit(holds)
         return partial_weight

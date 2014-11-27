@@ -8,6 +8,7 @@ from datetime import time, timedelta
 from structures import *
 from constraint import *
 from time import time as now
+from collections import Counter
 import gc
 import sys
 sys.path.append("../")
@@ -127,6 +128,11 @@ class Scheduler:
         # default message to be displayed on the loading screen
         self.gui_loading_info = ""
         self.gui_loading_info1 = self.gui_loading_info2 = self.gui_loading_info3 = ""
+        
+        # allowing the user to pause the algorithm to check constraints
+        self.paused = False
+        self.time_left_to_run = 0
+        self.saved_state_of_constraints = []
 
         #Courses separated by credit hours
         self.separated = self.separate_by_credit(self.courses)
@@ -431,17 +437,27 @@ class Scheduler:
     def evolution_loop(self, main_window_object, minutes_to_run = 1):
         """Main loop of scheduler, run to evolve towards a high fitness score"""
         start_time = now() #stopwatch starts
-        time_limit = 60 * minutes_to_run
-        one_increment = time_limit/40.0
 
         main_window_object.setup_loading_screen()
         main_window_object.go_to_loading_screen()
         loading_screen = main_window_object.misc_page
 
-        fitness_baseline = 10
-        total_iterations = 0
-        counter = 0
         weeks_to_keep = 5
+
+        if Counter(map(lambda x: x.name, self.constraints)) !=\
+           Counter(map(lambda x: x.name, self.saved_state_of_constraints)):
+               self.paused = False
+
+        if self.paused:
+            total_iterations = 11
+            counter = 11
+            time_limit = self.time_left_to_run - now()
+        else:
+            total_iterations = 0
+            counter = 0
+            time_limit = 60 * minutes_to_run
+            
+        one_increment = time_limit/40.0
 
         def week_slice_helper():
             """Sets self.weeks to the 5 best week options and returns the list of valid weeks"""
@@ -469,8 +485,11 @@ class Scheduler:
                 number_of_segments_to_add -= 1
             return
 
-        # Resetting self.weeks will trigger generate_starting_population() below
-        self.weeks = []
+        if not self.paused:
+            # Resetting self.weeks will trigger generate_starting_population() below
+            self.weeks = []
+        else:
+            self.paused = False
 
         while True:
             print('Generation counter:', counter + 1)
@@ -522,9 +541,19 @@ class Scheduler:
             counter += 1
             print("Number of weeks:", str(len(self.weeks)))
             print()
+            if counter == 10 and len(valid_weeks) == 0:
+                if main_window_object.ask_to_keep_running() == True:
+                    self.paused = True
+                    self.time_left_to_run = time_limit - time_elapsed 
+                    self.saved_state_of_constraints = self.constraints[:]
+                    
+                    main_window_object.run_clicked = False 
+                    main_window_object.go_to_constraints_screen()
+                    break
 
-        print("Final number of generations: ", total_iterations + 1)
-        main_window_object.finished_running()
+        if not self.paused:
+            print("Final number of generations: ", total_iterations + 1)
+            main_window_object.finished_running()
 
     ## Provides all time slots matching in a given week
     #  @param self

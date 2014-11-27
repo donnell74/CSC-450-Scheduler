@@ -1,0 +1,20 @@
+data:
+  constraint_list:
+    course_constraints: # leave labels even if no constraints are present
+    instructor_constraints:
+        time_pref:
+          -
+            instr_name: Shade
+            before_after: after
+            time: "13:25"
+            priority: High
+        day_pref:
+          -
+            instr_name: Liu
+            day_code: MTWRF
+            priority: Low
+        max_courses:
+          -
+            instr_name: Saquer
+            max_courses: 2
+            priority: Low

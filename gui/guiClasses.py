@@ -514,6 +514,7 @@ class ViewPage(Page):
                         self.selections[option] = temp[4] + " " + temp[5]
 
                         option += 1
+        self.rooms.sort()
 
         option = 0 # reset
 
@@ -973,7 +974,14 @@ class MainWindow(Frame):
         return
 
 
+    def go_to_constraints_screen(self):
+        self.show_constraint()
+        self.update()
+
+        return
+
     def run_scheduler(self):
+        print(self.run_clicked)
         if not self.run_clicked:
             self.run_clicked = True
             self.view_page.is_run_clicked = False
@@ -986,8 +994,15 @@ class MainWindow(Frame):
 
             # only export schedules if it is possible
             try:
-                interface.export_schedules(globs.mainScheduler.weeks)
+                if not globs.mainScheduler.paused:
+                    interface.export_schedules(globs.mainScheduler.weeks)
             except:
                 print("Could not export schedules")
 
         return
+
+    def ask_to_keep_running(self):
+        if tkMessageBox.askyesno("Continue?", "It is possible you have conflicting\
+                constraints, do you want to pause the algorithm to check your constraints?"):
+            return True
+        return False

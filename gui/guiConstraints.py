@@ -190,7 +190,7 @@ class InstructorConstraint(Page):
         # don't pack this because Time is the default option so computers shouldn't be visible
 
         self.label_computer = Label(self.computer_frame, \
-            text = "Instructor would prefer to teach lecture classes in a classroom with computers:", wraplength = 100)
+            text = "Instructor would prefer to teach classes not requiring computers in a computer lab:", wraplength = 100)
         self.label_computer.pack(side = TOP)
 
         self.computer_options = ["True", "False"]
@@ -814,20 +814,22 @@ class ConstraintPage(Page):
 
         # PAGES
         self.home_page = HomeConstraintPage(self.content_container)
-        #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         self.home_page.pack(anchor = NW, padx = 50)
 
         self.constraints_view = ConstraintsView(self.content_container)
-        #self.constraints_view.place(in_ = self.instructor_page, anchor = E)
-        #self.constraints_view.place(in_ = self.course_page, anchor = E)
+        if len(globs.mainScheduler.constraints) > 10: # there are 10 hard constraints
+            for i in range(len(globs.mainScheduler.constraints) - 10):
+                constraint_name = globs.mainScheduler.constraints[i].name
+                priority = globs.mainScheduler.constraints[i].weight
+                self.constraints_view.add_constraint_listbox(constraint_name, priority)
         self.constraints_view.pack(side = RIGHT, anchor = NE, padx = 50)
 
         self.instructor_page = InstructorConstraint(self.content_container, self.constraints_view)
-        #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+
         #self.instructor_page.pack(side = LEFT)
 
         self.course_page = CourseConstraint(self.content_container, self.constraints_view)
-        #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+
         #self.course_page.pack(side = LEFT)
 
         # INITIALIZE WITH HOME PAGE

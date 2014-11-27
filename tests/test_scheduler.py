@@ -37,8 +37,12 @@ class TestScheduler(unittest.TestCase):
         self.assertEquals(sample_scheduler.max_fitness, 60)
 
     def test_calc_fitness(self):
+        labs = []
+        for each_course in sample_scheduler.courses:
+            if each_course.is_lab:
+                labs.append(each_course)
         sample_scheduler.add_constraint("lab_on_tr", 30, 
-                constraint.lab_on_tr, [sample_scheduler.courses[1]])
+                constraint.lab_on_tr, [labs])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
 
