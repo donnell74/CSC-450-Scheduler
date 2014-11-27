@@ -160,6 +160,14 @@ class ViewPage(Page):
         self.toggle_graphics.place(x = 555, y = 47)
 
 
+    def remove_buttons(self):
+        """Removes all buttons from the view page"""
+        attributes = ['constraint_acceptance', 'toggle_graphics']
+        for each_attribute in attributes:
+            if hasattr(self, each_attribute):
+                getattr(self, each_attribute).pack_forget()
+
+
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
 
@@ -240,6 +248,7 @@ class ViewPage(Page):
             height_to_show = 23
             if hasattr(self, 'bg_label'):
                 self.bg_label.destroy()
+            self.remove_buttons()
         else:
             text_to_show = 'Click RUN to generate schedules.'
             size_to_show = size_h1
