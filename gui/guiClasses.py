@@ -101,7 +101,6 @@ class HomePage(Page):
             self.custom_input.pack_forget()
 
 # Constraint page is located in guiConstraints.py
-
 class ViewPage(Page):
 
     def __init__(self, root):
@@ -135,6 +134,8 @@ class ViewPage(Page):
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
 
+        self.canvas_created = False
+        
         self.toggle_constraint_acceptance_flag = True
         # holds the rooms
         self.rooms = []
@@ -166,8 +167,8 @@ class ViewPage(Page):
         self.delete(self.drop_down_items)
 
         # delete previous canvas
-        self.delete(self.canvas_items)
-
+        #self.delete(self.canvas_items)
+        
         # default is to display graphical schedules first
         if not self.toggle_schedules_flag:
             if self.is_run_clicked:
@@ -187,29 +188,31 @@ class ViewPage(Page):
     def toggle_constraint_acceptance(self):
         """ Switch between the acceptance and rejected constraints """
 
-        # delete previous canvas
-        self.delete(self.canvas_items)
+        if self.canvas_created:
+            
+            # delete old labels to make room for new ones
+            self.delete(self.table_labels)
 
-        # delete old labels to make room for new ones
-        self.delete(self.table_labels)
+            # delete drop downs
+            self.delete(self.drop_down_items)
 
-        # delete drop downs
-        self.delete(self.drop_down_items)
+            # default is to display accepted constraints first
+            if not self.toggle_constraint_acceptance_flag:
+                
+                if self.is_run_clicked:
+                    self.toggle_constraint_acceptance_flag = True
+                    #self.create_graphical_constraints()
+                    #self.insert_schedule(self.last_viewed_schedule)
+                    self.canv.delete("all")
+                    self.create_compact_schedules()
+            else:
+                if self.is_run_clicked:
+                    self.toggle_constraint_acceptance_flag = True
 
-        # default is to display accepted constraints first
-        if not self.toggle_constraint_acceptance_flag:
-            print ("______")
-            if self.is_run_clicked:
-                self.toggle_constraint_acceptance_flag = True
-                #self.create_graphical_constraints()
-                #self.insert_schedule(self.last_viewed_schedule)
-                self.create_compact_schedules()
+                # delete previous canvas
+                self.canv.delete("all")
 
-        else:
-            if self.is_run_clicked:
-                self.toggle_constraint_acceptance_flag = True
-
-            self.create_compact_constraint()
+                self.create_compact_constraint()
 
     def show_nav(self):
         """ show buttons so user can click toggle between schedules """
@@ -250,6 +253,7 @@ class ViewPage(Page):
         self.bg_label.place(x = 50, y = 107)
 
         if self.is_run_clicked and not none_to_show:
+            self.bg_label.destroy()
             self.insert_schedule(self.last_viewed_schedule)
 
     def create_compact_constraint(self):
@@ -257,15 +261,15 @@ class ViewPage(Page):
             respresentation of the valid schedules """
         
         # background place holder for the schedules
-        self.bg_label = Label(self, width = 37, height= 13,
+        """self.bg_label = Label(self, width = 37, height= 13,
                               font=(font_style, size_h1),
                               text = 'Click RUN to generate schedules.',
                               bg = 'white')
-        self.bg_label.place(x = 50, y = 107)
+        self.bg_label.place(x = 50, y = 107)"""
 
         # initial color of the schedule labels
-        self.color = [255, 255, 255]
-
+        #self.color = [255, 255, 255]
+        self.delete([self.bg_label])
         if self.is_run_clicked:
             self.insert_constraint(self.last_viewed_schedule)
     
@@ -279,6 +283,9 @@ class ViewPage(Page):
         self.selected_option = StringVar(self)
         self.selected_option.set(self.rooms[self.room_selection_option]) # default value
 
+        if self.rooms != None:
+            self.rooms.sort()
+            
         self.menu_select = apply(OptionMenu,
                             (self, self.selected_option) + tuple(self.rooms))
         self.menu_select.place(x = 115, y = 5)
@@ -287,7 +294,7 @@ class ViewPage(Page):
 
         self.drop_down_items.append(self.menu_select)
         self.drop_down_items.append(self.room_label)
-
+    
     def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
@@ -304,37 +311,39 @@ class ViewPage(Page):
     def create_graphical_schedules(self):
         """ Creates a graphical respresentation of the valid schedules """
 
-        # create new canvas to hold the schedules
-        self.canv = Canvas(self, bg = 'white')
-        self.canv.config(scrollregion = (0, 0, 600, 1050))
-        self.canv.pack(expand = TRUE,
-                       fill = BOTH,
-                       padx = 50,
-                       pady = 70)
+        if not self.canvas_created:
+            # create new canvas to hold the schedules
+            self.canv = Canvas(self, bg = 'white')
+            self.canv.config(scrollregion = (0, 0, 600, 1050))
+            self.canv.pack(expand = TRUE,
+                           fill = BOTH,
+                           padx = 50,
+                           pady = 70)
 
-        # vertical scrollbar
-        vbar = Scrollbar(self.canv,
-                         orient = VERTICAL,
-                         command = self.canv.yview)
-        vbar.pack(side = RIGHT,
-                  fill = Y)
+            # vertical scrollbar
+            vbar = Scrollbar(self.canv,
+                             orient = VERTICAL,
+                             command = self.canv.yview)
+            vbar.pack(side = RIGHT,
+                      fill = Y)
 
-        # horizontal scrollbar
-        hbar = Scrollbar(self.canv,
-                         orient = HORIZONTAL,
-                         command = self.canv.xview)
-        hbar.pack(side = BOTTOM,
-                  fill = X)
+            # horizontal scrollbar
+            hbar = Scrollbar(self.canv,
+                             orient = HORIZONTAL,
+                             command = self.canv.xview)
+            hbar.pack(side = BOTTOM,
+                      fill = X)
 
-        self.canv.config(yscrollcommand = vbar.set,
-                    xscrollcommand = hbar.set)
+            self.canv.config(yscrollcommand = vbar.set,
+                        xscrollcommand = hbar.set)
 
-        # keep track of canvas object so it can be deleted
-        self.canvas_items.append(self.canv)
+            # keep track of canvas object so it can be deleted
+            self.canvas_items.append(self.canv)
 
-        # listen for mouse wheel
-        self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
-    
+            # listen for mouse wheel
+            self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
+
+            self.canvas_created = True
         
     def on_mouse_wheel(self, event):
         """ Update the canvas vertical scrollbar """
@@ -428,6 +437,8 @@ class ViewPage(Page):
     def insert_schedule(self, n):
         """ Inserts schedule n into the textarea/scrollbox of the View page """
 
+        self.toggle_constraint_acceptance_flag = True
+        
         self.last_viewed_schedule = n
 
         # delete drop downs
@@ -437,7 +448,7 @@ class ViewPage(Page):
         if not self.toggle_schedules_flag:
 
             # delete previous canvas
-            self.delete(self.canvas_items)
+            #self.delete(self.canvas_items)
 
             self.create_graphical_schedules()
 
@@ -447,11 +458,11 @@ class ViewPage(Page):
             if self.is_run_clicked:
                 self.format_graphical_schedule(globs.mainScheduler.weeks[n].print_concise())
 
-            self.bg_label['fg'] = 'white'
+            #self.bg_label['fg'] = 'white'
 
         else:
             # hide bg_label text
-            self.bg_label['fg'] = 'white'
+            #self.bg_label['fg'] = 'white'
 
             # delete previous canvas items
             self.canv.delete("all")
@@ -464,17 +475,17 @@ class ViewPage(Page):
         self.last_viewed_schedule = n
 
         self.delete(self.drop_down_items)
-
+        self.delete([self.bg_label])
         if self.toggle_constraint_acceptance_flag:
             self.format_compact_constraint(globs.mainScheduler.weeks[n].constraints)
-            self.bg_label['fg'] = 'white'
+            #self.bg_label['fg'] = 'white'
 
         else:
             # destroy old labels to make room for new ones
             self.delete(self.table_labels)
             
             # hide bg_label text
-            self.bg_label['fg'] = 'white'
+            #self.bg_label['fg'] = 'white'
 
         self.toggle_constraint_acceptance_flag = not self.toggle_constraint_acceptance_flag
             
@@ -771,9 +782,15 @@ class ViewPage(Page):
             yt += 29
 
     def format_compact_constraint(self, constraints_dict):
-        """ Formats the compact schedules """                
+        """ Formats the compact schedules """
+        y = 20
         for key in constraints_dict.keys():
-            self.table_labels.append(Label(self,
+            self.canv.create_text(10, y, anchor = 'w',
+                                  text = (str(constraints_dict[key][0]) + '/' +\
+                                          str(constraints_dict[key][1]))\
+                                          .ljust(5) + key.rjust(100),
+                                  font = (font_style, size_l))
+            """self.table_labels.append(Label(self,
                                            text = (str(constraints_dict[key][0]) + '/' +\
                                                    str(constraints_dict[key][1]))\
                                                .ljust(5) + key.rjust(100),
@@ -781,12 +798,13 @@ class ViewPage(Page):
                                            width = 66,
                                            bg = 'white',
                                            fg = 'black',
-                                           anchor = NW))
+                                           anchor = NW))"""
+            y += 24
         # position the labels
-        yt = 103
-        for i in xrange(len(self.table_labels)):
-            self.table_labels[i].place(x = 50, y = yt)
-            yt += 24
+        #yt = 103
+        #for i in xrange(len(self.table_labels)):
+            #self.table_labels[i].place(x = 50, y = yt)
+            #yt += 24
 
     def delete(self, labels):
         """ Delete dynamically created objects from memory """
@@ -930,10 +948,10 @@ class MainWindow(Frame):
 
         self.view_page = ViewPage(self.content_container)
         self.view_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-
+        
         self.misc_page = MiscPage(self.content_container)
         self.misc_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-
+        
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
 
@@ -970,7 +988,6 @@ class MainWindow(Frame):
         """ Display view_page after run_scheduler is finished running. """
         self.misc_page.finish_loading()
 
-        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         self.view_page.is_run_clicked = True
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
