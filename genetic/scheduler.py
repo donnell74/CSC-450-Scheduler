@@ -123,6 +123,7 @@ class Scheduler:
         self.weeks = []
 
         self.constraints = []
+        self.num_hard_constraints = 0  # updated in globs, used for the mandatory, hardcoded constraints
         self.max_fitness = 0
 
         # default message to be displayed on the loading screen

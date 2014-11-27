@@ -817,8 +817,8 @@ class ConstraintPage(Page):
         self.home_page.pack(anchor = NW, padx = 50)
 
         self.constraints_view = ConstraintsView(self.content_container)
-        if len(globs.mainScheduler.constraints) > 10: # there are 10 hard constraints
-            for i in range(len(globs.mainScheduler.constraints) - 10):
+        if len(globs.mainScheduler.constraints) > globs.mainScheduler.num_hard_constraints:
+            for i in range(globs.mainScheduler.num_hard_constraints, len(globs.mainScheduler.constraints)):
                 constraint_name = globs.mainScheduler.constraints[i].name
                 priority = globs.mainScheduler.constraints[i].weight
                 self.constraints_view.add_constraint_listbox(constraint_name, priority)
