@@ -233,15 +233,17 @@ class ViewPage(Page):
                 '4. Ensure that no two mandatory constraints conflict such that they cannot\n' + \
                 'both be fulfilled at the same time'
             size_to_show = 12
-            width_to_show = 60
+            width_to_show = 66
+            height_to_show = 23
             if hasattr(self, 'bg_label'):
                 self.bg_label.destroy()
         else:
             text_to_show = 'Click RUN to generate schedules.'
             size_to_show = size_h1
             width_to_show = 37
+            height_to_show = 13
         # background place holder for the schedules
-        self.bg_label = Label(self, width = width_to_show, height= 13,
+        self.bg_label = Label(self, width = width_to_show, height = height_to_show,
                               font=(font_style, size_to_show),
                               text = text_to_show,
                               bg = 'white')
@@ -1027,7 +1029,7 @@ class MainWindow(Frame):
         return
 
     def ask_to_keep_running(self):
-        if tkMessageBox.askyesno("Continue?", "It is possible you have conflicting\
-                constraints, do you want to pause the algorithm to check your constraints?"):
+        if tkMessageBox.askyesno("Continue?", "It is possible you have conflicting " + \
+                                 "constraints, do you want to pause the algorithm to check your constraints?"):
             return True
         return False
