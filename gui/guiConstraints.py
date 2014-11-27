@@ -817,8 +817,8 @@ class ConstraintPage(Page):
         self.home_page.pack(anchor = NW, padx = 50)
 
         self.constraints_view = ConstraintsView(self.content_container)
-        if len(globs.mainScheduler.constraints) > 10: # there are 10 hard constraints
-            for i in range(len(globs.mainScheduler.constraints) - 10):
+        if len(globs.mainScheduler.constraints) > globs.mainScheduler.num_hard_constraints:
+            for i in range(globs.mainScheduler.num_hard_constraints, len(globs.mainScheduler.constraints)):
                 constraint_name = globs.mainScheduler.constraints[i].name
                 priority = globs.mainScheduler.constraints[i].weight
                 self.constraints_view.add_constraint_listbox(constraint_name, priority)
@@ -969,8 +969,9 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                                 # in break, conflict
                                                 return True
                         elif new_constraint[2] == "computers":          # computer pref
-                            if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
-                                return True
+                            if old_constraint[2] == "computers":
+                                if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
+                                    return True
                         elif new_constraint[1] == "break":              # break constraint
                             if old_constraint[3] in [new_constraint[2], new_constraint[3]]: 
                                 # if it's on the edge of one of the break times, it's fine
@@ -980,6 +981,10 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                     if old_constraint[3] > new_constraint[2]: 
                                         # in break, conflict
                                         return True
+                        elif new_constraint[1] == "max":                # max courses
+                            if old_constraint[1] == "max":
+                                # duplicates are already caught, so max_courses conflicts
+                                return True
 
     # if no return True by now, the constraint is fine and doesn't conflict
     return False
@@ -1119,6 +1124,9 @@ def create_max_course_constraint(instructor, max_courses, priority, added_constr
     instructor = pull_instructor_obj(instructor)
 
     constraint_name = "{0}_max_courses_{1}".format(instructor.name, max_courses)
+
+    if okay_to_add_constraint(constraint_name) == False: return
+
     globs.mainScheduler.add_constraint(constraint_name, priority,
                                        constraint.instructor_max_courses,
                                        [instructor, max_courses, is_mandatory])

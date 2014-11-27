@@ -75,18 +75,21 @@ class ConstraintsView(Frame):
 
     def delete_selection(self):
         selection = self.listbox.curselection()
+        selected_indices = list(selection)
+        selected_indices.reverse()  # go over the indices backward to prevent mistakes
+        
         if len(selection) > 0:
             #clear constraints selected from list box
-            pos = 0
-            for i in selection :
-                real_position = int(i) - pos
-                self.listbox.delete( real_position,real_position )
-                pos = pos + 1
+            for i in selected_indices:
+                self.listbox.delete(i)
 
             # clear constraints from the class
             deletion_list =[]
-            for j in selection:
+            for j in selected_indices:
+                #print(self.constraint_name_list)
+                #print(self.constraints_output)
                 deletion_list.append(self.constraint_name_list.pop(j))
+                print(deletion_list[-1])
                 self.constraints_output.pop(j)
             # clear selected constraints from the scheduler object
             globs.mainScheduler.delete_list_constraints(deletion_list)

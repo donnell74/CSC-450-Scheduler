@@ -35,11 +35,6 @@ def init(): # call globals.init() from main
         print "Slot divide is", mainScheduler.slot_divide
         mainScheduler.generate_starting_population(just_one = True)
 
-        # Create list of default constraints from YAML (default_constraints.yaml)
-        if os.path.isfile(yaml_constraint_path):
-            # found default constraint file
-            interface.create_constraints_from_yaml(yaml_constraint_path, mainScheduler, instructors)
-
         #prereqs computation and display
         prereqs = interface.get_prereqs(xml_input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
@@ -47,7 +42,7 @@ def init(): # call globals.init() from main
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
                   " ".join([c.absolute_course for c in prereq.prereqs])'''
 
-        # Add all mandatory constraints here
+        # Add all mandatory/hard constraints here
         mainScheduler.add_constraint("instructor conflict", 0,
                                     constraint.instructor_conflict,
                                     [instructors])
@@ -79,6 +74,12 @@ def init(): # call globals.init() from main
                                      constraint.lab_on_tr,
                                      [labs])
 
+        mainScheduler.num_hard_constraints = len(mainScheduler.constraints)
+
+        # Create list of default constraints from YAML (default_constraints.yaml)
+        if os.path.isfile(yaml_constraint_path):
+            # found default constraint file
+            interface.create_constraints_from_yaml(yaml_constraint_path, mainScheduler, instructors)
 
     # used for gui strings
     # must be in military time
