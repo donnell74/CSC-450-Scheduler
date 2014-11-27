@@ -124,7 +124,6 @@ class ViewPage(Page):
                                       text = 'Toggle View',
                                       padx = 10, pady = 10,
                                       cursor = 'hand2')
-        self.toggle_graphics.place(x = 555, y = 47)
 
         #button to show if constraints were accepted or rejected
         self.constraint_acceptance = Button(self,
@@ -132,7 +131,6 @@ class ViewPage(Page):
                                             text = 'View Constraints',
                                             padx =10, pady = 3,
                                             cursor = 'hand2')
-        self.constraint_acceptance.place(x = 533, y = 1)
 
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
@@ -153,6 +151,12 @@ class ViewPage(Page):
         
         # display schedules
         self.toggle_schedules()
+
+
+    def place_display_toggle_buttons(self):
+        """Places the toggle constraint view button and the toggle view button in the viewpage"""
+        self.constraint_acceptance.place(x = 533, y = 1)
+        self.toggle_graphics.place(x = 555, y = 47)
 
 
     def toggle_schedules(self):
@@ -214,18 +218,36 @@ class ViewPage(Page):
             self.create_buttons()
             self.place_buttons()
 
-    def create_compact_schedules(self):
+    def create_compact_schedules(self, none_to_show = False):
         """ Creates a more compact graphical schedule
             respresentation of the valid schedules """
 
+        if none_to_show:
+            text_to_show = 'No valid schedules were generated within the time limit.\n' +\
+                'You may try running again, but if the problem persists, please consider\n' + \
+                'trying one of the following solutions:\n\n' + \
+                '1. Increase the maximum runtime on the main screen\n' + \
+                '2. Decrease the number of mandatory constraints\n' + \
+                '3. Increase the number of time slots and/or rooms (or decrease the number\n' + \
+                'of courses) in the input\n' + \
+                '4. Ensure that no two mandatory constraints conflict such that they cannot\n' + \
+                'both be fulfilled at the same time'
+            size_to_show = 12
+            width_to_show = 60
+            if hasattr(self, 'bg_label'):
+                self.bg_label.destroy()
+        else:
+            text_to_show = 'Click RUN to generate schedules.'
+            size_to_show = size_h1
+            width_to_show = 37
         # background place holder for the schedules
-        self.bg_label = Label(self, width = 37, height= 13,
-                              font=(font_style, size_h1),
-                              text = 'Click RUN to generate schedules.',
+        self.bg_label = Label(self, width = width_to_show, height= 13,
+                              font=(font_style, size_to_show),
+                              text = text_to_show,
                               bg = 'white')
         self.bg_label.place(x = 50, y = 107)
 
-        if self.is_run_clicked:
+        if self.is_run_clicked and not none_to_show:
             self.insert_schedule(self.last_viewed_schedule)
 
     def create_compact_constraint(self):
@@ -945,7 +967,10 @@ class MainWindow(Frame):
         self.view_page.is_run_clicked = True
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
-        self.view_page.show_nav()
+            self.view_page.show_nav()
+            self.view_page.place_display_toggle_buttons()
+        else:
+            self.view_page.create_compact_schedules(none_to_show = True) # tell user no schedules
 
         # DISPLAY VIEW PAGE
         self.show_view()
