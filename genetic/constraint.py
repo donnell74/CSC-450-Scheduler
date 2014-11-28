@@ -107,7 +107,7 @@ def lab_on_tr(this_week, args):
         if not each_course.isTR:
             this_week.valid = False
             reval["score"] = 0
-            reval["failed"].append(each_course)
+            reval["failed"].append(each_lab)
 
     return reval 
 
@@ -349,7 +349,7 @@ def instructor_break_constraint(this_week, args):
                     this_week.valid = False
 
                 reval["score"] = 0
-                reval["failed"].append(course)
+                reval["failed"].append(instructor.courses[i])
                 holds.append(0)
 
         else:  # after gap altogether, course.start_time > gap_end
