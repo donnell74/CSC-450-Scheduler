@@ -998,7 +998,6 @@ class MainWindow(Frame):
         return
 
     def run_scheduler(self):
-        print(self.run_clicked)
         if not self.run_clicked:
             self.run_clicked = True
             self.view_page.is_run_clicked = False
