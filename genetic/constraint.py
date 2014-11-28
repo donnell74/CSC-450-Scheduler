@@ -485,7 +485,7 @@ def instructor_max_courses(this_week, args):
 
     for key in instr_courses_by_day.keys():
         if len(instr_courses_by_day[key]) > max_courses:
-            reval["failed"] = instr_courses_by_day[key]
+            reval["failed"] = [section.course for section in instr_courses_by_day[key]]
             if is_mandatory:
                 this_week.valid = False
 

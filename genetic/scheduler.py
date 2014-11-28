@@ -246,11 +246,13 @@ class Scheduler:
         # randomly select a course from the select constraint
         total_failed_courses = len(selected_constraint["failed"])
         if total_failed_courses > 0:
+            print([i.code for i in selected_constraint["failed"]])
             selected_course = selected_constraint["failed"][randint(0, total_failed_courses - 1)]
         else:
             print("No courses for failed constraint")
             return
 
+        print("Trying to improve: ", each_constraint.name)
         print("Trying to reschedule: ", selected_course)
 
         starting_len = len(selected_constraint["failed"])
@@ -262,16 +264,22 @@ class Scheduler:
             self.randomly_fill_schedule(this_week, [selected_course], 
                                         this_week.find_empty_time_slots())
     
-            result = failed_constraints[choice][0].get_fitness(this_week)
 
             this_week.valid = True # reset the valid so calc_fitness works correctly
+            this_week.update_sections(self.courses)
             self.calc_fitness(this_week)
-
+            result = failed_constraints[choice][0].get_fitness(this_week)
+            """
+            print("\n"*2)
+            print("len: ", len(result["failed"]), " valid: ", this_week.valid, " fitness: ", this_week.fitness)
+            print("=" * 25)
+            [print(i) for i in this_week.find_course(selected_course)]
+            print("=" * 25, '\n')
+            """
             if len(result["failed"]) < starting_len and this_week.valid:
                 print("Rescheduled: ", selected_course)
                 if len(result["failed"]) == 0:
-                    print ("Exiting with counter of: ", guided_counter)
-                    return
+                    break
                 else:
                     total_failed_courses = len(result["failed"])
                     selected_course = result["failed"][randint(0, total_failed_courses - 1)]
@@ -281,7 +289,9 @@ class Scheduler:
             else:
                 guided_counter += 1
 
-        if not this_week.valid:
+        # make sure we don't make things wors
+        if not this_week.valid or this_week.fitness < copy_of_this_week.fitness:
+            print("switching")
             this_week = copy_of_this_week
 
         print ("Exiting with counter of: ", guided_counter)
