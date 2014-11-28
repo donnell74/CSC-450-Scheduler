@@ -118,6 +118,14 @@ class Week:
                             time_slots.append(each_slot)
         return time_slots
 
+    ## Unschedules a course from a week
+    #  @param this_week A week to unschedule the course from
+    #  @param course A course object to unschedule from this_week
+    def unschedule_course(self, course):
+        courses_to_unschedule = self.find_course(course)
+        for each_time_slot in courses_to_unschedule:
+            each_time_slot.course = None
+
     ## Finds objects for a given week
     #  @param self
     #  @param info A get object 

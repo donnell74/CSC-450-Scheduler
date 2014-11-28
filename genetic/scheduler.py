@@ -204,24 +204,92 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
-            this_week.constraints[each_constraint.name] = [each_fitness,
+            this_week.constraints[each_constraint.name] = [each_fitness["score"],
                     each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
-                number_valid += each_fitness
+                number_valid += each_fitness["score"]
                 #print(each_constraint.name)
             else:
-                total_fitness += each_fitness
+                total_fitness += each_fitness["score"]
 
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
 
         #print(this_week.constraints)
 
+
+    ## Mutates a schedule by changing one course based off a random constraint
+    #  @param self
+    #  @param this_week A week to modify
+    def guided_mutate(self, this_week):
+        # deep copy the week so we can't drop the fitness score
+        copy_of_this_week = this_week.deep_copy()
+
+        # get a list of all failed constraints
+        failed_constraints = []
+        for each_constraint in self.constraints:
+            constraint_result = each_constraint.get_fitness(this_week)
+            if each_constraint.weight != 0 and \
+               constraint_result["score"] != each_constraint.weight:
+                failed_constraints.append((each_constraint, constraint_result))
+
+        # randomly select a failed constraint
+        total_failed = len(failed_constraints)
+        if total_failed > 0:
+            choice = randint(0, total_failed - 1)
+            selected_constraint = failed_constraints[choice][1]
+        else:
+            print("No failed constraints")
+            return
+
+        # randomly select a course from the select constraint
+        total_failed_courses = len(selected_constraint["failed"])
+        if total_failed_courses > 0:
+            selected_course = selected_constraint["failed"][randint(0, total_failed_courses - 1)]
+        else:
+            print("No courses for failed constraint")
+            return
+
+        print("Trying to reschedule: ", selected_course)
+
+        starting_len = len(selected_constraint["failed"])
+        GUIDED_MAX_TRIES = 100
+        guided_counter = 0
+        while guided_counter < GUIDED_MAX_TRIES:
+            # unschedule and then reschedule the course
+            this_week.unschedule_course(selected_course) 
+            self.randomly_fill_schedule(this_week, [selected_course], 
+                                        this_week.find_empty_time_slots())
+    
+            result = failed_constraints[choice][0].get_fitness(this_week)
+
+            this_week.valid = True # reset the valid so calc_fitness works correctly
+            self.calc_fitness(this_week)
+
+            if len(result["failed"]) < starting_len and this_week.valid:
+                print("Rescheduled: ", selected_course)
+                if len(result["failed"]) == 0:
+                    print ("Exiting with counter of: ", guided_counter)
+                    return
+                else:
+                    total_failed_courses = len(result["failed"])
+                    selected_course = result["failed"][randint(0, total_failed_courses - 1)]
+                    guided_counter += 1
+                    starting_len -= 1
+                    print("Trying to reschedule: ", selected_course)
+            else:
+                guided_counter += 1
+
+        if not this_week.valid:
+            this_week = copy_of_this_week
+
+        print ("Exiting with counter of: ", guided_counter)
+
+
     ## Mutates a schedule by changing the courses time
     #  @param self
-    #  @param  A function that modifies week  in a random way 
-    #  @return this_week
+    #  @param  A week to modify
     def mutate(self, this_week):
         """Mutates a schedule by changing a course's time"""
         empty_slots = this_week.find_empty_time_slots()
@@ -407,6 +475,7 @@ class Scheduler:
             raise BreedError("An element in weeks is not a Week object")
 
 
+        print("Max: ", max(i.fitness for i in self.weeks))
         list_of_children = []
         # combinations...(ex) 5 choose 2
         for each_week in range(len(self.weeks) - 1):
@@ -472,6 +541,7 @@ class Scheduler:
             else:
                 self.weeks = self.weeks[:weeks_to_keep]
 
+
             return valid_weeks
 
         def loading_bar_helper(one_increment, current_elapsed_seconds, max_runtime):
@@ -521,8 +591,23 @@ class Scheduler:
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
-            print("Minimum fitness of the top schedules of the generation:",
-                  min(i.fitness for i in self.weeks))
+            pop_min = min(i.fitness for i in self.weeks)
+            pop_avg = reduce(lambda x, y: x+y, [w.fitness for w in self.weeks]) / len(self.weeks)
+            print("Minimum fitness of the top schedules of the generation:", pop_min)
+            print("Average fitness of the top schedules of the generation:", pop_avg)
+            if pop_min == pop_avg and pop_min != self.max_fitness:
+                print("Invoking guided mutatation")
+                choice = randint(0, len(self.weeks) - 1)
+                self.guided_mutate(self.weeks[choice])
+                self.weeks[choice].update_sections(self.courses)
+                self.calc_fitness(self.weeks[choice])
+
+            pop_min = min(i.fitness for i in self.weeks)
+            pop_avg = reduce(lambda x, y: x+y, [w.fitness for w in self.weeks]) / len(self.weeks)
+            print("Minimum fitness of the top schedules of the generation:", pop_min)
+            print("Average fitness of the top schedules of the generation:", pop_avg)
+            print("Number of valid weeks: ", len(filter(lambda x: x.valid, self.weeks)))
+
             # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
             #                          str(min(i.fitness for i in self.weeks))
 

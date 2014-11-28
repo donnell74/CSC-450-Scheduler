@@ -22,7 +22,7 @@ data:
         day_pref:
           -
             instr_name: Shade
-            day_code: TR
+            day_code: MTWF
             priority: Low
         computer_pref:
           -
