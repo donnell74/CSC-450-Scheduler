@@ -37,7 +37,7 @@ def all_after_time(this_week, args):
      """
     holds = []
     is_mandatory = args[2]
-    reval = {"score": 0, "failed": []}
+    reval = {"score": 1, "failed": []}
 
     for c in args[0]:  # access list of courses
         result = course_after_time(this_week, [c, args[1], is_mandatory])["score"]
@@ -48,8 +48,8 @@ def all_after_time(this_week, args):
     if is_mandatory:
         if False in holds:
             this_week.valid = False
-        else:
-            reval["score"] = 1
+            reval["score"] = 0
+
     else:  # not mandatory
         reval["score"] = get_partial_credit(holds)
 
@@ -59,7 +59,7 @@ def all_after_time(this_week, args):
 def course_before_time(this_week, args):
     """find the course and check that its time is before the constraining slot
     args should be [<course>, <timeslot> [, is_mandatory] ]"""
-    reval = {"score": 0, "failed": []}
+    reval = {"score": 1, "failed": []}
 
     if len(args) > 2:  # includes the mandatory boolean
         is_mandatory = args[2]
@@ -73,8 +73,7 @@ def course_before_time(this_week, args):
             this_week.valid = False
 
         reval["failed"].append(args[0])
-    else:
-        reval["score"] = 1
+        reval["score"] = 0
 
     return reval
 
@@ -82,7 +81,7 @@ def course_before_time(this_week, args):
 def course_after_time(this_week, args):
     """find the course and check that its time is after the constraining slot
     args should be [<course>, <timeslot> [, is_mandatory] ]"""
-    reval = {"score": 0, "failed": []}
+    reval = {"score": 1, "failed": []}
     if len(args) > 2: #includes mandatory boolean
         is_mandatory = args[2]
     else:
@@ -93,9 +92,9 @@ def course_after_time(this_week, args):
     if hold == 0:  # hold fails
         if is_mandatory:
             this_week.valid = False
+
         reval["failed"].append(args[0])
-    else:
-        reval["score"] = 1
+        reval["score"] = 0
 
     return reval
 
@@ -122,6 +121,7 @@ def instructor_time_pref_before(this_week, args):
     time_slot = args[1]
     is_mandatory = args[2]
     holds = [] # will contain 0's for all courses that fail constraint
+    reval = {"score": 1, "failed": []}
 
     for each_course in this_instructor.courses:
         #section object for course
@@ -129,19 +129,20 @@ def instructor_time_pref_before(this_week, args):
         if each_section.time_slots[0].start_time >= time_slot:
             #case 1: a course fails
             holds.append(0)
+            reval["failed"].append(each_course)
         else:
             holds.append(1) # case 2: a course passes
 
         if is_mandatory:
             if False in holds: # at least one failure
                 this_week.valid = False
-                return 0
-            else:
-                return 1
-    # not mandatory, treat it like normal
-    partial_weight = get_partial_credit(holds)
-    return partial_weight
+                reval["score"] = 0
 
+    if not is_mandatory:
+        # not mandatory, treat it like normal
+        reval["score"] = get_partial_credit(holds)
+
+    return reval
 
 
 def instructor_time_pref_after(this_week, args):
@@ -153,6 +154,7 @@ def instructor_time_pref_after(this_week, args):
     is_mandatory = args[2]
     #print(this_week.schedule.instructors[0])
     holds = [] # will contain 0's for all courses that fail constraint
+    reval = {"score": 1, "failed": []}
 
     for each_course in this_instructor.courses:
         #section object for course
@@ -161,19 +163,20 @@ def instructor_time_pref_after(this_week, args):
         if each_section.time_slots[0].start_time < time_slot:
             #case 1: a course fails
             holds.append(0)
+            reval["failed"].append(each_course)
         else:
             holds.append(1)
 
         if is_mandatory:
-            if len(holds) >= 1: # at least one failure
+            if False in holds: # at least one failure
                 this_week.valid = False
-                return 0
-            else:
-                return 1
-    # not mandatory, treat it like normal
-    partial_weight = get_partial_credit(holds)
-    return partial_weight
+                reval["score"] = 0
 
+    if not is_mandatory:
+        # not mandatory, treat it like normal
+        reval["score"] = get_partial_credit(holds)
+
+    return reval
 
 
 def instructor_conflict(this_week, args):
@@ -257,6 +260,7 @@ def instructor_preference_day(this_week, args):
     is_mandatory = args[2]
 
     holds = []
+    reval = {"score": 1, "failed": []}
 
     for section_week in this_week.sections:
         if instructor.name == section_week.instructor.name:
@@ -264,18 +268,17 @@ def instructor_preference_day(this_week, args):
                 if not day.day_code in day_code:
                     if is_mandatory:
                         this_week.valid = False
-                        return 0
-                    else:
-                        holds.append(0)
+
+                    reval["score"] = 0
+                    reval["failed"].append(section_week.course)
+                    holds.append(0)
                 else:
                     holds.append(1)
                     
-    # if mandatory and it's here, it passed
-    if is_mandatory:
-        return 1
-    else: # not mandatory, partial credit
-        partial_credit = get_partial_credit(holds)
-        return partial_credit
+    if not is_mandatory:
+        reval["score"] = get_partial_credit(holds)
+
+    return reval
 
 
 def instructor_preference_computer(this_week, args):
@@ -286,6 +289,7 @@ def instructor_preference_computer(this_week, args):
     computer_preference = args[1]
     is_mandatory = args[2]
     holds = []
+    reval = {"score": 1, "failed": []}
     
     for section_week in this_week.sections:
         # only applies to courses that do not need computers
@@ -295,9 +299,10 @@ def instructor_preference_computer(this_week, args):
                 if section_week.room.has_computers == False:
                     if is_mandatory:
                         this_week.valid = False
-                        return 0 # mandatory contraints are all or nothing
-                    else:
-                        holds.append(0)
+
+                    reval["score"] =  0 
+                    reval["failed"].append(section_week.course)
+                    holds.append(0)
                 else:
                     holds.append(1)
             else: 
@@ -305,19 +310,17 @@ def instructor_preference_computer(this_week, args):
                 if section_week.room.has_computers == True:
                     if is_mandatory:
                         this_week.valid = False
-                        return 0
-                    else:
-                        holds.append(0)
+
+                    reval["score"] = 0
+                    reval["failed"].append(section_week.course)
+                    holds.append(0)
                 else:
                     holds.append(1)
 
-    # if mandatory and it's here, it passed
-    if is_mandatory:
-        return 1
-    else:
-        partial_credit = get_partial_credit(holds)
-        return partial_credit
+    if not is_mandatory:
+        reval["score"] = get_partial_credit(holds)
 
+    return reval
 
 
 def instructor_break_constraint(this_week, args):
@@ -334,6 +337,7 @@ def instructor_break_constraint(this_week, args):
     is_mandatory = args[3]
 
     holds = []
+    reval = {"score": 1, "failed": []}
 
     for i in range(len(instructor.courses)): 
         course = this_week.find_course(instructor.courses[i])[0]
@@ -343,18 +347,18 @@ def instructor_break_constraint(this_week, args):
             else:  # in gap, bad
                 if is_mandatory:
                     this_week.valid = False
-                    return 0
-                else: 
-                    holds.append(0)
+
+                reval["score"] = 0
+                reval["failed"].append(course)
+                holds.append(0)
+
         else:  # after gap altogether, course.start_time > gap_end
             holds.append(1)
 
-    if is_mandatory: # if no fails by here, it passed
-        return 1
-    else:
-        partial_weight = get_partial_credit(holds)
-        return partial_weight
+    if not is_mandatory: 
+        reval["score"] = get_partial_credit(holds)
 
+    return reval
 
 def is_overlap(timeslot1, timeslot2):
     """Return true if timeslots overlap else false"""
@@ -472,6 +476,8 @@ def instructor_max_courses(this_week, args):
         "f": []
     }
 
+    reval = {"score": 1, "failed": []}
+
     for section in this_week.sections:
         if section.instructor.name == instructor.name:
             for day in section.days:
@@ -479,11 +485,13 @@ def instructor_max_courses(this_week, args):
 
     for key in instr_courses_by_day.keys():
         if len(instr_courses_by_day[key]) > max_courses:
+            reval["failed"] = instr_courses_by_day[key]
             if is_mandatory:
                 this_week.valid = False
-            return 0
 
-    return 1
+            reval["score"] = 0
+
+    return reval
 
 
 def get_partial_credit(results_list):
