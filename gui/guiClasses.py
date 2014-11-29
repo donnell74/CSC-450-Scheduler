@@ -111,7 +111,9 @@ class ViewPage(Page):
         self.head_label.pack()
 
         self.is_run_clicked = False
-
+        self.cached_constraints = None
+        self.cache_flag = True
+        
         # holds the room names that are in the drop down selection
         self.drop_down_items = []
         # holds canvas items
@@ -154,7 +156,6 @@ class ViewPage(Page):
         
         # display schedules
         self.toggle_schedules()
-
 
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
@@ -760,6 +761,13 @@ class ViewPage(Page):
     def format_compact_constraint(self, constraints_dict):
         """ Formats the compact schedules """
 
+        # cache constraints
+        if self.cached_constraints != globs.mainScheduler.constraints and self.cache_flag == True:
+            for constraint in globs.mainScheduler.constraints:
+                self.cached_constraints.append(constraint)
+            
+            self.cache_flag = False
+        
         #----------------------------------------------#
         # sort constraints by universal and user-added #
         #----------------------------------------------#
@@ -767,7 +775,8 @@ class ViewPage(Page):
         # lists for two types of constranits (universal and user-added)
         universal_constraints = []
         user_added_constraints = []
-        for constraint in globs.mainScheduler.constraints:
+
+        for constraint in self.cached_constraints:
             if constraint.universal:
                 universal_constraints.append(constraint.name)
             else:
@@ -864,14 +873,23 @@ class ViewPage(Page):
                 count += 1
                 if count == universal_constraints_length:
                     y += 6
-                    
+
                     # background color for user-added constraints
+                    length = user_added_constraints_length
+                    if length == 0:
+                        length = 1
+                        
                     self.canv.create_rectangle(15, y + 13, 518,
-                                               y + 19 + (user_added_constraints_length * 24),
+                                               y + 19 + (length * 24),
                                                width = 3, outline = 'yellow')
                     y += 3
                     
                 y += 24
+
+        if user_added_constraints_length == 0:
+                self.canv.create_text(25, y, anchor = 'w',
+                                      text = "No user-added constraints.",
+                                      font = (font_style, size_l))
                                          
     def delete(self, labels):
         """ Delete dynamically created objects from memory """
@@ -969,7 +987,7 @@ class MainWindow(Frame):
         # ToolTips does not work well on non-Windows platforms
         if sys.platform.startswith('win'):
             ToolTips(root)
-
+        
         self.run_finished = False
         self.run_clicked = False
 
@@ -1051,6 +1069,10 @@ class MainWindow(Frame):
         self.misc_page.finish_loading()
 
         self.view_page.is_run_clicked = True
+        self.view_page.cached_constraints = []
+        self.view_page.cache_flag = True
+        
+        self.view_page.is_constraints_set = True
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
         self.view_page.show_nav()
@@ -1089,8 +1111,9 @@ class MainWindow(Frame):
         return
 
     def run_scheduler(self):
-        print(self.run_clicked)
+        
         if not self.run_clicked:
+            self.view_page.is_constraints_set = False
             self.run_clicked = True
             self.view_page.is_run_clicked = False
             self.run_finished = False
