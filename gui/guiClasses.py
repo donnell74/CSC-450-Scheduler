@@ -259,6 +259,10 @@ class ViewPage(Page):
             if hasattr(self, 'bg_label'):
                 self.bg_label.destroy()
             self.hide_nav()
+
+            if hasattr(self, 'canv'):
+                self.canv.destroy()
+                self.canvas_created = False
         else:
             text_to_show = 'Click RUN to generate schedules.'
             size_to_show = size_h1
