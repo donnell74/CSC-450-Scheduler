@@ -878,7 +878,7 @@ class ViewPage(Page):
         user_added_constraints_length = len(user_added_constraints)
 
         # increase canvas scrollregion size if too many user added constraints
-        if user_added_constraints_length > 30:
+        if user_added_constraints_length > 20:
             self.canv.config(scrollregion = (0, 0, 600,
                                              1050 + user_added_constraints_length * 24))
             
