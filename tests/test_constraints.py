@@ -37,13 +37,13 @@ class TestConstraints(unittest.TestCase):
     def test_lab_constraint(self):
         sample_scheduler.add_constraint("is lab", 30,
                                         constraint.lab_on_tr,
-                                        [sample_scheduler.courses[0]])
+                                        [sample_scheduler.courses[0:1]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 0)
         sample_scheduler.clear_constraints()
         sample_scheduler.add_constraint("is lab", 30,
                                         constraint.lab_on_tr,
-                                        [sample_scheduler.courses[1]])
+                                        [sample_scheduler.courses[1:2]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
 
