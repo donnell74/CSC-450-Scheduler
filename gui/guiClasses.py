@@ -146,21 +146,21 @@ class ViewPage(Page):
         self.toggle_graphics = Button(self,
                                       command = lambda : self.toggle_schedules(),
                                       text = 'Toggle View',
-                                      padx = 10, pady = 10,
+                                      padx = 28, pady = 10,
                                       cursor = 'hand2')
 
         #button to show if constraints were accepted or rejected
         self.constraint_acceptance = Button(self,
                                             command = lambda : self.toggle_constraint_acceptance(),
-                                            text = 'View Constraints',
-                                            padx =10, pady = 3,
+                                            text = 'Toggle Constraints',
+                                            padx = 10, pady = 5,
                                             cursor = 'hand2')
 
 
     def place_display_toggle_buttons(self):
         """Places the toggle constraint view button and the toggle view button in the viewpage"""
-        self.constraint_acceptance.place(x = 533, y = 1)
-        self.toggle_graphics.place(x = 555, y = 47)
+        self.constraint_acceptance.place(x = 519, y = 10)
+        self.toggle_graphics.place(x = 518, y = 47)
 
 
     def hide_nav(self):
