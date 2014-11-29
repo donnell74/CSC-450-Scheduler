@@ -9,6 +9,9 @@ from weakref import ref
 from datetime import time as time_obj
 import constraint
 
+from Tkinter import Tk
+from tkMessageBox import showinfo
+
 def create_xml_from_yaml(path_to_yaml):
     """
     Creates an xml input file (Input.xml) from yaml.
@@ -54,6 +57,49 @@ def create_xml_from_yaml(path_to_yaml):
 
     def xml_header():
         return "<?xml version='1.0'?>"
+    
+    def valid_credit_hour_input():
+        ''' Validates that course credit hours are 1, 3, or 4.
+            And that a lab is only 1 credit hour.
+            Returns False if credit input is invalid.'''
+        
+        error_title = ''
+        error_message = ''
+        is_valid_input = True
+
+        # check for invalid credit hours
+        for course in course_list:
+            if not course['credit'] in [1, 3, 4] and course['is_lab'] == 0:
+                error_title = 'Error: course credit hours'
+                error_message = 'The course credit hour "' + str(course['credit']) + \
+                                '" is \nnot an acceptable credit hour.' + \
+                                '\nCredit hours must ' + \
+                                'be 1, 3, or 4.\n' + \
+                                '\nPlease change this in:\n' + \
+                                'genetic\seeds\input.yaml'
+                is_valid_input = False
+                show_error_message(error_title, error_message)
+                    
+            if course['is_lab'] == 1 and course['credit'] != 1:
+                error_title = 'Error: lab credit hours'
+                error_message = 'The lab credit hour "' + str(course['credit']) + \
+                                '" is \nnot an acceptable lab credit.' + \
+                                '\nLab credit must be 1 hour.\n' + \
+                                '\nPlease change this in:\n' + \
+                                'genetic\seeds\input.yaml'
+                is_valid_input = False
+                show_error_message(error_title, error_message)
+
+        return is_valid_input
+        
+    def show_error_message(error_title, error_message):
+        ''' Displays an error message '''
+        
+        root = Tk()
+        root.withdraw() # hide tkinter window
+
+        # display tkMessageBox
+        showinfo(error_title, error_message)
 
     try:
         yaml_file = open(path_to_yaml, 'r')
@@ -67,6 +113,9 @@ def create_xml_from_yaml(path_to_yaml):
         time_list_mwf = yaml_data_object['time_list_mwf']
         room_list = yaml_data_object['room_list']
 
+        if not valid_credit_hour_input():
+            exit() # exit the scheduler
+            
         xml_file = open('./genetic/seeds/Input.xml', 'w')
         indent_level = 0
 
