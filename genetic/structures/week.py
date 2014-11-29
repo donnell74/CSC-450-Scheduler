@@ -72,6 +72,7 @@ class Week:
                 each_section = structures.Section(each_course, each_slots)
                 self.sections.append(each_section)
         except:
+            print("ERROR: Update Sections") 
             print(each_course)
 
     ## Finds sections for a given course
