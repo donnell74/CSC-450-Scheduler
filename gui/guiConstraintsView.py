@@ -1,4 +1,4 @@
-from Tkinter import Frame, Label, Button, Scrollbar, Listbox
+from Tkinter import Frame, Label, Button, Scrollbar, Listbox, HORIZONTAL
 from Tkconstants import RIGHT, LEFT, YES, BOTTOM, NW, VERTICAL, MULTIPLE, X, Y, END
 import globs
 
@@ -22,18 +22,26 @@ class ConstraintsView(Frame):
 
         self.delete_all = Button(buttons_frame, text="Delete all",\
                                  command=self.delete_all_constraints)
-        self.delete_all.pack(side=RIGHT)
+        self.delete_all.pack(side=RIGHT, pady = 10)
 
         self.delete_selection = Button(buttons_frame, text="Delete", command=self.delete_selection)
         self.delete_selection.pack(side = RIGHT, padx = 20)
 
-        self.scrollbar = Scrollbar(self, orient=VERTICAL)
-        self.listbox = Listbox(self, yscrollcommand = self.scrollbar.set, selectmode = MULTIPLE,\
-                                width = 40, height = 15)
-        self.scrollbar.config(command=self.listbox.yview)
+        self.yScroll = Scrollbar(self, orient=VERTICAL)
+        self.yScroll.pack(side=RIGHT, fill = Y)
+        
+        self.xScroll = Scrollbar(self, orient=HORIZONTAL)
+        self.xScroll.pack(side=BOTTOM, fill = X)
+        
+        self.listbox = Listbox(self, xscrollcommand = self.xScroll.set,\
+                               yscrollcommand = self.yScroll.set,\
+                               selectmode = MULTIPLE,\
+                               width = 45, height = 20)
 
+        self.xScroll['command'] = self.listbox.xview
+        self.yScroll['command'] = self.listbox.yview
+    
         self.listbox.pack(side=LEFT, fill=X, expand=1)
-        self.scrollbar.pack(side=LEFT, fill=Y)
 
     def add_constraint_listbox(self, constraint_name, priority):
         "Updates the list box with the new constraint created"

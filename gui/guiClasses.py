@@ -119,22 +119,6 @@ class ViewPage(Page):
         # holds canvas items
         self.canvas_items = []
 
-        # button to allow user to toggle between old and new style of graphical schedules
-        self.toggle_graphics = Button(self,
-                                      command = lambda : self.toggle_schedules(),
-                                      text = 'Toggle View',
-                                      padx = 10, pady = 10,
-                                      cursor = 'hand2')
-        self.toggle_graphics.place(x = 555, y = 47)
-
-        #button to show if constraints were accepted or rejected
-        self.constraint_acceptance = Button(self,
-                                            command = lambda : self.toggle_constraint_acceptance(),
-                                            text = 'View Constraints',
-                                            padx =10, pady = 3,
-                                            cursor = 'hand2')
-        self.constraint_acceptance.place(x = 533, y = 1)
-
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
 
@@ -156,6 +140,43 @@ class ViewPage(Page):
         
         # display schedules
         self.toggle_schedules()
+
+
+    def create_display_toggle_buttons(self):
+        """Creates the buttons for toggling views"""
+        # button to allow user to toggle between old and new style of graphical schedules
+        self.toggle_graphics = Button(self,
+                                      command = lambda : self.toggle_schedules(),
+                                      text = 'Toggle View',
+                                      padx = 28, pady = 5,
+                                      cursor = 'hand2')
+
+        #button to show if constraints were accepted or rejected
+        self.constraint_acceptance = Button(self,
+                                            command = lambda : self.toggle_constraint_acceptance(),
+                                            text = 'Toggle Constraints',
+                                            padx = 10, pady = 10,
+                                            cursor = 'hand2')
+
+
+    def place_display_toggle_buttons(self):
+        """Places the toggle constraint view button and the toggle view button in the viewpage"""
+        self.constraint_acceptance.place(x = 519, y = 47)
+        self.toggle_graphics.place(x = 518, y = 10)
+
+
+    def hide_nav(self):
+        """Removes all buttons from the view page; undoes show_nav"""
+        attributes = ['constraint_acceptance', 'toggle_graphics', 'drop_down_items', 's0', 's1',
+        's2', 's3', 's4']
+        for each_attribute in attributes:
+            if hasattr(self, each_attribute):
+                if isinstance(getattr(self, each_attribute), list):
+                    for each_sub_attr in getattr(self, each_attribute):
+                        each_sub_attr.destroy()
+                else:
+                    getattr(self, each_attribute).destroy()
+
 
     def toggle_schedules(self):
         """ Switch between the compact or graphical schedule """
@@ -217,19 +238,46 @@ class ViewPage(Page):
         if self.is_run_clicked:
             self.create_buttons()
             self.place_buttons()
+            self.create_display_toggle_buttons()
+            self.place_display_toggle_buttons()
 
-    def create_compact_schedules(self):
+    def create_compact_schedules(self, none_to_show = False):
         """ Creates a more compact graphical schedule
             respresentation of the valid schedules """
 
+        if none_to_show:
+            text_to_show = 'No valid schedules were generated within the time limit.\n' +\
+                'You may try running again, but if the problem persists, please consider\n' + \
+                'trying one of the following solutions:\n\n' + \
+                '1. Increase the maximum runtime on the main screen\n' + \
+                '2. Decrease the number of mandatory constraints\n' + \
+                '3. Increase the number of time slots and/or rooms (or decrease the number\n' + \
+                'of courses) in the input\n' + \
+                '4. Ensure that no two mandatory constraints conflict such that they cannot\n' + \
+                'both be fulfilled at the same time'
+            size_to_show = 12
+            width_to_show = 66
+            height_to_show = 23
+            if hasattr(self, 'bg_label'):
+                self.bg_label.destroy()
+            self.hide_nav()
+
+            if hasattr(self, 'canv'):
+                self.canv.destroy()
+                self.canvas_created = False
+        else:
+            text_to_show = 'Click RUN to generate schedules.'
+            size_to_show = size_h1
+            width_to_show = 37
+            height_to_show = 13
         # background place holder for the schedules
-        self.bg_label = Label(self, width = 37, height= 13,
-                              font=(font_style, size_h1),
-                              text = 'Click RUN to generate schedules.',
+        self.bg_label = Label(self, width = width_to_show, height = height_to_show,
+                              font=(font_style, size_to_show),
+                              text = text_to_show,
                               bg = 'white')
         self.bg_label.place(x = 50, y = 107)
 
-        if self.is_run_clicked:
+        if self.is_run_clicked and not none_to_show:
             self.bg_label.destroy()
             self.insert_schedule(self.last_viewed_schedule)
 
@@ -917,7 +965,7 @@ class MiscPage(Page):
         self.load_bar_bg.place(x = 207, y = 120)
 
         self.load_bar = Label(self, width = 0, height = 2)
-        self.load_bar['bg'] = 'green'
+        self.load_bar['bg'] = 'gray'
         self.load_bar.place(x = 207, y = 120)
 
         self.info_label = Label(self, text='', \
@@ -935,6 +983,11 @@ class MiscPage(Page):
 
     def update_loading_bar(self):
         self.update()
+
+        if not self.is_loading:
+            self.load_bar['bg'] = 'green'
+            self.is_loading = True
+            
         # print(self.load_bar['width'])
         # Stop at "almost done" status; will jump to 100% when finished
         if self.load_bar['width'] <= 39:
@@ -1080,7 +1133,11 @@ class MainWindow(Frame):
         self.view_page.is_constraints_set = True
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
-        self.view_page.show_nav()
+            self.view_page.show_nav()
+            if hasattr(self.view_page, 'bg_label'):
+                self.view_page.bg_label.destroy()
+        else:
+            self.view_page.create_compact_schedules(none_to_show = True) # tell user no schedules
 
         # DISPLAY VIEW PAGE
         self.show_view()
@@ -1138,7 +1195,7 @@ class MainWindow(Frame):
         return
 
     def ask_to_keep_running(self):
-        if tkMessageBox.askyesno("Continue?", "It is possible you have conflicting\
-                constraints, do you want to pause the algorithm to check your constraints?"):
+        if tkMessageBox.askyesno("Continue?", "It is possible you have conflicting " + \
+                                 "constraints, do you want to pause the algorithm to check your constraints?"):
             return True
         return False
