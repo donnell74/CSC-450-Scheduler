@@ -117,20 +117,6 @@ class ViewPage(Page):
         # holds canvas items
         self.canvas_items = []
 
-        # button to allow user to toggle between old and new style of graphical schedules
-        self.toggle_graphics = Button(self,
-                                      command = lambda : self.toggle_schedules(),
-                                      text = 'Toggle View',
-                                      padx = 10, pady = 10,
-                                      cursor = 'hand2')
-
-        #button to show if constraints were accepted or rejected
-        self.constraint_acceptance = Button(self,
-                                            command = lambda : self.toggle_constraint_acceptance(),
-                                            text = 'View Constraints',
-                                            padx =10, pady = 3,
-                                            cursor = 'hand2')
-
         self.last_viewed_schedule = 0
         self.toggle_schedules_flag = False
 
@@ -154,18 +140,40 @@ class ViewPage(Page):
         self.toggle_schedules()
 
 
+    def create_display_toggle_buttons(self):
+        """Creates the buttons for toggling views"""
+        # button to allow user to toggle between old and new style of graphical schedules
+        self.toggle_graphics = Button(self,
+                                      command = lambda : self.toggle_schedules(),
+                                      text = 'Toggle View',
+                                      padx = 10, pady = 10,
+                                      cursor = 'hand2')
+
+        #button to show if constraints were accepted or rejected
+        self.constraint_acceptance = Button(self,
+                                            command = lambda : self.toggle_constraint_acceptance(),
+                                            text = 'View Constraints',
+                                            padx =10, pady = 3,
+                                            cursor = 'hand2')
+
+
     def place_display_toggle_buttons(self):
         """Places the toggle constraint view button and the toggle view button in the viewpage"""
         self.constraint_acceptance.place(x = 533, y = 1)
         self.toggle_graphics.place(x = 555, y = 47)
 
 
-    def remove_buttons(self):
-        """Removes all buttons from the view page"""
-        attributes = ['constraint_acceptance', 'toggle_graphics']
+    def hide_nav(self):
+        """Removes all buttons from the view page; undoes show_nav"""
+        attributes = ['constraint_acceptance', 'toggle_graphics', 'drop_down_items', 's0', 's1',
+        's2', 's3', 's4']
         for each_attribute in attributes:
             if hasattr(self, each_attribute):
-                getattr(self, each_attribute).pack_forget()
+                if isinstance(getattr(self, each_attribute), list):
+                    for each_sub_attr in getattr(self, each_attribute):
+                        each_sub_attr.destroy()
+                else:
+                    getattr(self, each_attribute).destroy()
 
 
     def toggle_schedules(self):
@@ -228,6 +236,8 @@ class ViewPage(Page):
         if self.is_run_clicked:
             self.create_buttons()
             self.place_buttons()
+            self.create_display_toggle_buttons()
+            self.place_display_toggle_buttons()
 
     def create_compact_schedules(self, none_to_show = False):
         """ Creates a more compact graphical schedule
@@ -248,7 +258,7 @@ class ViewPage(Page):
             height_to_show = 23
             if hasattr(self, 'bg_label'):
                 self.bg_label.destroy()
-            self.remove_buttons()
+            self.hide_nav()
         else:
             text_to_show = 'Click RUN to generate schedules.'
             size_to_show = size_h1
@@ -1001,7 +1011,8 @@ class MainWindow(Frame):
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
             self.view_page.show_nav()
-            self.view_page.place_display_toggle_buttons()
+            if hasattr(self.view_page, 'bg_label'):
+                self.view_page.bg_label.destroy()
         else:
             self.view_page.create_compact_schedules(none_to_show = True) # tell user no schedules
 
