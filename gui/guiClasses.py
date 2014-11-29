@@ -759,29 +759,120 @@ class ViewPage(Page):
 
     def format_compact_constraint(self, constraints_dict):
         """ Formats the compact schedules """
-        y = 20
-        for key in constraints_dict.keys():
-            self.canv.create_text(10, y, anchor = 'w',
-                                  text = (str(constraints_dict[key][0]) + '/' +\
-                                          str(constraints_dict[key][1]))\
-                                          .ljust(5) + key.rjust(100),
-                                  font = (font_style, size_l))
-            """self.table_labels.append(Label(self,
-                                           text = (str(constraints_dict[key][0]) + '/' +\
-                                                   str(constraints_dict[key][1]))\
-                                               .ljust(5) + key.rjust(100),
-                                           font=(font_style, size_l),
-                                           width = 66,
-                                           bg = 'white',
-                                           fg = 'black',
-                                           anchor = NW))"""
-            y += 24
-        # position the labels
-        #yt = 103
-        #for i in xrange(len(self.table_labels)):
-            #self.table_labels[i].place(x = 50, y = yt)
-            #yt += 24
 
+        #----------------------------------------------#
+        # sort constraints by universal and user-added #
+        #----------------------------------------------#
+        
+        # lists for two types of constranits (universal and user-added)
+        universal_constraints = []
+        user_added_constraints = []
+        for constraint in globs.mainScheduler.constraints:
+            if constraint.universal:
+                universal_constraints.append(constraint.name)
+            else:
+                user_added_constraints.append(constraint.name)
+                
+        universal_constraints.sort()
+        user_added_constraints.sort()
+
+        # sort constraints and prep constraint data for canvas display
+        universal_sorted_constraints = []
+        user_added_sorted_constraints = []
+        for key in constraints_dict.keys():
+            if key in universal_constraints:
+                universal_sorted_constraints.append([key,
+                                                     constraints_dict[key][0],
+                                                     constraints_dict[key][1]])
+            elif key in user_added_constraints:
+                user_added_sorted_constraints.append([key,
+                                                     constraints_dict[key][0],
+                                                     constraints_dict[key][1]])
+        universal_sorted_constraints.sort()
+        user_added_sorted_constraints.sort()
+        
+        #---------------------------------------#
+        # display constraint data on the canvas #
+        #---------------------------------------#
+
+        # legend bullet: univeral constraints
+        self.canv.create_rectangle(20, 25, 40, 45, fill = 'cyan', outline = '')
+        self.canv.create_text(125, 35,
+                              text = 'Universal Constraints',
+                              font = (font_style, size_l))
+        
+        # legend bullet: user-added constraints
+        self.canv.create_rectangle(250, 25, 231, 45, width = 3, fill = 'yellow', outline = '')
+        self.canv.create_text(345, 35,
+                              text = 'User Added Constraints',
+                              font = (font_style, size_l))
+        
+        y = 75
+        self.canv.create_text(20, y, anchor = 'w',
+                                  text = 'Constraint Name',
+                                  font = (font_style, size_h2))
+        self.canv.create_text(430, y, anchor = 'w',
+                                  text = 'Passes',
+                                  font = (font_style, size_h2))
+        
+        y += 40
+
+        universal_constraints_length = len(universal_sorted_constraints)
+        user_added_constraints_length = len(user_added_constraints)
+        
+        count = 0
+
+        # background color for universal constraints
+        self.canv.create_rectangle(15, 99, 518,
+                                   104 + (universal_constraints_length * 24),
+                                   width = 3, outline = 'cyan')
+
+        # create text to display on the canvas
+        for constraints in [universal_sorted_constraints, user_added_sorted_constraints]:
+            for constraint in constraints:
+
+                # show constraint name
+                self.canv.create_text(25, y, anchor = 'w',
+                                      text = constraint[0],
+                                      font = (font_style, size_l))
+                
+                passes = ''
+                numerator = constraint[1]
+                denominator = constraint[2]
+
+                # determine if pass or fail
+                if (numerator == 0 or numerator == 1) and (denominator == 1):
+                    if numerator == 0:
+                        passes = 'Fail'
+                    else:
+                        passes = 'Pass'
+
+                    # show pass or fail
+                    self.canv.create_text(440, y, anchor = 'w',
+                                          text = passes,
+                                          font = (font_style, size_l))
+                # calculate percent
+                else:
+                    percent = (float(numerator) / float(denominator)) * 100
+                    percent = round(percent, 2)
+
+                    # show percent
+                    self.canv.create_text(440, y, anchor = 'w',
+                                          text = str(percent) + '%',
+                                          font = (font_style, size_l))
+
+                count += 1
+                if count == universal_constraints_length:
+                    y += 6
+                    
+                    # background color for user-added constraints
+                    self.canv.create_rectangle(15, y + 13, 518,
+                                               y + 19 + (user_added_constraints_length * 24),
+                                               width = 3, outline = 'yellow')
+                    y += 3
+                    
+                y += 24
+                                         
     def delete(self, labels):
         """ Delete dynamically created objects from memory """
 
