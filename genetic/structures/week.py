@@ -276,6 +276,7 @@ class Week:
                                                                 each_slot.end_time, each_slot.instructor]
                         if each_slot.instructor not in instructors:
                             instructors.append(each_slot.instructor)
+            instructors = sorted(instructors, key = lambda instructor: instructor.name)
 
             concise_schedule_str = ""
             for instructor in instructors:
