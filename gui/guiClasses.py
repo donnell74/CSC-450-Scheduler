@@ -828,7 +828,12 @@ class ViewPage(Page):
 
         universal_constraints_length = len(universal_sorted_constraints)
         user_added_constraints_length = len(user_added_constraints)
-        
+
+        # increase canvas scrollregion size if too many user added constraints
+        if user_added_constraints_length > 30:
+            self.canv.config(scrollregion = (0, 0, 600,
+                                             1050 + user_added_constraints_length * 24))
+            
         count = 0
 
         # background color for universal constraints
