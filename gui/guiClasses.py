@@ -574,7 +574,6 @@ class ViewPage(Page):
                         self.selections[option] = temp[4] + " " + temp[5]
 
                         option += 1
-        self.rooms.sort()
 
         option = 0 # reset
 
