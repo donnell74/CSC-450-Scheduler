@@ -2,7 +2,8 @@ from genetic import interface, scheduler, constraint
 import os
 
 def init(): # call globals.init() from main
-    global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
+    global courses, course_titles, rooms, time_slots, instructors, \
+           mainScheduler, start_times, end_times, semester_to_schedule
 
     yaml_input_path = "genetic/seeds/Input.yaml"
     yaml_override_path = "genetic/seeds/override.yaml"

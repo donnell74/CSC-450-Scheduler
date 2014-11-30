@@ -30,7 +30,16 @@ class HomePage(Page):
     def __init__(self, root):
         Frame.__init__(self, root)
         self.head_label = Label(self, text="CSC Department Scheduler", font=(font_style, size_h1))
-        self.head_label.pack(pady=10)
+        self.head_label.pack(pady = (20, 10))
+
+        semester_info = "Semester to schedule: {0} {1}".format(globs.semester_to_schedule[0],
+                                                               globs.semester_to_schedule[1])
+        self.semester_label = Label(self, text = semester_info, font = (font_style, size_h2))
+        self.semester_label.pack()
+
+        semester_additional_info = "If the above is incorrect, please specify in the override file"
+        self.semester_additional_label = Label(self, text = semester_additional_info, font = (font_style, size_p))
+        self.semester_additional_label.pack(pady = (0, 10))
 
         paragraph_text = "User Guide: step-by-step\n\n" +\
                          "1.) Click RUN to begin generating CSC schedules.\n\n" +\
@@ -121,7 +130,7 @@ class ViewPage(Page):
         self.toggle_schedules_flag = False
 
         self.canvas_created = False
-        
+
         self.toggle_constraint_acceptance_flag = True
         # holds the rooms
         self.rooms = []
@@ -130,12 +139,12 @@ class ViewPage(Page):
         self.room_selection_option = 0  # default to 0
         # dict to hold selection option + room name/number
         self.selections = {}
-        
+
         self.table_labels = []  # holds the labels for the schedules
 
         # dict to hold constraints and fitness score
         self.constraint_bag = {}
-        
+
         # display schedules
         self.toggle_schedules()
 
@@ -184,7 +193,7 @@ class ViewPage(Page):
 
         # delete previous canvas
         #self.delete(self.canvas_items)
-        
+
         # default is to display graphical schedules first
         if not self.toggle_schedules_flag:
             if self.is_run_clicked:
@@ -205,7 +214,7 @@ class ViewPage(Page):
         """ Switch between the acceptance and rejected constraints """
 
         if self.canvas_created:
-            
+
             # delete old labels to make room for new ones
             self.delete(self.table_labels)
 
@@ -214,7 +223,7 @@ class ViewPage(Page):
 
             # default is to display accepted constraints first
             if not self.toggle_constraint_acceptance_flag:
-                
+
                 if self.is_run_clicked:
                     self.toggle_constraint_acceptance_flag = True
                     #self.create_graphical_constraints()
@@ -282,7 +291,7 @@ class ViewPage(Page):
     def create_compact_constraint(self):
         """ Creates a more compact graphical schedule
             respresentation of the valid schedules """
-        
+
         # background place holder for the schedules
         """self.bg_label = Label(self, width = 37, height= 13,
                               font=(font_style, size_h1),
@@ -295,7 +304,7 @@ class ViewPage(Page):
         self.delete([self.bg_label])
         if self.is_run_clicked:
             self.insert_constraint(self.last_viewed_schedule)
-    
+
     def create_room_selection(self):
         """ Creates a drop down menu for room selection """
 
@@ -308,7 +317,7 @@ class ViewPage(Page):
 
         if self.rooms != None:
             self.rooms.sort()
-            
+
         self.menu_select = apply(OptionMenu,
                             (self, self.selected_option) + tuple(self.rooms))
         self.menu_select.place(x = 115, y = 5)
@@ -317,7 +326,7 @@ class ViewPage(Page):
 
         self.drop_down_items.append(self.menu_select)
         self.drop_down_items.append(self.room_label)
-    
+
     def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
@@ -367,7 +376,7 @@ class ViewPage(Page):
             self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
 
             self.canvas_created = True
-        
+
     def on_mouse_wheel(self, event):
         """ Update the canvas vertical scrollbar """
 
@@ -461,7 +470,7 @@ class ViewPage(Page):
         """ Inserts schedule n into the textarea/scrollbox of the View page """
 
         self.toggle_constraint_acceptance_flag = True
-        
+
         self.last_viewed_schedule = n
 
         # delete drop downs
@@ -506,12 +515,12 @@ class ViewPage(Page):
         else:
             # destroy old labels to make room for new ones
             self.delete(self.table_labels)
-            
+
             # hide bg_label text
             #self.bg_label['fg'] = 'white'
 
         self.toggle_constraint_acceptance_flag = not self.toggle_constraint_acceptance_flag
-            
+
 
     def format_graphical_schedule(self, schedule_text):
         """ Formats the graphical schedules """
@@ -603,7 +612,7 @@ class ViewPage(Page):
 
         if len(y_times) == 0:
             return
-        
+
         a = y_times[0]
         b = y_times[len(y_times) - 1]
         n = 0
@@ -872,7 +881,7 @@ class MiscPage(Page):
         if not self.is_loading:
             self.load_bar['bg'] = 'green'
             self.is_loading = True
-            
+
         # print(self.load_bar['width'])
         # Stop at "almost done" status; will jump to 100% when finished
         if self.load_bar['width'] <= 39:
@@ -971,10 +980,10 @@ class MainWindow(Frame):
 
         self.view_page = ViewPage(self.content_container)
         self.view_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        
+
         self.misc_page = MiscPage(self.content_container)
         self.misc_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        
+
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
 
@@ -1059,7 +1068,7 @@ class MainWindow(Frame):
             self.run_clicked = True
             self.view_page.is_run_clicked = False
             self.run_finished = False
-            
+
             instructors = globs.instructors
             # RUN SCHEDULER METHOD
             # Add hard/obvious constraints before running
