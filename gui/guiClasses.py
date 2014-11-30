@@ -307,23 +307,20 @@ class ViewPage(Page):
 
         self.selected_option = StringVar(self)
         self.selected_option.set(self.rooms[self.room_selection_option]) # default value
-
-        if self.rooms != None:
-            self.rooms.sort()
-            
+        
         self.menu_select = apply(OptionMenu,
                             (self, self.selected_option) + tuple(self.rooms))
         self.menu_select.place(x = 115, y = 5)
-
+        
         self.selected_option.trace('w', lambda *args: self.get_selected(self.selected_option))
 
         self.drop_down_items.append(self.menu_select)
         self.drop_down_items.append(self.room_label)
-    
+
     def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
-
+        
         option = selected.get()
         for i in xrange(len(self.selections)):
 
@@ -333,6 +330,22 @@ class ViewPage(Page):
         # update schedule
         self.insert_schedule(self.last_viewed_schedule)
 
+    def sort_selections(self):
+        """ Sorts self.selections """
+        
+        # sort selections
+        sorted_selections = []
+        for key in self.selections:
+            sorted_selections.append(self.selections[key])
+
+        self.selections = {}
+        sorted_selections.sort()
+
+        key = 0
+        for room in sorted_selections:
+            self.selections[key] = room
+            key += 1
+            
     def create_graphical_schedules(self):
         """ Creates a graphical respresentation of the valid schedules """
 
@@ -577,6 +590,9 @@ class ViewPage(Page):
 
         option = 0 # reset
 
+        self.rooms.sort()
+        self.sort_selections()
+        
         # calculate what time to begin showing courses on the graphical schedule
         for i in xrange(len(schedule_text) - 1):
             s = schedule_text[i].split(' ')
