@@ -1,0 +1,10 @@
+# This file should be used to specify information about the current
+# semester being scheduled. A semester and year should be specified
+# (e.g. Fall 2015); otherwise the application will guess.
+
+# Additional information is not necessary and should only be included
+# to indicate some deviation from the information included in the
+# global input file, 'global.yaml'. For example, if normally a course
+# is taught by one professor, but for some reason this course will be
+# taught by a different professor only for this particular semester,
+# it should be included here.
