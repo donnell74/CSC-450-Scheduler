@@ -39,7 +39,7 @@ class HomePage(Page):
 
         semester_additional_info = "(If this is incorrect, please specify in the override file.)"
         self.semester_additional_label = Label(self, text = semester_additional_info, font = (font_style, size_p))
-        self.semester_additional_label.pack(pady = (0, 10))
+        self.semester_additional_label.pack(pady = (0, 20))
 
         paragraph_text = "User Guide: step-by-step\n\n" +\
                          "1.) Click RUN to begin generating CSC schedules.\n\n" +\
@@ -47,15 +47,14 @@ class HomePage(Page):
                          "2.) After the scheduling is finished click on the View \nbutton" +\
                          " to view the schedules.\n"
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
-        self.description_label.pack()
+        self.description_label.pack(pady = (0, 10))
 
         runtime_option_text = "Choose a run speed:"
         self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
         self.runtime_label.pack()
         self.runtime_disclaimer = Label(self, text = "The scheduler may finish earlier"\
                                         " if it finds 5 valid schedules.", font = (font_style, 10))
-        self.runtime_disclaimer.pack(pady = 5)
-
+        self.runtime_disclaimer.pack(pady = (0, 5))
 
         runtime_modes = [
             ("Quick (~1 minute)", 1),
@@ -63,7 +62,7 @@ class HomePage(Page):
             ("High (~1 hour)", 60),
             ("Overnight (~8 hours)", 480),
             ("Custom", 0)
-            ]
+        ]
 
         self.runtime_selected_var = IntVar()
         self.runtime_selected_var.set(1)
@@ -73,7 +72,6 @@ class HomePage(Page):
             b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
                             value = val, font = (font_style, size_l))
             b.pack(anchor = W, padx = 225)
-
 
         self.custom_input = Frame(self, width = 50, height = 20)
         self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
