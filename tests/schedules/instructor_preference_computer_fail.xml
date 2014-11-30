@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<data>
+    <schedule name="instructor preference computer fail">
+        <courseList>
+          <item code='CSC 450' credit='3' instructor='Shade' prereq='CSC325 CSC365' capacity='10' needs_computers='0' is_lab='0'></item>
+          <item code='CSC 460' credit='3' instructor='Wang' prereq='CSC320 CSC325' capacity='10' needs_computers='1' is_lab='0'></item>
+        </courseList>
+        <roomList>
+          <item building='CHEK' number='205' capacity='40' has_computers='0'></item>
+          <item building="CHEK" number="209" capacity="30" has_computers="1"></item>
+        </roomList>
+        <timeListMWF>
+          <item>10:00-11:00</item>
+          <item>11:00-12:00</item>
+        </timeListMWF>
+        <timeListTR>
+            <item>08:00-09:15</item>
+            <item>09:30-10:45</item>
+        </timeListTR>
+        <timeSlotDivide>2</timeSlotDivide>
+    </schedule>
+    <course 
+        code="CSC 450"
+        credit="3"
+        startTime="10:00"
+        endTime="11:00"
+        days="MWF"
+        room="CHEK 209"
+        instructor="Shade">
+    </course>
+    <course 
+        code="CSC 460"
+        credit="3"
+        startTime="11:00"
+        endTime="12:00"
+        days="MWF"
+        room="CHEK 205"
+        instructor="Wang">
+    </course>
+</data>
