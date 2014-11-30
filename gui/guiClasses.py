@@ -37,7 +37,7 @@ class HomePage(Page):
         self.semester_label = Label(self, text = semester_info, font = (font_style, size_h2))
         self.semester_label.pack()
 
-        semester_additional_info = "If the above is incorrect, please specify in the override file"
+        semester_additional_info = "(If this is incorrect, please specify in the override file.)"
         self.semester_additional_label = Label(self, text = semester_additional_info, font = (font_style, size_p))
         self.semester_additional_label.pack(pady = (0, 10))
 
