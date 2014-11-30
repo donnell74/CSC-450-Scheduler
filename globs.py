@@ -13,7 +13,7 @@ def init(): # call globals.init() from main
                   "'Input.xml' in ./genetic/seeds/ and try again")
         return
     else:
-        interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
+        interface.create_xml_input_from_yaml(yaml_input_path) #create xml from yaml
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"

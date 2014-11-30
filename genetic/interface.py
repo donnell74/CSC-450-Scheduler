@@ -12,7 +12,7 @@ import constraint
 from Tkinter import Tk
 from tkMessageBox import showinfo
 
-def create_xml_from_yaml(path_to_yaml):
+def create_xml_input_from_yaml(path_to_yaml):
     """
     Creates an xml input file (Input.xml) from yaml.
     IN: path to yaml input
