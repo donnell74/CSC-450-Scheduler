@@ -8,3 +8,6 @@
 # is taught by one professor, but for some reason this course will be
 # taught by a different professor only for this particular semester,
 # it should be included here.
+
+data:
+    semester: Spring 2015

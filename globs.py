@@ -5,15 +5,16 @@ def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
 
     yaml_input_path = "genetic/seeds/Input.yaml"
+    yaml_override_path = "genetic/seeds/override.yaml"
     yaml_constraint_path = "genetic/seeds/default_constraints.yaml"
 
     # Create XML input from YAMl (Input.yaml)
-    if os.path.isfile(yaml_input_path) == False:
-        print("No valid input found. Please put put an input seed named 'Input.yaml' or " +
-                  "'Input.xml' in ./genetic/seeds/ and try again")
-        return
+    if not os.path.isfile(yaml_input_path):
+        raise IOError("No valid input found. Please put put an input seed named 'Input.yaml' or " +
+                      "'Input.xml' in ./genetic/seeds/ and try again")
     else:
-        interface.create_xml_input_from_yaml(yaml_input_path) #create xml from yaml
+        interface.create_xml_input_from_yaml(yaml_input_path)
+        semester_to_schedule = interface.get_semester_to_schedule(yaml_override_path)
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"

@@ -6,11 +6,88 @@ import xml.etree.ElementTree as ET
 from scheduler import *
 from time import strftime, gmtime
 from weakref import ref
-from datetime import time as time_obj
+from datetime import date, time as time_obj
 import constraint
 
 from Tkinter import Tk
 from tkMessageBox import showinfo
+
+def get_semester_to_schedule(path_to_yaml):
+    """
+    Given the path to the override file, return the specific semester to be planned.
+    If no valid override input is found, use today's date to guess at the semester
+    and year. For example, if it is currently Fall or Winter, the guess will
+    be for the Spring of the same year. If it is currently Spring or Summer,
+    the guess will be for the Fall of next year.
+    IN: path to yaml override file.
+    OUT: a tuple representing the semester and year to be planned
+        e.g.: ('Fall', 2015)
+    """
+
+    try:
+        yaml_file = open(path_to_yaml, 'r')
+        yaml_dict = yaml.load(yaml_file)
+        yaml_file.close()
+
+        semester_object = yaml_dict['data']['semester'].split(' ')
+        fall_or_spring = semester_object[0].lower()
+        if fall_or_spring in ['fall', 'fa', 'f']:
+            fall_or_spring = "Fall"
+        elif fall_or_spring in ['spring', 'sp', 's']:
+            fall_or_spring = "Spring"
+        else:
+            raise IOError("Error: Invalid semester input.")
+
+        # we know at least fall / spring
+        if fall_or_spring == "Fall":
+            year_upcoming = date.today().year
+        else:
+            year_upcoming = date.today().year + 1
+
+        if len(semester_object) == 1: # no year is specified
+            semester_year = year_upcoming
+        elif int(semester_object[1]) < year_upcoming: # don't schedule past years
+            semester_year = year_upcoming
+        else:
+            semester_year = int(semester_object[1])
+
+        return (fall_or_spring, semester_year)
+
+    except IOError: # override file not found; guess the semester to schedule
+        # "day of year" ranges for the northern hemisphere
+        spring_or_summer = range(80, 264)
+        # fall_or_winter = everything else
+
+        # get today's 'day number'. (Jan 1st -> 1)
+        day_num = date.today().timetuple().tm_yday
+
+        """
+        If it is spring or summer, we guess that the semester to plan
+        is the upcoming fall. Otherwise, we guess it is the upcoming spring.
+        """
+        if day_num in spring_or_summer:
+            # we guess that we're planning for fall of the same year
+            fall_or_spring = "Fall"
+            semester_year = date.today().year
+        else:
+            # we guess that we're planning for spring of next year
+            fall_or_spring = "Spring"
+            semester_year = date.today().year + 1
+
+        print "No override found. Guessing at the semester to be planned:",
+        print fall_or_spring, semester_year
+        return (fall_or_spring, semester_year)
+
+    except ValueError:
+        print "Invalid input. Please use the format 'Fall 2015'"
+        return
+
+    except Exception as e:
+        print type(e)
+        return
+
+def get_override(path_to_yaml):
+    pass
 
 def create_xml_input_from_yaml(path_to_yaml):
     """
