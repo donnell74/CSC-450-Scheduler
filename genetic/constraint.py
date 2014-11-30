@@ -55,7 +55,7 @@ def course_before_time(this_week, args):
     if len(args) > 2:  # includes the mandatory boolean
         is_mandatory = args[2]
 
-    hold = this_week.find_course(args[0])[0].start_time < args[1]
+    hold = this_week.find_course(args[0])[0].end_time < args[1]
 
     if is_mandatory:
         if hold == 0:  # hold fails
@@ -86,7 +86,12 @@ def course_after_time(this_week, args):
 
 
 def lab_on_tr(this_week, args):
-    return int(this_week.find_course(args[0])[0].isTR == True)
+    lab_courses = args[0]
+    for each_lab in lab_courses:
+        if not this_week.find_course(each_lab)[0].isTR:
+            this_week.valid = False
+            return 0
+    return 1
 
 
 def morning_class(this_week, args):
@@ -112,7 +117,7 @@ def instructor_time_pref_before(this_week, args):
     for each_course in this_instructor.courses:
         #section object for course
         each_section = this_week.find_section( each_course.code )
-        if each_section.time_slots[0].start_time >= time_slot:
+        if each_section.time_slots[0].end_time > time_slot:
             #case 1: a course fails
             holds.append(0)
         else:
@@ -143,7 +148,7 @@ def instructor_time_pref_after(this_week, args):
     for each_course in this_instructor.courses:
         #section object for course
         each_section = this_week.find_section( each_course.code )
-        #only want section obujects for this_instructor
+        #only want section objects for this_instructor
         if each_section.time_slots[0].start_time < time_slot:
             #case 1: a course fails
             holds.append(0)
@@ -256,7 +261,7 @@ def instructor_preference_day(this_week, args):
                     
     # if mandatory and it's here, it passed
     if is_mandatory:
-        return 0
+        return 1
     else: # not mandatory, partial credit
         partial_credit = get_partial_credit(holds)
         return partial_credit
@@ -272,7 +277,8 @@ def instructor_preference_computer(this_week, args):
     holds = []
     
     for section_week in this_week.sections:
-        if section_week.instructor.name == instructor.name:
+        # only applies to courses that do not need computers
+        if section_week.instructor.name == instructor.name and not section_week.course.needs_computers:
             if computer_preference == True:
                 #instructor prefers computers
                 if section_week.room.has_computers == False:
@@ -296,7 +302,7 @@ def instructor_preference_computer(this_week, args):
 
     # if mandatory and it's here, it passed
     if is_mandatory:
-        return 0
+        return 1
     else:
         partial_credit = get_partial_credit(holds)
         return partial_credit
@@ -321,7 +327,7 @@ def instructor_break_constraint(this_week, args):
     for i in range(len(instructor.courses)): 
         course = this_week.find_course(instructor.courses[i])[0]
         if course.start_time < gap_end:
-            if course.start_time < gap_start: # before gap altogether, fine
+            if course.end_time < gap_start or course.start_time > gap_end: # before or after gap
                 holds.append(1)
             else:  # in gap, bad
                 if is_mandatory:
@@ -333,7 +339,7 @@ def instructor_break_constraint(this_week, args):
             holds.append(1)
 
     if is_mandatory: # if no fails by here, it passed
-        return 0
+        return 1
     else:
         partial_weight = get_partial_credit(holds)
         return partial_weight

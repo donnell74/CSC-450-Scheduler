@@ -5,7 +5,7 @@ data:
       -
         code: CSC 111
         before_after: before
-        time: "08:50"
+        time: "12:20"
         priority: Low
       -
         code: CSC 450

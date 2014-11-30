@@ -72,6 +72,7 @@ class Week:
                 each_section = structures.Section(each_course, each_slots)
                 self.sections.append(each_section)
         except:
+            print("ERROR: Update Sections") 
             print(each_course)
 
     ## Finds sections for a given course
@@ -275,6 +276,7 @@ class Week:
                                                                 each_slot.end_time, each_slot.instructor]
                         if each_slot.instructor not in instructors:
                             instructors.append(each_slot.instructor)
+            instructors = sorted(instructors, key = lambda instructor: instructor.name)
 
             concise_schedule_str = ""
             for instructor in instructors:
