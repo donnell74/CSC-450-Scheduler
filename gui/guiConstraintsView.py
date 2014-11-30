@@ -96,8 +96,7 @@ class ConstraintsView(Frame):
             for j in selected_indices:
                 #print(self.constraint_name_list)
                 #print(self.constraints_output)
-                deletion_list.append(self.constraint_name_list.pop(j))
-                print(deletion_list[-1])
-                self.constraints_output.pop(j)
+                deletion_list.append(self.constraint_name_list.pop(int(j)))
+                self.constraints_output.pop(int(j))
             # clear selected constraints from the scheduler object
             globs.mainScheduler.delete_list_constraints(deletion_list)

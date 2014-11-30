@@ -629,7 +629,7 @@ class TypeManualConcurrency(Frame):
         if len(selection) > 1:
             list_courses_obj = []
             for i in selection :
-                list_courses_obj.append(self.list_of_courses[i])
+                list_courses_obj.append(self.list_of_courses[int(i)])
 
             self.listbox.selection_clear(0, END)
             

@@ -47,25 +47,25 @@ def init(): # call globals.init() from main
         # Add all mandatory/hard constraints here
         mainScheduler.add_constraint("instructor conflict", 0,
                                     constraint.instructor_conflict,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
                                     constraint.sequential_time_different_building_conflict,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("subsequent courses", 0,
                                     constraint.num_subsequent_courses,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("capacity checking", 0,
                                     constraint.ensure_course_room_capacity,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("no overlapping courses", 0,
                                     constraint.no_overlapping_courses,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("computer requirement", 0,
                                     constraint.ensure_computer_requirement,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("course sections at different times", 0,
                                     constraint.course_sections_at_different_times,
-                                    [courses])
+                                    [courses], True)
 
         labs = []
         for each_course in mainScheduler.courses:
@@ -74,7 +74,7 @@ def init(): # call globals.init() from main
 
         mainScheduler.add_constraint("labs on tr", 0,
                                      constraint.lab_on_tr,
-                                     [labs])
+                                     [labs], True)
 
         mainScheduler.num_hard_constraints = len(mainScheduler.constraints)
 
