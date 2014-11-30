@@ -148,7 +148,8 @@ def create_xml_input_from_yaml(path_to_yaml):
         for course in course_list:
             if not course['credit'] in [1, 3, 4] and course['is_lab'] == 0:
                 error_title = 'Error: course credit hours'
-                error_message = 'The course credit hour "' + str(course['credit']) + \
+                error_message = 'Error for course {0}\n.'.format(course['code']) + \
+                                'The course credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable credit hour.' + \
                                 '\nCredit hours must ' + \
                                 'be 1, 3, or 4.\n' + \
@@ -159,7 +160,8 @@ def create_xml_input_from_yaml(path_to_yaml):
 
             if course['is_lab'] == 1 and course['credit'] != 1:
                 error_title = 'Error: lab credit hours'
-                error_message = 'The lab credit hour "' + str(course['credit']) + \
+                error_message = 'Error for course {0}.\n'.format(course['code']) + \
+                                'The lab credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable lab credit.' + \
                                 '\nLab credit must be 1 hour.\n' + \
                                 '\nPlease change this in:\n' + \
