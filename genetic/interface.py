@@ -57,12 +57,12 @@ def create_xml_input_from_yaml(path_to_yaml):
 
     def xml_header():
         return "<?xml version='1.0'?>"
-    
+
     def valid_credit_hour_input():
         ''' Validates that course credit hours are 1, 3, or 4.
             And that a lab is only 1 credit hour.
             Returns False if credit input is invalid.'''
-        
+
         error_title = ''
         error_message = ''
         is_valid_input = True
@@ -79,7 +79,7 @@ def create_xml_input_from_yaml(path_to_yaml):
                                 'genetic\seeds\input.yaml'
                 is_valid_input = False
                 show_error_message(error_title, error_message)
-                    
+
             if course['is_lab'] == 1 and course['credit'] != 1:
                 error_title = 'Error: lab credit hours'
                 error_message = 'The lab credit hour "' + str(course['credit']) + \
@@ -91,10 +91,10 @@ def create_xml_input_from_yaml(path_to_yaml):
                 show_error_message(error_title, error_message)
 
         return is_valid_input
-        
+
     def show_error_message(error_title, error_message):
         ''' Displays an error message '''
-        
+
         root = Tk()
         root.withdraw() # hide tkinter window
 
@@ -115,7 +115,7 @@ def create_xml_input_from_yaml(path_to_yaml):
 
         if not valid_credit_hour_input():
             exit() # exit the scheduler
-            
+
         xml_file = open('./genetic/seeds/Input.xml', 'w')
         indent_level = 0
 
@@ -240,23 +240,23 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 if course_obj == c.code: # found it
                     course_obj = c
                     break
-        
+
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
         else:
             is_mandatory = False
         timeslot_obj = str_to_time(constraint_dict["time"])
-        
+
         # scheduler.courses is course list
         if constraint_dict["before_after"] == "before":
             scheduler.add_constraint(constraint_name,
-                                        priority, 
+                                        priority,
                                         constraint.course_before_time,
                                         [course_obj, timeslot_obj, is_mandatory])
         else: # after constraint
             scheduler.add_constraint(constraint_name,
-                                        priority, 
+                                        priority,
                                         constraint.course_after_time,
                                         [course_obj, timeslot_obj, is_mandatory])
 
@@ -299,7 +299,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN:  a dictionary of appropriate data
         OUT: a max_courses constraint is added to the scheduler
         """
-        
+
         constraint_name = constraint_dict["instr_name"] + \
                             "_max_courses_" + str(constraint_dict["max_courses"])
         priority = get_priority_value(constraint_dict["priority"])
@@ -390,7 +390,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     # begin parsing YAML
     input_file = file(path_to_yaml, "r")
     yaml_dict = yaml.load(input_file)
-    
+
     if yaml_dict["data"]["constraint_list"]["course_constraints"] is not None:
         # course constraints exist
         course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
@@ -423,7 +423,7 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     OUT: scheduler object with one week based on the xml input"""
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
-    
+
     instructors = create_instructors_from_courses(path_to_xml)
     instructors_dict = dict(zip([inst.name for inst in instructors],
                            [inst for inst in instructors]))
