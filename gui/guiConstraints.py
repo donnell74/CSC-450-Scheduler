@@ -52,7 +52,7 @@ class AddedConstraintsScreen(Page):
         textL = " Constraints Added: "
         self.text = Label(self, text = textL)
         self.text.pack(anchor = NW, expand = YES)
-        
+
         # scrollbox
         self.scroll = ScrolledText(self, undo = True, width = 40, height = 15)
         self.scroll['font'] = ('Courier New', '11')
@@ -1042,21 +1042,21 @@ def create_course_time_constraint(course, start_time, when, priority, added_cons
                 course = c
                 break
         if when == "Before":
-             globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.course_before_time,
                                                  [course, time_obj, is_mandatory])
         else:  # one course AFTER a time
-             globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name, priority,
                                         constraint.course_after_time,
                                          [course, time_obj, is_mandatory])
     else: # applies to all courses
         course = globs.mainScheduler.courses
         if when == "Before":
-             globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_before_time,
                                                  [course, time_obj, is_mandatory])
         else: # all courses AFTER
-             globs.mainScheduler.add_constraint(constraint_name, priority,
+            globs.mainScheduler.add_constraint(constraint_name, priority,
                                                 constraint.all_after_time,
                                                  [course, time_obj, is_mandatory])
 
@@ -1091,7 +1091,7 @@ def create_time_pref_constraint(instructor, before_after, timeslot, priority, ad
         globs.mainScheduler.add_constraint(constraint_name, priority,
                                            constraint.instructor_time_pref_after,
                                            [instructor, time_obj, is_mandatory])
-        pass
+        
 
     # update scrollbox with this created constraint
     added_constraints.add_constraint_listbox(constraint_name, priority)

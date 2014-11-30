@@ -36,7 +36,8 @@ class HomePage(Page):
                          "1.) Click RUN to begin generating CSC schedules.\n\n" +\
                          "a.) OPTIONAL: Click the Constraint button to \ngenerate custom schedules.\n\n" +\
                          "2.) After the scheduling is finished click on the View \nbutton" +\
-                         " to view the schedules.\n"
+                         " to view the schedules. Also they will be\n" +\
+                         " exported to CSV format in the installation directory\n"
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
