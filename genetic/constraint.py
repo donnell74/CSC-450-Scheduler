@@ -539,7 +539,9 @@ def course_sections_at_different_times(this_week, arg):
 
 class Constraint:
 
-    def __init__(self, name, weight, func, args=[]):
+    def __init__(self, name, weight, func, args = [], universal = False):
+        """universal constraints: added automatically, not by user
+        not universal: made by user in default_constraints.yaml or in GUI"""
         if type(name) is not str:
             raise ConstraintCreationError("Name is not a string")
 
@@ -553,6 +555,7 @@ class Constraint:
         self.weight = weight
         self.args = args
         self.func = func
+        self.universal = universal
 
     def get_fitness(self, this_week):
         #fitness score
