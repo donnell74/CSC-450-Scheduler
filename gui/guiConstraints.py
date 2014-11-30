@@ -10,6 +10,20 @@ from genetic import constraint
 from ScrolledText import ScrolledText  # textbox with scrollbar for view screen
 import tkMessageBox
 
+#constants
+PARTIAL_SCHEDULING = "Partial Scheduling"
+TIME = "Time"
+MANUAL_CONCURRENCY = "Manual Concurrency"
+
+TYPE_PARTIAL_SCHEDULING = 0
+TYPE_TIME_COURSE = 1
+TYPE_MANUAL_CONCURRENCY = 2
+TYPE_TIME_INSTRUCTOR = 3
+TYPE_DAY = 4
+TYPE_INSTRUCTOR_BREAK = 5
+TYPE_MAX_PER_DAY = 6
+TYPE_COMPUTER_PREFERENCE = 7
+
 class Page(Frame):
     ## 
     #  @param self
@@ -117,6 +131,12 @@ class InstructorConstraint(Page):
         # time
         self.time_frame = Frame(self)
         self.time_frame.pack()
+
+        description_constraint_label_time = Label(self.time_frame, 
+                                                  text=get_description_constraint(TYPE_TIME_INSTRUCTOR),
+                                                  wraplength = 100)
+        description_constraint_label_time.pack(side = TOP)
+
         self.label_when = Label(self.time_frame, text = "When:")
         self.label_when.pack(side = TOP)
 
@@ -159,10 +179,15 @@ class InstructorConstraint(Page):
         self.day_frame = Frame(self, width = 100)
         # don't pack this because Time is the default option so days shouldn't be visible
 
-        self.label_day = Label(self.day_frame,
-                               text = "Day(s) instructor prefers to teach:",
-                               wraplength = 100)
-        self.label_day.pack(side = TOP)
+        description_constraint_label_day = Label(self.day_frame,
+                                                 text=get_description_constraint(TYPE_DAY),
+                                                 wraplength = 100)
+        description_constraint_label_day.pack(side = TOP)
+
+#         self.label_day = Label(self.day_frame,
+#                                text = "Day(s) instructor prefers to teach:",
+#                                wraplength = 100)
+#         self.label_day.pack(side = TOP)
 
         self.days = ["M", "T", "W", "R", "F"]
         self.boxes = [IntVar() for i in range(5)]
@@ -190,7 +215,7 @@ class InstructorConstraint(Page):
         # don't pack this because Time is the default option so computers shouldn't be visible
 
         self.label_computer = Label(self.computer_frame, \
-            text = "Instructor would prefer to teach classes not requiring computers in a computer lab:", wraplength = 100)
+            text = get_description_constraint(TYPE_COMPUTER_PREFERENCE), wraplength = 100)
         self.label_computer.pack(side = TOP)
 
         self.computer_options = ["True", "False"]
@@ -220,6 +245,11 @@ class InstructorConstraint(Page):
         # ADD MAX PER DAY STUFFS HERE
         self.max_course_frame = Frame(self, width=100)
 
+        description_constraint_label_max = Label(self.max_course_frame,
+                                                 text=get_description_constraint(TYPE_MAX_PER_DAY),
+                                                 wraplength = 100)
+        description_constraint_label_max.pack(side = TOP)
+
         self.max_course_value = StringVar()
         self.max_course_value.set("0")
         self.max_course_value.trace("w", self.check_is_digit)
@@ -247,7 +277,7 @@ class InstructorConstraint(Page):
         self.break_frame = Frame(self, width = 100)
 
         self.label_break = Label(self.break_frame,
-                                 text = "Instructor would like no classes between:",
+                                 text = get_description_constraint(TYPE_INSTRUCTOR_BREAK),
                                  wraplength = 120)
         self.label_break.pack(side = TOP)
 
@@ -440,11 +470,6 @@ class InstructorConstraint(Page):
             self.break_frame.pack_forget()
             self.time_frame.pack()
 
-#constants
-PARTIAL_SCHEDULING = "Partial Scheduling"
-TIME = "Time"
-MANUAL_CONCURRENCY = "Manual Concurrency"
-
 class CourseConstraint(Page):
     """Course constraint frame"""
 
@@ -508,6 +533,9 @@ class TypeTime(Frame):
         Frame.__init__(self, root)
 
         self.constraints_view_obj = constraints_view_obj
+
+        description_constraint_label = Label(self, text=get_description_constraint(TYPE_TIME_COURSE))
+        description_constraint_label.pack(side = TOP)
 
         message_course = Label(self, text="Course code:")
         message_course.pack(side = TOP)
@@ -584,9 +612,12 @@ class TypeManualConcurrency(Frame):
         Frame.__init__(self, root)
 
         self.constraints_view_obj = constraints_view_obj
-
-        message_course = Label(self, text="Select courses:")
-        message_course.pack(side = TOP)
+        
+        description_constraint_label = Label(self, text=get_description_constraint(TYPE_MANUAL_CONCURRENCY), wraplength = 100)
+        description_constraint_label.pack(side = TOP)
+        
+#         message_course = Label(self, text="Select courses:")
+#         message_course.pack(side = TOP)
         
         self.listbox_frame = Frame(self)
         self.listbox_frame.pack(side = TOP)
@@ -660,7 +691,8 @@ class TypePartialScheduling(Frame):
         Frame.__init__(self, root)
 
         self.constraints_view_obj = constraints_view_obj
-
+        description_constraint_label = Label(self, text=get_description_constraint(TYPE_PARTIAL_SCHEDULING))
+        description_constraint_label.pack(side = TOP)
         message_course = Label(self, text="Course code:")
         message_course.pack(side = TOP)
 
@@ -1155,3 +1187,25 @@ def create_instr_break(instructor, gap_start, gap_end, priority, added_constrain
     added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
+def get_description_constraint(constraint_type):
+
+    description = ""
+
+    if constraint_type == TYPE_MANUAL_CONCURRENCY:
+        description = "Courses that shouldn't be scheduled in the same time:"
+    elif constraint_type == TYPE_TIME_COURSE:
+        description = "Course shouldn't be held in time:"
+    elif constraint_type == TYPE_PARTIAL_SCHEDULING:
+        description = "Course must be partial scheduled:"
+    elif constraint_type == TYPE_COMPUTER_PREFERENCE:
+        description = "Instructor would prefer to teach classes not requiring computers in a computer lab:"
+    elif constraint_type == TYPE_DAY:
+        description = "Day(s) instructor prefers to teach:"
+    elif constraint_type == TYPE_INSTRUCTOR_BREAK:
+        description = "Instructor would like no classes between:"
+    elif constraint_type == TYPE_MAX_PER_DAY:
+        description = "Maximum class per day instructor prefer to teach:"
+    elif constraint_type == TYPE_TIME_INSTRUCTOR:
+        description = "Time instructor prefers to teach:"
+
+    return description
