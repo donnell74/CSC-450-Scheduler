@@ -160,14 +160,14 @@ class Scheduler:
     #  @param self
     #  @param constraint A constraint object
     #  @return none
-    def add_constraint(self, name, weight, func, *args):
+    def add_constraint(self, name, weight, func, args = [], universal = False):
         """Adds an constraint to the schedule"""
         exists = False
         for constraint in self.constraints:
             if constraint.name == name:
                 exists = True
         if not exists:
-            self.constraints.append(Constraint(name, weight, func, *args))
+            self.constraints.append(Constraint(name, weight, func, args, universal))
             self.max_fitness += weight
 
     ## Clears constraints from list
