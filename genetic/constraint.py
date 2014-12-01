@@ -258,7 +258,7 @@ def instructor_preference_day(this_week, args):
                         holds.append(0)
                 else:
                     holds.append(1)
-                    
+
     # if mandatory and it's here, it passed
     if is_mandatory:
         return 1
@@ -275,7 +275,7 @@ def instructor_preference_computer(this_week, args):
     computer_preference = args[1]
     is_mandatory = args[2]
     holds = []
-    
+
     for section_week in this_week.sections:
         # only applies to courses that do not need computers
         if section_week.instructor.name == instructor.name and not section_week.course.needs_computers:
@@ -289,7 +289,7 @@ def instructor_preference_computer(this_week, args):
                         holds.append(0)
                 else:
                     holds.append(1)
-            else: 
+            else:
                 #instructor doesn't prefer computers
                 if section_week.room.has_computers == True:
                     if is_mandatory:
@@ -324,7 +324,7 @@ def instructor_break_constraint(this_week, args):
 
     holds = []
 
-    for i in range(len(instructor.courses)): 
+    for i in range(len(instructor.courses)):
         course = this_week.find_course(instructor.courses[i])[0]
         if course.start_time < gap_end:
             if course.end_time < gap_start or course.start_time > gap_end: # before or after gap
@@ -333,7 +333,7 @@ def instructor_break_constraint(this_week, args):
                 if is_mandatory:
                     this_week.valid = False
                     return 0
-                else: 
+                else:
                     holds.append(0)
         else:  # after gap altogether, course.start_time > gap_end
             holds.append(1)
