@@ -96,18 +96,18 @@ def create_xml_input_from_yaml(path_to_yaml):
     IN: path to yaml input
     OUT: None (does not return anything; creates Input.xml in genetic/seeds/)
     """
-    def course_object_to_xml_string(code, credit, instructor, prereq,
+    def course_object_to_xml_string(code, period, credit, instructor, prereq,
                                     capacity, needs_computers, is_lab):
         # since "prereq='{}'".format('') -> "prereq=''''", we need an ugly conditional
         if prereq:
-            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='{3}' "
-                                       "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
-            return unformatted_xml_string.format(code, credit, instructor,
+            unformatted_xml_string =  ("<item code='{0}' period='{1}' credit='{2}' instructor='{3}' prereq='{4}' "
+                                       "capacity='{5}' needs_computers='{6}' is_lab='{7}'></item>")
+            return unformatted_xml_string.format(code, period, credit, instructor,
                                                  prereq, capacity, needs_computers, is_lab)
         else: # prereq == None
-            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='' "
-                                       "capacity='{3}' needs_computers='{4}' is_lab='{5}'></item>")
-            return unformatted_xml_string.format(code, credit, instructor,
+            unformatted_xml_string =  ("<item code='{0}' period='{1}' credit='{2}' instructor='{3}' prereq='' "
+                                       "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
+            return unformatted_xml_string.format(code, period, credit, instructor,
                                                  capacity, needs_computers, is_lab)
 
     def room_object_to_xml_string(building, number, capacity, has_computers):
@@ -230,6 +230,7 @@ def create_xml_input_from_yaml(path_to_yaml):
             else:
                 course_prereq = course['prereq']
             course_xml_string = course_object_to_xml_string(code = course['code'],
+                                                            period = course['period'],
                                                             credit = course['credit'],
                                                             instructor = course['instructor'],
                                                             prereq = course_prereq,
