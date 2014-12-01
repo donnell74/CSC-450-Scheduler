@@ -99,6 +99,87 @@ class TestConstraints(unittest.TestCase):
         #This schedule should pass, fitness should be 30
         self.assertEquals(good_scheduler.weeks[0].fitness, 0)
 
+    def test_all_before_time(self):
+        bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/all_before_time_fail.xml")
+        saquer_instr = structures.Instructor(name="Saquer")
+
+        # non mandatory check - bad
+        bad_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                     constraint.all_before_time,
+                                     [bad_scheduler.courses, time(13, 0), False])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        # This schedule should not pass, fitness should be 0
+        self.assertEquals(bad_scheduler.weeks[0].fitness, 0)
+
+        # mandatory check - bad
+        bad_scheduler.clear_constraints()
+        bad_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                     constraint.all_before_time,
+                                     [bad_scheduler.courses, time(13, 0), True])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        # This schedule should not pass, fitness should be 0
+        self.assertFalse(bad_scheduler.weeks[0].fitness, 30)
+
+        # non mandatory check - good
+        good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/all_before_time_pass.xml")
+        good_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                      constraint.all_before_time,
+                                      [good_scheduler.courses, time(13, 0), False])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        # This schedule should pass, fitness should be 30
+        self.assertEquals(good_scheduler.weeks[0].fitness, 30)
+
+        # mandatory check - good
+        good_scheduler.clear_constraints()
+        good_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                      constraint.all_before_time,
+                                      [good_scheduler.courses, time(13, 0), True])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        # This schedule should pass, fitness should be 30
+        self.assertTrue(good_scheduler.weeks[0].valid)
+
+
+    def test_all_after_time(self):
+        bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/all_after_time_fail.xml")
+        saquer_instr = structures.Instructor(name="Saquer")
+
+        # non mandatory check - bad
+        bad_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                     constraint.all_after_time,
+                                     [bad_scheduler.courses, time(11, 0), False])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        # This schedule should not pass, fitness should be 0
+        self.assertEquals(bad_scheduler.weeks[0].valid, 0)
+
+        # mandatory check - bad
+        bad_scheduler.clear_constraints()
+        bad_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                     constraint.all_after_time,
+                                     [bad_scheduler.courses, time(13, 0), True])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        # This schedule should not pass, fitness should be 0
+        self.assertFalse(bad_scheduler.weeks[0].valid)
+
+        # non mandatory check - good
+        good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/all_after_time_pass.xml")
+        good_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                      constraint.all_after_time,
+                                      [good_scheduler.courses, time(13, 0), False])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        # This schedule should pass, fitness should be 30
+        self.assertEquals(good_scheduler.weeks[0].fitness, 30)
+
+        # mandatory check - good
+        good_scheduler.clear_constraints()
+        good_scheduler.add_constraint("Saquer_max_courses_2", 30,
+                                      constraint.all_after_time,
+                                      [bad_scheduler.courses, time(13, 0), True])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        # This schedule should pass, fitness should be 30
+        self.assertTrue(good_scheduler.weeks[0].valid)
+        
+        
+
 
 if __name__ == "__main__":
     unittest.main()
