@@ -36,7 +36,8 @@ class HomePage(Page):
                          "1.) Click RUN to begin generating CSC schedules.\n\n" +\
                          "a.) OPTIONAL: Click the Constraint button to \ngenerate custom schedules.\n\n" +\
                          "2.) After the scheduling is finished click on the View \nbutton" +\
-                         " to view the schedules.\n"
+                         " to view the schedules. Also they will be\n" +\
+                         " exported to CSV format in the installation directory\n"
         self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
         self.description_label.pack()
 
@@ -1084,10 +1085,10 @@ class MainWindow(Frame):
                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.view_btn.pack(fill=X, side="top", pady=2)
 
-        self.misc_btn = Button(self.menu, text='Splash', command=self.show_misc, \
-                               width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
-        self.misc_btn.pack(fill=X, side="top", pady=2)
-
+#         self.misc_btn = Button(self.menu, text='Splash', command=self.show_misc, \
+#                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
+#         self.misc_btn.pack(fill=X, side="top", pady=2)
+#editing renato
         self.run_btn = Button(self.menu, text='RUN', bg='green', command=self.run_scheduler, \
                                width="10", height="3", font=(font_style, size_h2), cursor = 'hand2')
         self.run_btn.pack(fill = X, side = "top", pady=2)
@@ -1120,6 +1121,18 @@ class MainWindow(Frame):
     def show_misc(self):
         self.misc_page.lift()
 
+    def disable_buttons(self):
+        self.home_btn.config(state=DISABLED)
+        self.constraint_btn.config(state=DISABLED)
+        self.view_btn.config(state=DISABLED)
+        self.run_btn.config(state=DISABLED)
+
+    def enable_buttons(self):
+        self.home_btn.config(state=NORMAL)
+        self.constraint_btn.config(state=NORMAL)
+        self.view_btn.config(state=NORMAL)
+        self.run_btn.config(state=NORMAL)
+
     def thread_run_scheduler(self):
         instructors = globs.instructors
         self.misc_page.load_bar['width'] = 0 # make sure loading bar starts at 0 each run
@@ -1132,7 +1145,11 @@ class MainWindow(Frame):
                 runtime_var = 1
             print(runtime_var)
 
+        self.disable_buttons()
+
         globs.mainScheduler.evolution_loop(self, runtime_var)
+
+        self.enable_buttons()
 
         self.run_finished = True
         return
@@ -1188,7 +1205,7 @@ class MainWindow(Frame):
         return
 
     def run_scheduler(self):
-        
+
         if not self.run_clicked:
             self.view_page.is_constraints_set = False
             self.run_clicked = True
