@@ -143,10 +143,19 @@ def create_xml_input_from_yaml(path_to_yaml):
         error_title = ''
         error_message = ''
         is_valid_input = True
-
+        invalid_course_credits = []
+        invalid_lab_credits = []
+        
         # check for invalid credit hours
         for course in course_list:
+            
             if not course['credit'] in [1, 3, 4] and course['is_lab'] == 0:
+
+                if not course['credit'] in invalid_course_credits:
+                    invalid_course_credits.append(course['credit'])
+                else:
+                    continue
+            
                 error_title = 'Error: course credit hours'
                 error_message = 'The course credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable credit hour.' + \
@@ -158,6 +167,12 @@ def create_xml_input_from_yaml(path_to_yaml):
                 show_error_message(error_title, error_message)
 
             if course['is_lab'] == 1 and course['credit'] != 1:
+
+                if not course['credit'] in invalid_lab_credits:
+                    invalid_lab_credits.append(course['credit'])
+                else:
+                    continue
+            
                 error_title = 'Error: lab credit hours'
                 error_message = 'The lab credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable lab credit.' + \
