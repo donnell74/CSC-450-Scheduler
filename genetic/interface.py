@@ -568,6 +568,19 @@ def create_course_list_from_file_test(path_to_xml):
         print(inst)
         return None
 
+def course_should_be_scheduled(period):
+    """
+    Determines if a course should be scheduled based on its periodicity.
+    For example, if the semester being scheduled is Fall and a course is
+    only taught in the Spring, it should be ignored.
+    IN: periodicity of course being considered ["F", "B", "S", "D"]
+    OUT: True if course should be scheduled else False
+    """
+    this_semester = globs.semester_to_schedule[0]
+    return (period in ["B"]) or \
+            (this_semester == "Fall" and period == "F") or \
+            (this_semester == "Spring" and period == "S")
+
 
 def create_course_list_from_file(path_to_xml, instructors_dict):
     """Reads an xml file and creates a list of course objects from it
@@ -581,14 +594,18 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
-            course = Course(code = c.attrib["code"],
-                            credit = int(c.attrib["credit"]),
-                            instructor = instructor,
-                            capacity = int(c.attrib["capacity"]),
-                            needs_computers = bool(int(c.attrib["needs_computers"])),
-                            is_lab = bool(int(c.attrib["is_lab"])))
-            instructor.add_course(course)
-            courses.append(course)
+            # only schedule courses with valid periodicity
+            if c.attrib["period"] in ["F", "S", "B", "D"]:
+                # only schedule courses with periodicity occuring in this semester
+                if course_should_be_scheduled(c.attrib["period"]):
+                    course = Course(code = c.attrib["code"],
+                                    credit = int(c.attrib["credit"]),
+                                    instructor = instructor,
+                                    capacity = int(c.attrib["capacity"]),
+                                    needs_computers = bool(int(c.attrib["needs_computers"])),
+                                    is_lab = bool(int(c.attrib["is_lab"])))
+                    instructor.add_course(course)
+                    courses.append(course)
         return courses
     except Exception as inst:
         print(inst)
