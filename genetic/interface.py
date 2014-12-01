@@ -8,6 +8,7 @@ from time import strftime, gmtime
 from weakref import ref
 from datetime import date, time as time_obj
 import constraint
+import globs
 
 from Tkinter import Tk
 from tkMessageBox import showinfo
@@ -474,8 +475,10 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         # course constraints exist
         course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
         for course in course_constraints:
-            constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
-            course_time_constraint(course, scheduler)
+            # only add constraint if this course exists
+            if course["code"] in globs.course_titles:
+                constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
+                course_time_constraint(course, scheduler)
 
     if yaml_dict["data"]["constraint_list"]["instructor_constraints"] is not None:
         instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
@@ -484,16 +487,18 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 # instructor constraints exist
                 for i in range(len(instr_constraints[type])): # create every constraint of each type
                     this_constraint = instr_constraints[type][i]
-                    if type == "time_pref":
-                        instructor_time_pref(this_constraint, scheduler)
-                    elif type == "max_courses":
-                        max_courses(this_constraint, scheduler)
-                    elif type == "day_pref":
-                        day_pref(this_constraint, scheduler)
-                    elif type == "computer_pref":
-                        computer_pref(this_constraint, scheduler)
-                    elif type == "instructor_break":
-                        instructor_break(this_constraint, scheduler)
+                    # only add constraint if this instructor exists
+                    if this_constraint['instr_name'] in globs.instructors_list:
+                        if type == "time_pref":
+                            instructor_time_pref(this_constraint, scheduler)
+                        elif type == "max_courses":
+                            max_courses(this_constraint, scheduler)
+                        elif type == "day_pref":
+                            day_pref(this_constraint, scheduler)
+                        elif type == "computer_pref":
+                            computer_pref(this_constraint, scheduler)
+                        elif type == "instructor_break":
+                            instructor_break(this_constraint, scheduler)
 
 
 def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
