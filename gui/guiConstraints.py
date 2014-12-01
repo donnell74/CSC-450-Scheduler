@@ -1192,20 +1192,20 @@ def get_description_constraint(constraint_type):
     description = ""
 
     if constraint_type == TYPE_MANUAL_CONCURRENCY:
-        description = "Courses that shouldn't be scheduled in the same time:"
+        description = "Courses that shouldn't be scheduled in the same time:\n"
     elif constraint_type == TYPE_TIME_COURSE:
-        description = "Course shouldn't be held in time:"
+        description = "Course shouldn't be held in time:\n"
     elif constraint_type == TYPE_PARTIAL_SCHEDULING:
-        description = "Course must be partial scheduled:"
+        description = "Course must be partial scheduled:\n"
     elif constraint_type == TYPE_COMPUTER_PREFERENCE:
-        description = "Instructor would prefer to teach classes not requiring computers in a computer lab:"
+        description = "Instructor would prefer to teach classes not requiring computers in a computer lab:\n"
     elif constraint_type == TYPE_DAY:
-        description = "Day(s) instructor prefers to teach:"
+        description = "Day(s) instructor prefers to teach:\n"
     elif constraint_type == TYPE_INSTRUCTOR_BREAK:
-        description = "Instructor would like no classes between:"
+        description = "Instructor would like no classes between:\n"
     elif constraint_type == TYPE_MAX_PER_DAY:
-        description = "Maximum class per day instructor prefer to teach:"
+        description = "Maximum class per day instructor prefer to teach:\n"
     elif constraint_type == TYPE_TIME_INSTRUCTOR:
-        description = "Time instructor prefers to teach:"
+        description = "Time instructor prefers to teach:\n"
 
     return description
