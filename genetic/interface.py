@@ -54,7 +54,8 @@ def get_semester_to_schedule(path_to_yaml):
 
         return (fall_or_spring, semester_year)
 
-    except IOError: # override file not found; guess the semester to schedule
+    except (IOError, TypeError): # override file not found or invalid information entered;
+                                 # guess the semester to schedule
         # "day of year" ranges for the northern hemisphere
         spring_or_summer = range(80, 264)
         # fall_or_winter = everything else
@@ -84,7 +85,7 @@ def get_semester_to_schedule(path_to_yaml):
         return
 
     except Exception as e:
-        print type(e)
+        print e
         return
 
 def get_override(path_to_yaml):
