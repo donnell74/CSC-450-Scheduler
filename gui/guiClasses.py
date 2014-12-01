@@ -1205,7 +1205,7 @@ class MainWindow(Frame):
         return
 
     def run_scheduler(self):
-        
+
         if not self.run_clicked:
             self.view_page.is_constraints_set = False
             self.run_clicked = True
