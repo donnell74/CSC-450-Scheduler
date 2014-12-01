@@ -117,7 +117,58 @@ class TestConstraints(unittest.TestCase):
                                     [shade_instr, False, False])
         good_scheduler.calc_fitness(good_scheduler.weeks[0])
         self.assertEquals(good_scheduler.weeks[0].fitness, 30)
+        
+    def test_instructor_break(self):
+        break_scheduler_fail = interface.create_scheduler_from_file_test("tests/schedules/instructor_break_test.xml")
+        smith_instr = structures.Instructor(name = "Smith") # smith should fail
+        smith_instr.courses = [c for c in break_scheduler_fail.courses if c.code in ("CSC 130 A")]
+        break_scheduler_fail.add_constraint("Smith_break_10:10_12:20", 50,
+                                        constraint.instructor_break_constraint,
+                                        [smith_instr, time(10,10), time(12, 20), 0] )
+        break_scheduler_fail.calc_fitness(break_scheduler_fail.weeks[0])
+        self.assertEquals(break_scheduler_fail.weeks[0].fitness, 0)
+        
+        break_scheduler_pass = interface.create_scheduler_from_file_test("tests/schedules/instructor_break_test.xml")
+        saquer_instr = structures.Instructor(name = "Saquer") # saquer should pass
+        saquer_instr.courses = [c for c in break_scheduler_pass.courses if c.code in ("CSC 131 001", "CSC 131 A")]
+        break_scheduler_pass.add_constraint("Saquer_break_10:10_12:20", 25,
+                                        constraint.instructor_break_constraint,
+                                        [saquer_instr, time(10, 10), time(12, 20), 0] )
+        break_scheduler_pass.calc_fitness(break_scheduler_pass.weeks[0])
+        self.assertEquals(break_scheduler_pass.weeks[0].fitness, 25)
 
+    def test_sequential_time_different_building(self):
+        bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/different_building_test_fail.xml")
+        instructors = interface.create_instructors_from_courses("tests/schedules/different_building_test_fail.xml")
+        bad_scheduler.add_constraint("sequential_time_different_building", 100,
+                                     constraint.sequential_time_different_building_conflict,
+                                     [instructors])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        self.assertEquals(bad_scheduler.weeks[0].fitness, 0)
+
+        good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/different_building_test_pass.xml")
+        good_scheduler.add_constraint("sequential_time_different_building", 100,
+                                     constraint.sequential_time_different_building_conflict,
+                                     [instructors])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        self.assertEquals(good_scheduler.weeks[0].fitness, 100)
+
+    # def test_instructor_conflict(self):
+        # bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_conflict_fail.xml")
+        # instructors = interface.create_instructors_from_courses("tests/schedules/instructor_conflict_fail.xml")
+        # bad_scheduler.add_constraint("instructor conflict", 100,
+                                     # constraint.instructor_conflict,
+                                     # [instructors])
+        # bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        # self.assertEquals(bad_scheduler.weeks[0].fitness, 0)
+
+        # good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_conflict_pass.xml")
+        # instructors = interface.create_instructors_from_courses("tests/schedules/instructor_conflict_pass.xml")
+        # good_scheduler.add_constraint("instructor conflict", 100,
+                                      # constraint.instructor_conflict,
+                                      # [instructors])
+        # good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        # self.assertEquals(good_scheduler.weeks[0].fitness, 100)
 
 if __name__ == "__main__":
     unittest.main()
