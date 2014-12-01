@@ -37,13 +37,13 @@ class TestConstraints(unittest.TestCase):
     def test_lab_constraint(self):
         sample_scheduler.add_constraint("is lab", 30,
                                         constraint.lab_on_tr,
-                                        [sample_scheduler.courses[0]])
+                                        [sample_scheduler.courses[0:1]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 0)
         sample_scheduler.clear_constraints()
         sample_scheduler.add_constraint("is lab", 30,
                                         constraint.lab_on_tr,
-                                        [sample_scheduler.courses[1]])
+                                        [sample_scheduler.courses[1:2]])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
 
@@ -62,7 +62,7 @@ class TestConstraints(unittest.TestCase):
         #bad_time_slot_12 = structures.TimeSlot(start_time="11:00",
         #                                   end_time="12:00",
         #                                   this_room=bad_scheduler.rooms[0])
-        
+
         good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_time_before_test_pass.xml")
         volmar_instr = structures.Instructor(name="Volmar")
         volmar_instr.courses = [c for c in good_scheduler.courses if c.code in ("CSC 232 A","CSC 232 001")]
@@ -88,7 +88,7 @@ class TestConstraints(unittest.TestCase):
         #bad_time_slot_12 = structures.TimeSlot(start_time="11:00",
         #                                   end_time="12:00",
         #                                   this_room=bad_scheduler.rooms[0])
-        
+
         good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_time_after_test_pass.xml")
         volmar_instr = structures.Instructor(name="Volmar")
         volmar_instr.courses = [c for c in good_scheduler.courses if c.code in ("CSC 232 A","CSC 232 001")]
@@ -99,6 +99,7 @@ class TestConstraints(unittest.TestCase):
         #This schedule should pass, fitness should be 30
         self.assertEquals(good_scheduler.weeks[0].fitness, 0)
 
+<<<<<<< HEAD
     def test_all_before_time(self):
         bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/all_before_time_fail.xml")
         saquer_instr = structures.Instructor(name="Saquer")
@@ -180,6 +181,27 @@ class TestConstraints(unittest.TestCase):
         
         
 
+=======
+    def test_instructor_computer_pref(self):
+        bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_preference_computer_fail.xml")
+        shade_instr = structures.Instructor(name="Shade")
+        shade_instr.courses = [c for c in bad_scheduler.courses if c.code in ("CSC 450")]
+        bad_scheduler.add_constraint("Shade_prefers_computers_False", 30,
+                                    constraint.instructor_preference_computer,
+                                    [shade_instr, False, False])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        self.assertEquals(bad_scheduler.weeks[0].fitness, 0)
+
+        good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_preference_computer_pass.xml")
+        shade_instr = structures.Instructor(name="Shade")
+        shade_instr.courses = [c for c in good_scheduler.courses if c.code in ("CSC 450")]
+        good_scheduler.add_constraint("Shade_prefers_computers_False", 30,
+                                    constraint.instructor_preference_computer,
+                                    [shade_instr, False, False])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        self.assertEquals(good_scheduler.weeks[0].fitness, 30)
+
+>>>>>>> ca123806ded65efa1b9cfffdcdd75b4d21d17854
 
 if __name__ == "__main__":
     unittest.main()

@@ -190,7 +190,7 @@ class InstructorConstraint(Page):
         # don't pack this because Time is the default option so computers shouldn't be visible
 
         self.label_computer = Label(self.computer_frame, \
-            text = "Instructor would prefer to teach lecture classes in a classroom with computers:", wraplength = 100)
+            text = "Instructor would prefer to teach classes not requiring computers in a computer lab:", wraplength = 100)
         self.label_computer.pack(side = TOP)
 
         self.computer_options = ["True", "False"]
@@ -433,11 +433,12 @@ class InstructorConstraint(Page):
             self.computer_frame.pack_forget()
             self.max_course_frame.pack_forget()
             self.break_frame.pack()
-        else:
+        else: # time constraint
             self.day_frame.pack_forget()
             self.computer_frame.pack_forget()
             self.max_course_frame.pack_forget()
             self.break_frame.pack_forget()
+            self.time_frame.pack()
 
 #constants
 PARTIAL_SCHEDULING = "Partial Scheduling"
@@ -628,7 +629,7 @@ class TypeManualConcurrency(Frame):
         if len(selection) > 1:
             list_courses_obj = []
             for i in selection :
-                list_courses_obj.append(self.list_of_courses[i])
+                list_courses_obj.append(self.list_of_courses[int(i)])
 
             self.listbox.selection_clear(0, END)
             
@@ -813,20 +814,22 @@ class ConstraintPage(Page):
 
         # PAGES
         self.home_page = HomeConstraintPage(self.content_container)
-        #self.home_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
         self.home_page.pack(anchor = NW, padx = 50)
 
         self.constraints_view = ConstraintsView(self.content_container)
-        #self.constraints_view.place(in_ = self.instructor_page, anchor = E)
-        #self.constraints_view.place(in_ = self.course_page, anchor = E)
+        if len(globs.mainScheduler.constraints) > globs.mainScheduler.num_hard_constraints:
+            for i in range(globs.mainScheduler.num_hard_constraints, len(globs.mainScheduler.constraints)):
+                constraint_name = globs.mainScheduler.constraints[i].name
+                priority = globs.mainScheduler.constraints[i].weight
+                self.constraints_view.add_constraint_listbox(constraint_name, priority)
         self.constraints_view.pack(side = RIGHT, anchor = NE, padx = 50)
 
         self.instructor_page = InstructorConstraint(self.content_container, self.constraints_view)
-        #self.instructor_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+
         #self.instructor_page.pack(side = LEFT)
 
         self.course_page = CourseConstraint(self.content_container, self.constraints_view)
-        #self.course_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
+
         #self.course_page.pack(side = LEFT)
 
         # INITIALIZE WITH HOME PAGE
@@ -966,8 +969,9 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                                 # in break, conflict
                                                 return True
                         elif new_constraint[2] == "computers":          # computer pref
-                            if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
-                                return True
+                            if old_constraint[2] == "computers":
+                                if new_constraint[3] != old_constraint[3]:  # different truthiness; conflict
+                                    return True
                         elif new_constraint[1] == "break":              # break constraint
                             if old_constraint[3] in [new_constraint[2], new_constraint[3]]: 
                                 # if it's on the edge of one of the break times, it's fine
@@ -977,6 +981,10 @@ def constraint_adding_conflict(constraint_name, constraint_list):
                                     if old_constraint[3] > new_constraint[2]: 
                                         # in break, conflict
                                         return True
+                        elif new_constraint[1] == "max":                # max courses
+                            if old_constraint[1] == "max":
+                                # duplicates are already caught, so max_courses conflicts
+                                return True
 
     # if no return True by now, the constraint is fine and doesn't conflict
     return False
@@ -1116,6 +1124,9 @@ def create_max_course_constraint(instructor, max_courses, priority, added_constr
     instructor = pull_instructor_obj(instructor)
 
     constraint_name = "{0}_max_courses_{1}".format(instructor.name, max_courses)
+
+    if okay_to_add_constraint(constraint_name) == False: return
+
     globs.mainScheduler.add_constraint(constraint_name, priority,
                                        constraint.instructor_max_courses,
                                        [instructor, max_courses, is_mandatory])

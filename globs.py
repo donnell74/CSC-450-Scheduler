@@ -5,6 +5,7 @@ def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
 
     yaml_input_path = "genetic/seeds/Input.yaml"
+    yaml_constraint_path = "genetic/seeds/default_constraints.yaml"
 
     # Create XML input from YAMl (Input.yaml)
     if os.path.isfile(yaml_input_path) == False:
@@ -41,34 +42,44 @@ def init(): # call globals.init() from main
             print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
                   " ".join([c.absolute_course for c in prereq.prereqs])'''
 
-        # Add all mandatory constraints here
+        # Add all mandatory/hard constraints here
         mainScheduler.add_constraint("instructor conflict", 0,
                                     constraint.instructor_conflict,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
                                     constraint.sequential_time_different_building_conflict,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("subsequent courses", 0,
                                     constraint.num_subsequent_courses,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("capacity checking", 0,
                                     constraint.ensure_course_room_capacity,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("no overlapping courses", 0,
                                     constraint.no_overlapping_courses,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("computer requirement", 0,
                                     constraint.ensure_computer_requirement,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("course sections at different times", 0,
                                     constraint.course_sections_at_different_times,
-                                    [courses])
+                                    [courses], True)
 
+        labs = []
         for each_course in mainScheduler.courses:
             if each_course.is_lab:
-                mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
-                                             constraint.lab_on_tr, [each_course])
+                labs.append(each_course)
 
+        mainScheduler.add_constraint("labs on tr", 0,
+                                     constraint.lab_on_tr,
+                                     [labs], True)
+
+        mainScheduler.num_hard_constraints = len(mainScheduler.constraints)
+
+        # Create list of default constraints from YAML (default_constraints.yaml)
+        if os.path.isfile(yaml_constraint_path):
+            # found default constraint file
+            interface.create_constraints_from_yaml(yaml_constraint_path, mainScheduler, instructors)
 
     # used for gui strings
     # must be in military time

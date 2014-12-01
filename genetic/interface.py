@@ -6,6 +6,11 @@ import xml.etree.ElementTree as ET
 from scheduler import *
 from time import strftime, gmtime
 from weakref import ref
+from datetime import time as time_obj
+import constraint
+
+from Tkinter import Tk
+from tkMessageBox import showinfo
 
 def create_xml_from_yaml(path_to_yaml):
     """
@@ -52,6 +57,49 @@ def create_xml_from_yaml(path_to_yaml):
 
     def xml_header():
         return "<?xml version='1.0'?>"
+    
+    def valid_credit_hour_input():
+        ''' Validates that course credit hours are 1, 3, or 4.
+            And that a lab is only 1 credit hour.
+            Returns False if credit input is invalid.'''
+        
+        error_title = ''
+        error_message = ''
+        is_valid_input = True
+
+        # check for invalid credit hours
+        for course in course_list:
+            if not course['credit'] in [1, 3, 4] and course['is_lab'] == 0:
+                error_title = 'Error: course credit hours'
+                error_message = 'The course credit hour "' + str(course['credit']) + \
+                                '" is \nnot an acceptable credit hour.' + \
+                                '\nCredit hours must ' + \
+                                'be 1, 3, or 4.\n' + \
+                                '\nPlease change this in:\n' + \
+                                'genetic\seeds\input.yaml'
+                is_valid_input = False
+                show_error_message(error_title, error_message)
+                    
+            if course['is_lab'] == 1 and course['credit'] != 1:
+                error_title = 'Error: lab credit hours'
+                error_message = 'The lab credit hour "' + str(course['credit']) + \
+                                '" is \nnot an acceptable lab credit.' + \
+                                '\nLab credit must be 1 hour.\n' + \
+                                '\nPlease change this in:\n' + \
+                                'genetic\seeds\input.yaml'
+                is_valid_input = False
+                show_error_message(error_title, error_message)
+
+        return is_valid_input
+        
+    def show_error_message(error_title, error_message):
+        ''' Displays an error message '''
+        
+        root = Tk()
+        root.withdraw() # hide tkinter window
+
+        # display tkMessageBox
+        showinfo(error_title, error_message)
 
     try:
         yaml_file = open(path_to_yaml, 'r')
@@ -65,6 +113,9 @@ def create_xml_from_yaml(path_to_yaml):
         time_list_mwf = yaml_data_object['time_list_mwf']
         room_list = yaml_data_object['room_list']
 
+        if not valid_credit_hour_input():
+            exit() # exit the scheduler
+            
         xml_file = open('./genetic/seeds/Input.xml', 'w')
         indent_level = 0
 
@@ -139,12 +190,240 @@ def create_xml_from_yaml(path_to_yaml):
         print(exception_instance)
         return None
 
+
+def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
+    """ Takes an input YAML file (default_constraints.yaml) and generates appropriate
+    constraints, then adds them to the scheduler.
+    NOTE: Helper functions are defined first, and then the parsing and generating begins
+    IN: a YAML file containing all the default constraints
+    OUT: the constraints will be added to the program and displayed in the Added Constraints
+    screen on the constraint page
+    """
+
+    def pull_instructor_obj(instructor_name):
+        """ finds the instructor object for the given name """
+        for instr in instructor_objs:
+            if instructor_name == instr.name:
+                return instr
+
+    def str_to_time(time_str):
+        """ converts a time string ("12:30") into a time obj """
+        t_hr, t_min = time_str.split(":")
+        return time_obj( int(t_hr), int(t_min) )
+
+    def get_priority_value(priority):
+        """ Turns the string value of priority into the
+        appropriate weight (int) value. """
+        priorities = {"Low": 10,
+                      "Medium": 25,
+                      "High": 50
+                      }
+        # Look up number value from dict. Return 0 if mandatory
+        priority = priorities.get(priority, 0)
+        return priority
+
+    def course_time_constraint(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a course
+        time constraint:  course_code, before_after, timeslot, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        constraint_name = constraint_dict["code"] + "_" +\
+                            constraint_dict["before_after"] + "_" \
+                            + constraint_dict["time"]
+
+        course_obj = constraint_dict["code"]
+        if course_obj == "All":
+            course_obj = scheduler.courses
+        else: # find the course object
+            for c in scheduler.courses:
+                if course_obj == c.code: # found it
+                    course_obj = c
+                    break
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        timeslot_obj = str_to_time(constraint_dict["time"])
+        
+        # scheduler.courses is course list
+        if constraint_dict["before_after"] == "before":
+            scheduler.add_constraint(constraint_name,
+                                        priority, 
+                                        constraint.course_before_time,
+                                        [course_obj, timeslot_obj, is_mandatory])
+        else: # after constraint
+            scheduler.add_constraint(constraint_name,
+                                        priority, 
+                                        constraint.course_after_time,
+                                        [course_obj, timeslot_obj, is_mandatory])
+
+
+    def instructor_time_pref(constraint_dict, scheduler):
+        """ This takes in a dictionary of the data required for an
+        instructor time preference constraint.  instr_name, before_after, time, priority.
+        IN:  A dictionary with the appropriate data fields
+        OUT: adds the constraint to the scheduler
+        """
+        constraint_name = constraint_dict["instr_name"] + \
+                            "_prefers_" + \
+                            constraint_dict["before_after"] + \
+                            "_" + constraint_dict["time"]
+
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+
+        instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        timeslot_obj = str_to_time(constraint_dict["time"])
+
+        if constraint_dict["before_after"] == "before":
+            scheduler.add_constraint(constraint_name,
+                                        priority,
+                                        constraint.instructor_time_pref_before,
+                                        [instr_obj, timeslot_obj, is_mandatory] )
+        else: # after
+            scheduler.add_constraint(constraint_name,
+                                        priority,
+                                        constraint.instructor_time_pref_after,
+                                        [instr_obj, timeslot_obj, is_mandatory] )
+
+
+    def max_courses(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor_max_courses constraint.
+        IN:  a dictionary of appropriate data
+        OUT: a max_courses constraint is added to the scheduler
+        """
+        
+        constraint_name = constraint_dict["instr_name"] + \
+                            "_max_courses_" + str(constraint_dict["max_courses"])
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+
+        max_courses = constraint_dict["max_courses"]
+        instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        scheduler.add_constraint(constraint_name,
+                                    priority,
+                                    constraint.instructor_max_courses,
+                                    [instr_obj, max_courses, is_mandatory])
+
+
+    def computer_pref(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor computer preference constraint.
+        IN: a dictionary of appropriate data
+        OUT: a computer_pref constraint added to the scheduler
+        """
+        constraint_name = constraint_dict["instr_name"] + \
+                            "_prefers_computers_" + \
+                            str(constraint_dict["prefers_computers"])
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        prefers_computers = constraint_dict["prefers_computers"]
+
+        scheduler.add_constraint(constraint_name,
+                                    priority,
+                                    constraint.instructor_preference_computer,
+                                    [instr_obj, prefers_computers, is_mandatory])
+
+
+    def day_pref(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor day preference constraint.
+        IN: a dictionary of appropriate data
+        OUT: a day_pref constraint added to the scheduler
+        """
+        constraint_name = constraint_dict["instr_name"] + \
+                            "_prefers_" + constraint_dict["day_code"]
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        day_code = constraint_dict["day_code"].lower()
+
+        if len(day_code) == 0 or len(day_code) == 5:
+            return  # drop silently, bad constraint
+
+        scheduler.add_constraint(constraint_name,
+                                    priority,
+                                    constraint.instructor_preference_day,
+                                    [instr_obj, day_code, is_mandatory])
+
+
+    def instructor_break(constraint_dict, scheduler):
+        """ Takes a dictionary of required data to generate an
+        instructor break constraint.
+        IN: a dictionary of appropriate data
+        OUT: an instructor_break constraint added to the scheduler
+        """
+        constraint_name = constraint_dict["instr_name"] + \
+                            "_break_" + constraint_dict["break_start"] + \
+                            "_" + constraint_dict["break_end"]
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        gap_start = str_to_time(constraint_dict["break_start"])
+        gap_end = str_to_time(constraint_dict["break_end"])
+
+        scheduler.add_constraint(constraint_name,
+                                    priority,
+                                    constraint.instructor_break_constraint,
+                                    [instr_obj, gap_start, gap_end, is_mandatory])
+
+    # begin parsing YAML
+    input_file = file(path_to_yaml, "r")
+    yaml_dict = yaml.load(input_file)
+    
+    if yaml_dict["data"]["constraint_list"]["course_constraints"] is not None:
+        # course constraints exist
+        course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
+        for course in course_constraints:
+            constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
+            course_time_constraint(course, scheduler)
+
+    if yaml_dict["data"]["constraint_list"]["instructor_constraints"] is not None:
+        instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
+        for type in instr_constraints:
+            if instr_constraints[type] is not None:
+                # instructor constraints exist
+                for i in range(len(instr_constraints[type])): # create every constraint of each type
+                    this_constraint = instr_constraints[type][i]
+                    if type == "time_pref":
+                        instructor_time_pref(this_constraint, scheduler)
+                    elif type == "max_courses":
+                        max_courses(this_constraint, scheduler)
+                    elif type == "day_pref":
+                        day_pref(this_constraint, scheduler)
+                    elif type == "computer_pref":
+                        computer_pref(this_constraint, scheduler)
+                    elif type == "instructor_break":
+                        instructor_break(this_constraint, scheduler)
+
+
 def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     """Reads in an xml file and schedules all courses found in it
     IN: path to xml file as string
     OUT: scheduler object with one week based on the xml input"""
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
+    
     instructors = create_instructors_from_courses(path_to_xml)
     instructors_dict = dict(zip([inst.name for inst in instructors],
                            [inst for inst in instructors]))
