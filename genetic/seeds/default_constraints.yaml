@@ -13,30 +13,30 @@ data:
         time: "11:15"
         priority: Medium
     instructor_constraints:
-        time_pref:
-          -
-            instr_name: Smith
-            before_after: before
-            time: "13:25"
-            priority: Medium
-        day_pref:
-          -
-            instr_name: Shade
-            day_code: TR
-            priority: Low
-        computer_pref:
-          -
-            instr_name: Scroggins
-            prefers_computers: True
-            priority: Mandatory
-        max_courses:
-          -
-            instr_name: Liu
-            max_courses: 2
-            priority: Low
-        instructor_break:
-          -
-            instr_name: Vollmar
-            break_start: "08:15"
-            break_end: "11:00"
-            priority: High
+      time_pref:
+        -
+          instr_name: Smith
+          before_after: before
+          time: "13:25"
+          priority: Medium
+      day_pref:
+        -
+          instr_name: Shade
+          day_code: TR
+          priority: Low
+      computer_pref:
+        -
+          instr_name: Scroggins
+          prefers_computers: True
+          priority: Mandatory
+      max_courses:
+        -
+          instr_name: Liu
+          max_courses: 2
+          priority: Low
+      instructor_break:
+        -
+          instr_name: Vollmar
+          break_start: "08:15"
+          break_end: "11:00"
+          priority: High
