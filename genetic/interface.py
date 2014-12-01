@@ -12,6 +12,9 @@ import constraint
 from Tkinter import Tk
 from tkMessageBox import showinfo
 
+## Function that Creates an xml input file (Input.xml) from yaml 
+#  @param path_to_yaml The path_to_yaml parameter
+#  @return none
 def create_xml_from_yaml(path_to_yaml):
     """
     Creates an xml input file (Input.xml) from yaml.
@@ -417,6 +420,10 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                         instructor_break(this_constraint, scheduler)
 
 
+## Function that reads an xml file and schedules all courses found in it 
+#  @param path_to_xml The path_to_xml parameter
+#  @param slot_divide The slot_divide parameter
+#  @return return_schedule
 def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     """Reads in an xml file and schedules all courses found in it
     IN: path to xml file as string
@@ -441,6 +448,10 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     return return_schedule
 
 
+## Function that reads 5 xml file and creates week objects for these seeds
+#  @param list_of_weeks_to_schedule_on The list_of_weeks_to_schedule_on parameter
+#  @param path_to_seeds The path_to_seeds parameter
+#  @return list_of_weeks_to_schedule_on
 def create_weeks_from_seeds(list_of_weeks_to_schedule_on, path_to_seeds):
     """Reads 5 XML files and creates week objects for these seeds
     path_to_seeds should look like directory/seed
@@ -455,6 +466,9 @@ def create_weeks_from_seeds(list_of_weeks_to_schedule_on, path_to_seeds):
     return list_of_weeks_to_schedule_on
 
 
+## Function that creates a list of course objects without an instructors_dict
+#  @param path_to_xml The path_to_xml parameter
+#  @return None
 def create_course_list_from_file_test(path_to_xml):
     """For testing purposes.  Creates a list of course objects without an instructors_dict
     IN: path to xml file as string
@@ -472,6 +486,10 @@ def create_course_list_from_file_test(path_to_xml):
         return None
 
 
+## Function that reads an xml file and creates a list of course objects  
+#  @param path_to_xml The path_to_xml parameter
+#  @param instructors_dict The instructors_dict parameter
+#  @return List of course objects; courses are assigned to instructors
 def create_course_list_from_file(path_to_xml, instructors_dict):
     """Reads an xml file and creates a list of course objects from it
     IN: xml path and an instructors_dict (instructor name, instructor object)
@@ -498,6 +516,9 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         return None
 
 
+## Function that reads an xml file and creates a list of rooms objects  
+#  @param path_to_xml The path_to_xml parameter
+#  @return List of rooms as strings
 def create_room_list_from_file(path_to_xml):
     """Reads an xml file and creates a list of rooms (strings) from it
     IN: path to xml file
@@ -517,6 +538,9 @@ def create_room_list_from_file(path_to_xml):
         return None
 
 
+## Function that reads an xml file and creates a list of time slots  
+#  @param path_to_xml The path_to_xml parameter
+#  @return Tuple of 2 lists of time slots as strings (mwf and tr)
 def create_time_slot_list_from_file(path_to_xml):
     """Reads an xml file and creates lists of time slots (strings) from it for mwf and tr
     IN: path to xml file
@@ -532,6 +556,9 @@ def create_time_slot_list_from_file(path_to_xml):
         return None
 
 
+## Function that reads an xml file and creates a dictionary of extras  
+#  @param path_to_xml The path_to_xml parameter
+#  @return Dictionary of extras
 def create_extras_list_from_file(path_to_xml):
     """Reads an xml file and creates a dictionary of extras
     IN: path to xml file
@@ -552,6 +579,9 @@ def create_extras_list_from_file(path_to_xml):
         return None
 
 
+## Function that reads an xml file and creates a list of unique instructor objects  
+#  @param path_to_xml The path_to_xml parameter
+#  @return List of instructor objects
 def create_instructors_from_courses(path_to_xml):
     """Reads an xml file and creates a list of unique instructor objects
     IN: path to xml file
@@ -644,6 +674,11 @@ instructor="%s">
         out.write("</data>")
 
 
+
+## Function that Exports top 5 valid schedules to csv f 
+#  @param weeks The weeks parameter
+#  @param export_dir The export_dir parameter
+#  @return Up to 5 csv files for top 5 valid schedules
 def export_schedules(weeks, export_dir="./"):
     """Exports top 5 valid schedules to csv
     IN: list of week objects, export directory
@@ -672,6 +707,10 @@ def export_schedules(weeks, export_dir="./"):
         counter += 1
 
 
+## Function that determine first-level prereqs from xml and list of all courses
+#  @param path_to_xml The path_to_xml parameter
+#  @param courses The courses parameter
+#  @return List of prereq objects
 def get_prereqs(path_to_xml, courses):
     """Determine first-level prereqs from xml and list of all courses
     IN: path to xml file, list of course objects
@@ -700,6 +739,10 @@ def get_prereqs(path_to_xml, courses):
         return None
 
 
+## Function that Extends prereqs for prereq of each prereq
+#  @param prereqs The prereqs parameter
+#  @param courses The courses parameter
+#  @return list of prereq objects with extended prereqs accounted for
 def get_extended_prereqs(prereqs, courses):
     """Extends prereqs for prereq of each prereq
     IN: list of prereq objects, list of all course objects

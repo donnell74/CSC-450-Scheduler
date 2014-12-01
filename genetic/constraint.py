@@ -1,6 +1,11 @@
 from structures import *
 from datetime import time, timedelta
 
+## Function that iterates through courses in the schedule
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return partial_weight Checking to make sure none are after a specific time
 def all_before_time(this_week, args):
     """Iterates through courses in the schedule to make sure
      none are before a specific time
@@ -25,6 +30,11 @@ def all_before_time(this_week, args):
         return partial_weight
 
 
+## Function that iterates through courses in the schedule
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return partial_weight Checking to make sure none are after a specific time
 def all_after_time(this_week, args):
     """Iterates through courses in the schedule to make sure
      none are after a specific time
@@ -49,6 +59,11 @@ def all_after_time(this_week, args):
 
 
 
+## Function that find the course and check that it's time is before the constraining slot time
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 If hold else 0 
 def course_before_time(this_week, args):
     """find the course and check that its time is before the constraining slot
     args should be [<course>, <timeslot> [, is_mandatory] ]"""
@@ -67,13 +82,18 @@ def course_before_time(this_week, args):
     return 1 if hold else 0
 
 
+## Function that finds the course and check that it's time is after the constraining slot time
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 If hold else 0 
 def course_after_time(this_week, args):
     """find the course and check that its time is after the constraining slot
     args should be [<course>, <timeslot> [, is_mandatory] ]"""
     if len(args) > 2: #includes mandatory boolean
         is_mandatory = args[2]
 
-    hold = this_week.find_course(args[0])[0].start_time > args[1]
+    hold = this_week.find_course(args[0])[0].start_time >= args[1]
 
     if is_mandatory:
         if hold == 0:  # hold fails
@@ -85,6 +105,11 @@ def course_after_time(this_week, args):
     return 1 if hold else 0
 
 
+## Function that find the course and check that if its a lab and its on tr
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 If hold else 0 
 def lab_on_tr(this_week, args):
     lab_courses = args[0]
     for each_lab in lab_courses:
@@ -94,6 +119,11 @@ def lab_on_tr(this_week, args):
     return 1
 
 
+## Function that checks if a given course its in the morning before 12pm
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 If hold else 0 
 def morning_class(this_week, args):
     """Checks if the given course starts before 12
     args should be [<course>]"""
@@ -104,6 +134,11 @@ def morning_class(this_week, args):
     return 1 if holds else 0
 
 
+## Function that finds the specific times before when the instructor wants to teach
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return Partial_weight
 def instructor_time_pref_before(this_week, args):
     """args should be a list containing this_instructor, courses, and
     before_time;
@@ -135,6 +170,11 @@ def instructor_time_pref_before(this_week, args):
 
 
 
+## Function that finds the specific times after when the instructor wants to teach
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return Partial_weight
 def instructor_time_pref_after(this_week, args):
     """args should be a list containing this_instructor, courses,
     and after_time
@@ -167,6 +207,11 @@ def instructor_time_pref_after(this_week, args):
 
 
 
+## Function that checks for instructors teaching multiple courses at once. 
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 or 0 if pass of fails
 def instructor_conflict(this_week, args):
     """
     Checks for instructors teaching multiple courses at once.  If none are found,
@@ -191,6 +236,10 @@ def instructor_conflict(this_week, args):
     return 1
 
 
+## Function that returns the minutes
+#  
+#  @param a_time The a_time parameter
+#  @return return raw amount of minutes for the sake of comparison
 def get_minutes(a_time):
     """
     return raw amount of minutes for the sake of comparison
@@ -198,6 +247,11 @@ def get_minutes(a_time):
     return a_time.hour * 60 + a_time.minute
 
 
+## Function that returns true if timeslots are sequential, else false. 
+#  @param timslot1
+#  @param timeslot2 The this_week parameter
+#  @param time_threshold
+#  @return result
 def times_are_sequential(timeslot1, timeslot2, time_threshold = 15):
     """
     return true if timeslots are sequential, else false
@@ -209,6 +263,12 @@ def times_are_sequential(timeslot1, timeslot2, time_threshold = 15):
     return result
 
 
+## Function that checks if an instructor teaches a course in one bulding and in the following
+## timeslot a different building.
+#  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 or 0
 def sequential_time_different_building_conflict(this_week, args):
     """
     Checks if an instructor teaches a course in one bulding and in the following
@@ -238,6 +298,10 @@ def sequential_time_different_building_conflict(this_week, args):
     return 1
 
 
+## Function that checks which days the instructor will like to lecture 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return partial_credit
 def instructor_preference_day(this_week, args):
     """Check if instructor's day preference holds or not
     Args should be [instructor, list_of_day_codes]"""
@@ -267,6 +331,10 @@ def instructor_preference_day(this_week, args):
         return partial_credit
 
 
+## Function that checks If an instructor prefers to teach in a class with or without computers  
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return partial_credit.
 def instructor_preference_computer(this_week, args):
     """If an instructor prefers to teach in a class with
     or without computers, validate the week on this criteria.
@@ -309,6 +377,10 @@ def instructor_preference_computer(this_week, args):
 
 
 
+## Function that allows an instructor to specify a gap where they do not want to teach any courses. 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return partial_weight.
 def instructor_break_constraint(this_week, args):
     """ Allows an instructor to specify a gap where they do not
     want to teach any courses.  (Ex: a lunch break)
@@ -345,6 +417,10 @@ def instructor_break_constraint(this_week, args):
         return partial_weight
 
 
+## Function that checks if time overlaps 
+#  @param timeslot1 The timeslot1 parameter
+#  @param timeslot2 The timeslot2 parameter
+#  @return  True or False
 def is_overlap(timeslot1, timeslot2):
     """Return true if timeslots overlap else false"""
     if timeslot1.start_time < timeslot2.start_time:
@@ -360,6 +436,10 @@ def is_overlap(timeslot1, timeslot2):
 
     return False
 
+## Function that checks that all timeslots do not overlap any other
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 1 or 0
 def no_overlapping_courses(this_week, args):
     """Check that all timeslots do not overlap any other
     timeslots"""
@@ -384,6 +464,10 @@ def no_overlapping_courses(this_week, args):
     return 1
 
 
+## Function that makes sure that an instructor does not have more than 2 back-to-back classes 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 0 or 1
 def num_subsequent_courses(this_week, args):
     """An instructor may not have more than 2 courses back-to-back
     Args should be [list_of_instructors]"""
@@ -418,6 +502,10 @@ def num_subsequent_courses(this_week, args):
     return 1
 
 
+## Function that makes sure that any course assigned to a room is the right capacity 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 0 or 1
 def ensure_course_room_capacity(this_week, args):
     """A course must be assigned to a room with enough capacity to
     hold the course's capacity."""
@@ -430,6 +518,10 @@ def ensure_course_room_capacity(this_week, args):
     return 1
 
 
+## Function that checks if a course specified has specified required computers assigned 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 0 or 1
 def ensure_computer_requirement(this_week, args):
     """ If a course is specified as requiring computers, its assigned
         room must also have computers to make its week valid."""
@@ -441,6 +533,10 @@ def ensure_computer_requirement(this_week, args):
 
     return 1
 
+## Function that checks that an instructor is not scheduled more classes per day than specified. 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 0 or 1
 def instructor_max_courses(this_week, args):
     """An instructor should not be scheduled more classes per day
     than the number they specified in the GUI.
@@ -470,6 +566,9 @@ def instructor_max_courses(this_week, args):
     return 1
 
 
+## Function that counts the number of true values in a list and returns the partial credit 
+#  @param results_list The results_list parameter
+#  @return partial_weight.
 def get_partial_credit(results_list):
     """ Counts the number of true values in a list and returns the
         partial credit value for the constraint weight.
@@ -506,6 +605,10 @@ class ConstraintCalcFitnessError(Exception):
         return repr(self.value)
 
 
+## Function that ensures different sections of a course with the same absolute name 
+#  @param this_week The this_week parameter
+#  @param args The args parameter
+#  @return 0 and 1
 def course_sections_at_different_times(this_week, arg):
     """ Ensures that different sections of a course with the same absolute name
     such as CSC 130 001 or 002, are not scheduled at the same time.
