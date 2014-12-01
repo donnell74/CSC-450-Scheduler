@@ -15,7 +15,9 @@ def init(): # call globals.init() from main
                       "'Input.xml' in ./genetic/seeds/ and try again")
     else:
         interface.create_xml_input_from_yaml(yaml_input_path)
-        semester_to_schedule = interface.get_semester_to_schedule(yaml_override_path)
+
+    # figure out which semester we're scheduling; guess if not specified in override
+    semester_to_schedule = interface.get_semester_to_schedule(yaml_override_path)
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"
