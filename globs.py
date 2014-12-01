@@ -3,21 +3,24 @@ import os
 
 def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, \
-           instructors_list ,mainScheduler, start_times, end_times, semester_to_schedule
+           instructors_list, instructors_dict, mainScheduler, \
+           start_times, end_times, semester_to_schedule
 
     yaml_input_path = "genetic/seeds/Input.yaml"
+    # yaml_input_path = "genetic/seeds/global.yaml"
     yaml_override_path = "genetic/seeds/override.yaml"
     yaml_constraint_path = "genetic/seeds/default_constraints.yaml"
+
+    # figure out which semester we're scheduling; guess if not specified in override
+    semester_to_schedule = interface.get_semester_to_schedule(yaml_override_path)
 
     # Create XML input from YAMl (Input.yaml)
     if not os.path.isfile(yaml_input_path):
         raise IOError("No valid input found. Please put put an input seed named 'Input.yaml' or " +
                       "'Input.xml' in ./genetic/seeds/ and try again")
     else:
-        interface.create_xml_input_from_yaml(yaml_input_path)
-
-    # figure out which semester we're scheduling; guess if not specified in override
-    semester_to_schedule = interface.get_semester_to_schedule(yaml_override_path)
+        # take into account override and output correct xml
+        interface.create_xml_input_from_yaml(yaml_input_path, yaml_override_path)
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"
@@ -27,12 +30,12 @@ def init(): # call globals.init() from main
     courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
     rooms = interface.create_room_list_from_file(xml_input_path)
     time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(xml_input_path)
+
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
     time_slot_divide = 2 #todo: remove this from xml
-    #DO NOT DO THIS AGAIN
-    #GREG IS SORRY
+
     try:
         mainScheduler
     except:

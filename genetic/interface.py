@@ -13,6 +13,33 @@ import globs
 from Tkinter import Tk
 from tkMessageBox import showinfo
 
+def course_has_all_attributes(course):
+    """
+    Determine if a course object (built from yaml override, not a true Course object)
+    has all requisite properties (code, period, credit, instructor,
+                                  capacity, needs_computers, is_lab)
+    IN: course object from yaml override
+    OUT: True if course has all attributes else False
+    """
+    required_attributes = ["code", "period", "credit", "instructor", "capacity", "needs_computers", "is_lab"]
+    for attribute in required_attributes:
+        if attribute not in course:
+            return False
+    return True
+
+def room_has_all_attributes(room):
+    """
+    Determine if a room object (built from yaml override, not a true Room object)
+    has all requisite properties (building, number, capacity, has_computers)
+    IN: room object from yaml override
+    OUT: True if room has all attributes else False
+    """
+    required_attributes = ["building", "number", "capacity", "has_computers"]
+    for attribute in required_attributes:
+        if attribute not in room:
+            return False
+    return True
+
 def get_semester_to_schedule(path_to_yaml):
     """
     Given the path to the override file, return the specific semester to be planned.
@@ -88,10 +115,7 @@ def get_semester_to_schedule(path_to_yaml):
         print e
         return
 
-def get_override(path_to_yaml):
-    pass
-
-def create_xml_input_from_yaml(path_to_yaml):
+def create_xml_input_from_yaml(path_to_global, path_to_override):
     """
     Creates an xml input file (Input.xml) from yaml.
     IN: path to yaml input
@@ -194,12 +218,27 @@ def create_xml_input_from_yaml(path_to_yaml):
         # display tkMessageBox
         showinfo(error_title, error_message)
 
-    try:
-        yaml_file = open(path_to_yaml, 'r')
-        yaml_dict = yaml.load(yaml_file)
-        yaml_file.close()
+    def this_course_in_course_list(course_code, course_list):
+        for course in course_list:
+            if course_code == course['code']:
+                return True
+        return False
 
-        yaml_data_object = yaml_dict['data']['schedule']
+    def update_attribute_in_course_list(course_code, attr, new_attr, course_list):
+        try:
+            for course in course_list:
+                if course_code == course['code']:
+                    course[attr] = str(new_attr)
+        except:
+            print "There was a problem with updating '" + str(attr) + "' for " + str(course_code)
+        return course_list
+
+    try:
+        global_file = open(path_to_global, 'r')
+        global_dict = yaml.load(global_file)
+        global_file.close()
+
+        yaml_data_object = global_dict['data']['schedule']
         schedule_name = yaml_data_object['name']
         course_list = yaml_data_object['course_list']
         time_list_tr = yaml_data_object['time_list_tr']
@@ -209,6 +248,77 @@ def create_xml_input_from_yaml(path_to_yaml):
         if not valid_credit_hour_input():
             exit() # exit the scheduler
 
+        override_file = open(path_to_override, 'r')
+        override_dict = yaml.load(override_file)
+        override_file.close()
+
+        course_overrides = override_dict['data']['course_list']
+        room_overrides = override_dict['data']['room_list']
+
+        # if there are overrides, update the global vars before outputting
+        if course_overrides:
+            for this_course in course_overrides:
+                # at least the course code must be specified
+                if 'code' in this_course:
+                    this_code = this_course['code']
+                    if this_course_in_course_list(this_code, course_list):
+                        # course already exists; modify information
+
+                        if 'period' in this_course:
+                            new_period = this_course['period']
+                            course_list = update_attribute_in_course_list(this_code, "period",
+                                                                          new_period, course_list)
+
+                        if 'instructor' in this_course:
+                            new_instructor = this_course['instructor']
+                            course_list = update_attribute_in_course_list(this_code, "instructor",
+                                                                          new_instructor, course_list)
+
+                        if 'prereq' in this_course:
+                            new_prereq = this_course['prereq']
+                            course_list = update_attribute_in_course_list(this_code, "prereq",
+                                                                          new_prereq, course_list)
+
+                        if 'capacity' in this_course:
+                            new_capacity = this_course['capacity']
+                            course_list = update_attribute_in_course_list(this_code, "capacity",
+                                                                          new_capacity, course_list)
+
+                        if 'needs_computers' in this_course:
+                            new_needs_computers = this_course['needs_computers']
+                            course_list = update_attribute_in_course_list(this_code, "needs_computers",
+                                                                          new_needs_computers, course_list)
+
+                        if 'is_lab' in this_course:
+                            new_is_lab = this_course['is_lab']
+                            course_list = update_attribute_in_course_list(this_code, "is_lab",
+                                                                          new_is_lab, course_list)
+
+                    # course does not already exist; check for required information
+                    elif course_has_all_attributes(this_course):
+                        new_course = {'code':               this_course['code'],
+                                      'period':             this_course['period'],
+                                      'credit':             this_course['credit'],
+                                      'instructor':         this_course['instructor'],
+                                      'prereq':             this_course['prereq'],
+                                      'capacity':           this_course['capacity'],
+                                      'needs_computers':    this_course['needs_computers'],
+                                      'is_lab':             this_course['is_lab']}
+                        course_list.append(new_course)
+                    else:
+                        print "Incomplete information supplied in the override for " + \
+                            this_course['code'] + ". Ignoring..."
+
+        if room_overrides:
+            for this_room in room_overrides:
+                if room_has_all_attributes(this_room):
+                    new_room = {"building": this_room['building'],
+                                "number": this_room['number'],
+                                "capacity": this_room['capacity'],
+                                "has_computers": this_room['has_computers']}
+                    room_list.append(new_room)
+
+        # now that we have dealt with any existing overrides, output to xml
         xml_file = open('./genetic/seeds/Input.xml', 'w')
         indent_level = 0
 
