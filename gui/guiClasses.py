@@ -113,9 +113,11 @@ class ViewPage(Page):
     def __init__(self, root):
         Frame.__init__(self, root)
 
-        self.head_label = Label(self, text="View Schedules",
+        head_text = "Schedules for {0} {1}".format(globs.semester_to_schedule[0],
+                                                   globs.semester_to_schedule[1])
+        self.head_label = Label(self, text = head_text,
                                 font = (font_style, size_h2))
-        self.head_label.pack()
+        self.head_label.pack(pady = (10, 0))
 
         self.is_run_clicked = False
         self.cached_constraints = None
