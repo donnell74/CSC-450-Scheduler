@@ -3,7 +3,7 @@ import os
 
 def init(): # call globals.init() from main
     global courses, course_titles, rooms, time_slots, instructors, \
-           mainScheduler, start_times, end_times, semester_to_schedule
+           instructors_list ,mainScheduler, start_times, end_times, semester_to_schedule
 
     yaml_input_path = "genetic/seeds/Input.yaml"
     yaml_override_path = "genetic/seeds/override.yaml"
@@ -21,6 +21,7 @@ def init(): # call globals.init() from main
     xml_input_path = "genetic/seeds/Input.xml"
     instructors = interface.create_instructors_from_courses(xml_input_path)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
+    instructors_list = set(instructors_dict.keys())
     courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
     rooms = interface.create_room_list_from_file(xml_input_path)
     time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(xml_input_path)
