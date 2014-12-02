@@ -204,24 +204,92 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
-            this_week.constraints[each_constraint.name] = [each_fitness,
+            this_week.constraints[each_constraint.name] = [each_fitness["score"],
                     each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
                 total_to_be_valid += 1
-                number_valid += each_fitness
+                number_valid += each_fitness["score"]
                 #print(each_constraint.name)
             else:
-                total_fitness += each_fitness
+                total_fitness += each_fitness["score"]
 
         this_week.fitness = total_fitness
         this_week.num_valid = number_valid
 
         #print(this_week.constraints)
 
+
+    ## Mutates a schedule by changing one course based off a random constraint
+    #  @param self
+    #  @param this_week A week to modify
+    def guided_mutate(self, this_week):
+        # deep copy the week so we can't drop the fitness score
+        copy_of_this_week = this_week.deep_copy()
+
+        # get a list of all failed constraints
+        failed_constraints = []
+        for each_constraint in self.constraints:
+            constraint_result = each_constraint.get_fitness(copy_of_this_week)
+            if each_constraint.weight != 0 and \
+               constraint_result["score"] != each_constraint.weight:
+                failed_constraints.append((each_constraint, constraint_result))
+
+        # randomly select a failed constraint
+        total_failed = len(failed_constraints)
+        if total_failed > 0:
+            choice = randint(0, total_failed - 1)
+            selected_constraint = failed_constraints[choice][1]
+        else:
+            print("No failed constraints")
+            return
+
+        # randomly select a course from the select constraint
+        total_failed_courses = len(selected_constraint["failed"])
+        if total_failed_courses > 0:
+            selected_course = selected_constraint["failed"][randint(0, total_failed_courses - 1)]
+        else:
+            print("No courses for failed constraint")
+            return
+
+        print("Trying to improve: ", failed_constraints[choice][0].name)
+        print("Trying to reschedule: ", selected_course)
+
+        starting_len = len(selected_constraint["failed"])
+        GUIDED_MAX_TRIES = 100
+        guided_counter = 0
+        while guided_counter < GUIDED_MAX_TRIES:
+            # unschedule and then reschedule the course
+            copy_of_this_week.unschedule_course(selected_course) 
+            self.randomly_fill_schedule(copy_of_this_week, [selected_course], 
+                                        copy_of_this_week.find_empty_time_slots())
+    
+
+            copy_of_this_week.valid = True # reset the valid so calc_fitness works correctly
+            copy_of_this_week.update_sections(self.courses)
+            self.calc_fitness(copy_of_this_week)
+            result = failed_constraints[choice][0].get_fitness(copy_of_this_week)
+            if len(result["failed"]) < starting_len and copy_of_this_week.valid:
+                print("Rescheduled: ", selected_course)
+                if len(result["failed"]) == 0:
+                    break
+                else:
+                    total_failed_courses = len(result["failed"])
+                    selected_course = result["failed"][randint(0, total_failed_courses - 1)]
+                    guided_counter += 1
+                    starting_len -= 1
+                    print("Trying to reschedule: ", selected_course)
+            else:
+                guided_counter += 1
+
+        # make sure we don't make things worse
+        if copy_of_this_week.valid and copy_of_this_week.fitness >= this_week.fitness:
+            print("Keeping mutant with: ", copy_of_this_week.fitness)
+            self.weeks.append(copy_of_this_week)
+
+
     ## Mutates a schedule by changing the courses time
     #  @param self
-    #  @param  A function that modifies week  in a random way 
-    #  @return this_week
+    #  @param  A week to modify
     def mutate(self, this_week):
         """Mutates a schedule by changing a course's time"""
         empty_slots = this_week.find_empty_time_slots()
@@ -407,6 +475,7 @@ class Scheduler:
             raise BreedError("An element in weeks is not a Week object")
 
 
+        print("Max: ", max(i.fitness for i in self.weeks))
         list_of_children = []
         # combinations...(ex) 5 choose 2
         for each_week in range(len(self.weeks) - 1):
@@ -487,6 +556,7 @@ class Scheduler:
             else:
                 self.weeks = self.weeks[:weeks_to_keep]
 
+
             return valid_weeks
 
         if not self.paused:
@@ -508,8 +578,6 @@ class Scheduler:
                 counter += 1
                 continue
                 #todo: error out if never have a complete week
-            else:
-                self.generate_starting_population(5)
 
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
@@ -525,19 +593,45 @@ class Scheduler:
                 print('Min fitness of results is', str(min(i.fitness for i in self.weeks)))
                 break
 
-            print("Minimum fitness of the top schedules of the generation:",
-                  min(i.fitness for i in self.weeks))
+            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
+
+            if len(self.weeks) >= 5:
+                top_5_min = min(i.fitness for i in self.weeks[0:5])
+                top_5_avg = reduce(lambda x, y: x+y, [w.fitness for w in self.weeks[0:5]]) / 5
+                print("Minimum fitness of the top schedules of the generation:", top_5_min)
+                print("Average fitness of the top schedules of the generation:", top_5_avg)
+                if top_5_min == top_5_avg and top_5_min != self.max_fitness:
+                    print("Invoking guided mutatation")
+                    
+                    # decide a week and mutate it
+                    choice = randint(0, 4)
+                    self.guided_mutate(self.weeks[choice])
+                    self.weeks[choice].update_sections(self.courses)
+                    self.calc_fitness(self.weeks[choice])
+
+                    # print out results
+                    top_5_min = min(i.fitness for i in self.weeks[0:5])
+                    top_5_avg = reduce(lambda x, y: x+y, [w.fitness for w in self.weeks[0:5]]) / 5
+                    print("Minimum fitness of the top schedules after guided mutation:", top_5_min)
+                    print("Average fitness of the top schedules after guided mutation:", top_5_avg)
+
             # self.gui_loading_info2 = "Minimum fitness of the top schedules of the generation: " + \
             #                          str(min(i.fitness for i in self.weeks))
 
-            print("Number of valid weeks for the generation:", str(len(valid_weeks)))
             # self.gui_loading_info3 = "Number of valid weeks for the generation: " + \
             #                          str(len(valid_weeks))
 
-            if min(i.fitness for i in self.weeks) == self.max_fitness and \
-              len(self.weeks) >= 5 and len(valid_weeks) >= 5:
-                break
+            if len(self.weeks) >= 5:
+                if min(i.fitness for i in self.weeks[0:5]) == self.max_fitness and \
+                   len(valid_weeks) >= 5:
+                    break
 
+            # prepare for breed
+            self.generate_starting_population(5)
+            for each_week in self.weeks:
+                each_week.update_sections(self.courses)
+                self.calc_fitness(each_week)
+            # breed
             print("Breed started with ", len(self.weeks), " weeks.")
             self.breed()
             print("Breed complete")
