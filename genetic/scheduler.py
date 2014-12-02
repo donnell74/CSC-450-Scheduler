@@ -188,6 +188,9 @@ class Scheduler:
     def delete_list_constraints(self, constraint_name_list):
         """Removes list constraints from schedule"""
         for constraint_name in constraint_name_list:
+            if "Avail" in constraint_name or\
+               "NotAvail" in constraint_name:
+               self.delete_room_avail(constraint_name)
             for constraint_obj in self.constraints:
                 if constraint_name == constraint_obj.name:
                     self.max_fitness -= constraint_obj.weight
@@ -234,6 +237,23 @@ class Scheduler:
         print("self.rooms_avail updated to: ")
         print(self.rooms_avail)
         
+     
+    def delete_room_avail(self, constraint_name):
+        tokens = constraint_name.split('_')
+        tokens[1] = '+' if tokens[1] == "Avail" else '-'
+        room = tokens[0]
+        tokens = (tokens[1], tokens[4].lower(), tokens[2], tokens[3])
+
+        
+        if self.rooms_avail.has_key(room):
+            this_room_avail = self.rooms_avail[room]
+            for counter in range(len(this_room_avail)):
+                if this_room_avail[counter] == tokens:
+                    self.rooms_avail[room].pop(counter)
+                    break
+                    
+        if not self.rooms_avail[room]:
+            del self.rooms_avail[room]
 
     ## Mutates a schedule by changing one course based off a random constraint
     #  @param self
