@@ -34,20 +34,23 @@ class HomePage(Page):
 
         semester_info = "Semester to schedule: {0} {1}".format(globs.semester_to_schedule[0],
                                                                globs.semester_to_schedule[1])
-        self.semester_label = Label(self, text = semester_info, font = (font_style, size_h2))
+        self.semester_label = Label(self, text = semester_info, font = (font_style, size_p))
         self.semester_label.pack()
 
         semester_additional_info = "(If this is incorrect, please specify in the override file.)"
-        self.semester_additional_label = Label(self, text = semester_additional_info, font = (font_style, size_p))
-        self.semester_additional_label.pack(pady = (0, 20))
+        self.semester_additional_label = Label(self, text = semester_additional_info, font = (font_style, size_l))
+        self.semester_additional_label.pack(pady = (0, 15))
 
-        paragraph_text = "User Guide: step-by-step\n\n" +\
-                         "1.) Click RUN to begin generating CSC schedules.\n\n" +\
+        
+        guide_title_text = "User Guide: step-by-step"
+        paragraph_text = "1.) Click RUN to begin generating CSC schedules.\n\n" +\
                          "a.) OPTIONAL: Click the Constraint button to \ngenerate custom schedules.\n\n" +\
                          "2.) After the scheduling is finished click on the View \nbutton" +\
-                         " to view the schedules.\n"
-        self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
-        self.description_label.pack(pady = (0, 10))
+                         " to view the schedules."
+        self.guide_title_heading = Label(self, text = guide_title_text, font = (font_style, size_p))
+        self.guide_title_heading.pack(pady = (0, 5))
+        self.description_label = Label(self, text = paragraph_text, font = (font_style, size_l))
+        self.description_label.pack(pady = (0, 15))
 
         runtime_option_text = "Choose a run speed:"
         self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
