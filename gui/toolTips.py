@@ -15,8 +15,8 @@ class ToolTips(object):
         self.buttons = ['Home',
                         'Constraint',
                         'View',
-                        'Misc',
                         'RUN',
+                        'Misc',
                         'Schedule 1',
                         'Schedule 2',
                         'Schedule 3',
@@ -30,8 +30,8 @@ class ToolTips(object):
         self.tips = {self.buttons[0] : 'Return home.',
                      self.buttons[1] : 'Make a custom schedule.',
                      self.buttons[2] : 'View the schedules.',
-                     self.buttons[3] : 'Misc',
-                     self.buttons[4] : 'Generate schedules.'}
+                     self.buttons[3] : 'Generate schedules.',
+                     self.buttons[4] : 'Misc'}
 
         # x position of a tool tip
         self.tip_x_pos = {self.buttons[0] : 150,
