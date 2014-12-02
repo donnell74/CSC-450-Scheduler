@@ -429,7 +429,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         priority = priorities.get(priority, 0)
         return priority
 
-    def course_time_constraint(constraint_dict, scheduler):
+    def course_time(constraint_dict, scheduler):
         """ Takes a dictionary of data required for a course
         time constraint:  course_code, before_after, timeslot, priority.
         IN: a dictionary with appropriate data fields
@@ -466,6 +466,107 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                                         priority,
                                         constraint.course_after_time,
                                         [course_obj, timeslot_obj, is_mandatory])
+
+
+    def course_day(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a course
+        day constraint:  code, day_code, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        constraint_name = constraint_dict["code"] + "_" + constraint_dict["day_code"]
+
+        course_obj = constraint_dict["code"]
+        for c in scheduler.courses:
+            if course_obj == c.code: # found it
+                course_obj = c
+                break
+
+        day_code = constraint_dict["day_code"].lower()
+
+        if len(day_code) == 0 or len(day_code) == 5:
+            return  # drop silently, bad constraint
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        
+        scheduler.add_constraint(constraint_name,
+                                    priority, 
+                                    constraint.partial_schedule_day,
+                                    [course_obj, day_code, is_mandatory])
+
+
+    def course_room(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a course
+        room constraint:  code, rooms, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        rooms = constraint_dict["rooms"]
+        constraint_name = constraint_dict["code"] + "_" + rooms[0]
+        if len(rooms) > 1:
+            constraint_name += "..."
+
+        course_obj = constraint_dict["code"]
+        for c in scheduler.courses:
+            if course_obj == c.code: # found it
+                course_obj = c
+                break
+
+        if len(rooms) == 0:
+            return  # drop silently, bad constraint
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        
+        scheduler.add_constraint(constraint_name,
+                                    priority, 
+                                    constraint.partial_schedule_room,
+                                    [course_obj, rooms, is_mandatory])
+
+
+    def avoid_overlap(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a manual
+        concurrence (avoid conflict) constraint:  code,
+        start_time, end_time, courses, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        courses = constraint_dict["courses"]
+        constraint_name = "avoid overlap" + "_" + constraint_dict["code"] + "_" + courses[0]
+        if len(courses) > 1:
+            constraint_name += "..."
+
+        course_objs = []
+        for each_course in courses:
+            for c in scheduler.courses:
+                if each_course == c.code: # found it
+                    course_objs.append(c)
+                    break
+
+        if len(courses) == 0:
+            return  # drop silently, bad constraint
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+
+        start_time = str_to_time(constraint_dict["start_time"])
+        end_time = str_to_time(constraint_dict["end_time"])
+        
+        scheduler.add_constraint(constraint_name,
+                                    priority, 
+                                    constraint.avoid_overlap,
+                                    [course_objs, start_time,
+                                    end_time, is_mandatory])
 
 
     def instructor_time_pref(constraint_dict, scheduler):
@@ -601,10 +702,19 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     if yaml_dict["data"]["constraint_list"]["course_constraints"] is not None:
         # course constraints exist
         course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
-        for course in course_constraints:
-            # only add constraint if this course exists
-            constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
-            course_time_constraint(course, scheduler)
+        for type in course_constraints:
+            if course_constraints[type] is not None:
+                # course constraints exist
+                for i in range(len(course_constraints[type])): # create each constraint of each type
+                    this_constraint = course_constraints[type][i]
+                    if type == "time":
+                        course_time(this_constraint, scheduler)
+                    elif type == "day":
+                        course_day(this_constraint, scheduler)
+                    elif type == "room":
+                        course_room(this_constraint, scheduler)
+                    elif type == "avoid_overlap":
+                        avoid_overlap(this_constraint, scheduler)
 
     if yaml_dict["data"]["constraint_list"]["instructor_constraints"] is not None:
         instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]

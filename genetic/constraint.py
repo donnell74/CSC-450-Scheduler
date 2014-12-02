@@ -2,7 +2,7 @@ from structures import *
 from datetime import time, timedelta
 
 ## Function that iterates through courses in the schedule
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return partial_weight Checking to make sure none are after a specific time
@@ -20,7 +20,7 @@ def all_before_time(this_week, args):
         result = course_before_time(this_week, [c, args[1], is_mandatory])["score"]
         holds.append(result)
         if result == False:
-            reval["failed"].append(c)
+            reval["failed"].append(c) 
 
 
     if is_mandatory:
@@ -35,7 +35,7 @@ def all_before_time(this_week, args):
 
 
 ## Function that iterates through courses in the schedule
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return partial_weight Checking to make sure none are after a specific time
@@ -67,10 +67,10 @@ def all_after_time(this_week, args):
 
 
 ## Function that find the course and check that it's time is before the constraining slot time
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
-#  @return 1 If hold else 0
+#  @return 1 If hold else 0 
 def course_before_time(this_week, args):
     """find the course and check that its time is before the constraining slot
     args should be [<course>, <timeslot> [, is_mandatory] ]"""
@@ -94,10 +94,10 @@ def course_before_time(this_week, args):
 
 
 ## Function that finds the course and check that it's time is after the constraining slot time
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
-#  @return 1 If hold else 0
+#  @return 1 If hold else 0 
 def course_after_time(this_week, args):
     """find the course and check that its time is after the constraining slot
     args should be [<course>, <timeslot> [, is_mandatory] ]"""
@@ -120,10 +120,10 @@ def course_after_time(this_week, args):
 
 
 ## Function that find the course and check that if its a lab and its on tr
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
-#  @return 1 If hold else 0
+#  @return 1 If hold else 0 
 def lab_on_tr(this_week, args):
     reval = {"score": 1, "failed": []}
     lab_courses = args[0]
@@ -134,11 +134,11 @@ def lab_on_tr(this_week, args):
             reval["score"] = 0
             reval["failed"].append(each_lab)
 
-    return reval
+    return reval 
 
 
 ## Function that finds the specific times before when the instructor wants to teach
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return Partial_weight
@@ -176,7 +176,7 @@ def instructor_time_pref_before(this_week, args):
 
 
 ## Function that finds the specific times after when the instructor wants to teach
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return Partial_weight
@@ -214,8 +214,8 @@ def instructor_time_pref_after(this_week, args):
     return reval
 
 
-## Function that checks for instructors teaching multiple courses at once.
-#
+## Function that checks for instructors teaching multiple courses at once. 
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 1 or 0 if pass of fails
@@ -231,9 +231,10 @@ def instructor_conflict(this_week, args):
     instructors = args[0]
     for each_instructor in instructors:
         times = []
+        count = 0
         for each_instructors_course in each_instructor.courses:
             times.append(
-               this_week.find_course(each_instructors_course)[0])
+                this_week.find_course(each_instructors_course)[0])
         while len(times) > 0:
             each_time = times.pop(0)
             for each_other_time in times:
@@ -244,7 +245,7 @@ def instructor_conflict(this_week, args):
 
 
 ## Function that returns the minutes
-#
+#  
 #  @param a_time The a_time parameter
 #  @return return raw amount of minutes for the sake of comparison
 def get_minutes(a_time):
@@ -254,7 +255,7 @@ def get_minutes(a_time):
     return a_time.hour * 60 + a_time.minute
 
 
-## Function that returns true if timeslots are sequential, else false.
+## Function that returns true if timeslots are sequential, else false. 
 #  @param timslot1
 #  @param timeslot2 The this_week parameter
 #  @param time_threshold
@@ -272,7 +273,7 @@ def times_are_sequential(timeslot1, timeslot2, time_threshold = 15):
 
 ## Function that checks if an instructor teaches a course in one bulding and in the following
 ## timeslot a different building.
-#
+#  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 1 or 0
@@ -306,7 +307,7 @@ def sequential_time_different_building_conflict(this_week, args):
     return reval
 
 
-## Function that checks which days the instructor will like to lecture
+## Function that checks which days the instructor will like to lecture 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return partial_credit
@@ -332,14 +333,72 @@ def instructor_preference_day(this_week, args):
                     holds.append(0)
                 else:
                     holds.append(1)
-
+                    
     if not is_mandatory:
         reval["score"] = get_partial_credit(holds)
 
     return reval
 
 
-## Function that checks If an instructor prefers to teach in a class with or without computers
+def partial_schedule_day(this_week, args):
+    """Check if course scheduled on days or not
+    Args should be [course, list_of_day_codes]"""
+    course = args[0]
+    day_code = args[1]
+    is_mandatory = args[2]
+
+    holds = []
+    reval = {"score": 1, "failed": []}
+
+    slots = this_week.find_course(course)
+    for each_slot in slots:
+        if not each_slot.day in day_code:
+            if is_mandatory:
+                this_week.valid = False
+			
+	    reval["score"] = 0
+	    reval["failed"].append(course)
+            holds.append(0)
+        else:
+            holds.append(1)
+                    
+    # if mandatory and it's here, it passed
+    if not is_mandatory:
+        reval["score"] = get_partial_credit(holds)
+
+    return reval
+
+
+def partial_schedule_room(this_week, args):
+    """Check if course scheduled in list of rooms or not
+    Args should be [course, list_of_rooms_names]"""
+    course = args[0]
+    rooms = args[1]
+    is_mandatory = args[2]
+
+    holds = []
+    reval = {"score": 1, "failed": []}
+
+    slots = this_week.find_course(course)
+    for each_slot in slots:
+        if not (each_slot.room.building + " " + each_slot.room.number) in rooms:
+            if is_mandatory:
+                this_week.valid = False
+		
+	    reval["score"] = 0
+	    reval["failed"].append(course)
+	    holds.append(0)
+        else:
+            holds.append(1)
+                    
+    # if mandatory and it's here, it passed
+    if not is_mandatory:
+        reval["score"] = get_partial_credit(holds)
+    
+    return reval
+
+
+## Function that checks If an instructor prefers to teach in a class with or without computers  
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return partial_credit.
@@ -351,9 +410,8 @@ def instructor_preference_computer(this_week, args):
     computer_preference = args[1]
     is_mandatory = args[2]
     holds = []
-
     reval = {"score": 1, "failed": []}
-
+    
     for section_week in this_week.sections:
         # only applies to courses that do not need computers
         if section_week.instructor.name == instructor.name and not section_week.course.needs_computers:
@@ -363,12 +421,12 @@ def instructor_preference_computer(this_week, args):
                     if is_mandatory:
                         this_week.valid = False
 
-                    reval["score"] =  0
+                    reval["score"] =  0 
                     reval["failed"].append(section_week.course)
                     holds.append(0)
                 else:
                     holds.append(1)
-            else:
+            else: 
                 #instructor doesn't prefer computers
                 if section_week.room.has_computers == True:
                     if is_mandatory:
@@ -386,7 +444,7 @@ def instructor_preference_computer(this_week, args):
     return reval
 
 
-## Function that allows an instructor to specify a gap where they do not want to teach any courses.
+## Function that allows an instructor to specify a gap where they do not want to teach any courses. 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return partial_weight.
@@ -406,7 +464,7 @@ def instructor_break_constraint(this_week, args):
     holds = []
     reval = {"score": 1, "failed": []}
 
-    for i in range(len(instructor.courses)):
+    for i in range(len(instructor.courses)): 
         course = this_week.find_course(instructor.courses[i])[0]
         if course.end_time <= gap_start or course.start_time >= gap_end: # before or after gap
             holds.append(1)
@@ -418,12 +476,87 @@ def instructor_break_constraint(this_week, args):
             reval["failed"].append(instructor.courses[i])
             holds.append(0)
 
-    if not is_mandatory:
+    if is_mandatory: # if no fails by here, it passed
         reval["score"] = get_partial_credit(holds)
-
+    
     return reval
 
-## Function that checks if time overlaps
+
+def avoid_overlap(this_week, args):
+    """ Avoids overlap between a course and a list of courses.
+    The first course is just a time gap that the other courses
+    should not be scheduled for.
+    IN: the list of args: [list_of_courses_to_avoid_overlap,
+                           gap_start, gap_end, is_mandatory]
+    OUT: if mandatory, sets the week validity and returns 0,
+            else partial credit score
+    """
+    list_of_courses = args[0]
+    gap_start = args[1]
+    gap_end = args[2]
+    is_mandatory = args[3]
+
+    holds = []
+    reval = {"score": 1, "failed": []}
+
+    for each_course in list_of_courses: 
+        each_slot_row = this_week.find_course(each_course)[0]
+        # before or after gap
+        if each_slot_row.end_time < gap_start or each_slot_row.start_time > gap_end:
+            holds.append(1)
+        else:  # in gap, bad
+            if is_mandatory:
+                this_week.valid = False
+
+            reval["score"] = 0
+            reval["failed"].append(each_course)
+            holds.append(0)
+
+    if is_mandatory: # if no fails by here, it passed
+        reval["score"] = get_partial_credit(holds)
+    
+    return reval
+
+
+def avoid_overlap_within_csc(this_week, args):
+    """ Avoids overlap between CSC courses that do not
+    have each other in their extended list of prereqs
+    IN: the list of args: [list_of_extended_prereq_objects,
+                           is_mandatory]
+    OUT: if mandatory, sets the week validity and returns 0,
+            else partial credit score
+    """
+    prereqs = args[0]
+    is_mandatory = args[1]
+    holds = []
+    reval = {"score": 1, "failed": []}
+
+    for each_prereq in prereqs:
+        for each_course in each_prereq.courses:
+            for each_not_prereq in each_prereq.not_prereqs:
+                slots = this_week.find_course(each_course)
+                other_slots = this_week.find_course(each_not_prereq)
+                for each_slot in slots:
+                    if each_slot.day in [s.day for s in other_slots]:
+                        gap_start = other_slots[0].start_time
+                        gap_end = other_slots[0].end_time
+                        if each_slot.end_time < gap_start or each_slot.start_time > gap_end:
+                            holds.append(1)
+                        else:  # in gap, bad
+			    if is_mandatory:
+				this_week.valid = False
+
+			    reval["score"] = 0
+			    reval["failed"].append(each_course)
+			    holds.append(0)
+
+    if not is_mandatory: # if no fails by here, it passed
+        reval["score"] = get_partial_credit(holds)
+    
+    return reval
+
+
+## Function that checks if time overlaps 
 #  @param timeslot1 The timeslot1 parameter
 #  @param timeslot2 The timeslot2 parameter
 #  @return  True or False
@@ -466,12 +599,12 @@ def no_overlapping_courses(this_week, args):
                 continue
             if is_overlap(each_time, each_other_time):
                 this_week.valid = False
-                reval["score"] = 0
+                reval["score"] = 0 
 
     return reval
 
 
-## Function that makes sure that an instructor does not have more than 2 back-to-back classes
+## Function that makes sure that an instructor does not have more than 2 back-to-back classes 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 0 or 1
@@ -510,7 +643,7 @@ def num_subsequent_courses(this_week, args):
     return reval
 
 
-## Function that makes sure that any course assigned to a room is the right capacity
+## Function that makes sure that any course assigned to a room is the right capacity 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 0 or 1
@@ -527,7 +660,7 @@ def ensure_course_room_capacity(this_week, args):
     return reval
 
 
-## Function that checks if a course specified has specified required computers assigned
+## Function that checks if a course specified has specified required computers assigned 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 0 or 1
@@ -544,7 +677,7 @@ def ensure_computer_requirement(this_week, args):
 
     return reval
 
-## Function that checks that an instructor is not scheduled more classes per day than specified.
+## Function that checks that an instructor is not scheduled more classes per day than specified. 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 0 or 1
@@ -581,7 +714,7 @@ def instructor_max_courses(this_week, args):
     return reval
 
 
-## Function that counts the number of true values in a list and returns the partial credit
+## Function that counts the number of true values in a list and returns the partial credit 
 #  @param results_list The results_list parameter
 #  @return partial_weight.
 def get_partial_credit(results_list):
@@ -620,7 +753,7 @@ class ConstraintCalcFitnessError(Exception):
         return repr(self.value)
 
 
-## Function that ensures different sections of a course with the same absolute name
+## Function that ensures different sections of a course with the same absolute name 
 #  @param this_week The this_week parameter
 #  @param args The args parameter
 #  @return 0 and 1

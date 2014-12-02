@@ -2,11 +2,12 @@ data:
   constraint_list:
     name: defaults
     course_constraints:
-      -
-        code: CSC 111
-        before_after: before
-        time: "08:50"
-        priority: Low
+        time:
+          -
+            code: CSC 111
+            before_after: before
+            time: "08:50"
+            priority: Low
     instructor_constraints:
         time_pref:
           -

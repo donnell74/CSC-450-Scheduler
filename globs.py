@@ -46,9 +46,12 @@ def init(): # call globals.init() from main
         #prereqs computation and display
         prereqs = interface.get_prereqs(xml_input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
-        '''for prereq in prereqs:
-            print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
-                  " ".join([c.absolute_course for c in prereq.prereqs])'''
+        for prereq in prereqs:
+            '''print " ".join([c.code for c in prereq.courses]) + ":" + \
+                  " ".join([c.code for c in prereq.prereqs]) + "\n*****\n"'''
+            prereq.determine_not_prereq(courses)
+            print " ".join([c.code for c in prereq.courses]) + ":" + \
+                  " ".join([c.code for c in prereq.not_prereqs]) + "\n*****\n"
 
         # Add all mandatory/hard constraints here
         mainScheduler.add_constraint("instructor conflict", 0,
@@ -81,6 +84,12 @@ def init(): # call globals.init() from main
         mainScheduler.add_constraint("labs on tr", 0,
                                      constraint.lab_on_tr,
                                      [labs], True)
+
+        mainScheduler.add_constraint(
+            "avoid overlap between CSC courses", 100,
+            constraint.avoid_overlap_within_csc,
+            [prereqs, False],
+            True)
 
         mainScheduler.num_hard_constraints = len(mainScheduler.constraints)
 
