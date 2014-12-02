@@ -219,6 +219,21 @@ class Scheduler:
 
         #print(this_week.constraints)
 
+    ## Safely adds room availability to scheduler
+    # @param self
+    # @param room A full name of a room (building + number, no spaces)
+    # @param is_avail A boolean saying if it is or is not availabile
+    # @param start A string representing time in format hh:mm
+    # @param end A string representing time in format hh:mm
+    def add_room_avail(self, room, is_avail, start, end):
+        if not self.rooms_avail.has_key(room):
+            self.rooms_avail[room] = []
+            
+        is_avail_char = '+' if is_avail else '-'
+        self.rooms_avail[room].append((is_avail_char, start, end))
+        print("self.rooms_avail updated to: ")
+        print(self.rooms_avail)
+        
 
     ## Mutates a schedule by changing one course based off a random constraint
     #  @param self

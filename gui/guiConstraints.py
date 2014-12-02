@@ -17,6 +17,7 @@ DAY_COURSE = "Day"
 ROOM_COURSE = "Room"
 TIME = "Time"
 MANUAL_CONCURRENCY = "Avoid Overlap"
+ROOM_TIME_AVAIL = "Available"
 
 TYPE_DAY_COURSE = 0
 TYPE_TIME_COURSE = 1
@@ -27,6 +28,7 @@ TYPE_INSTRUCTOR_BREAK = 5
 TYPE_MAX_PER_DAY = 6
 TYPE_COMPUTER_PREFERENCE = 7
 TYPE_ROOM_COURSE = 8
+TYPE_ROOM_TIME_AVAIL = 9
 
 class Page(Frame):
     ## 
@@ -546,6 +548,163 @@ class CourseConstraint(Page):
             self.type_time_page.pack_forget()
             self.type_manual_concurrency_page.pack_forget()
 
+            
+class RoomConstraint(Page):
+    """Course constraint frame"""
+
+    ## 
+    #  @param self
+    #  @param __init__ Building a constriant page
+    #  
+    def __init__(self, root, constraints_view_obj):
+        Frame.__init__(self, root)
+
+        #globs.init()
+
+        message_type = Label(self, text="Type:")
+        message_type.pack(side = TOP)
+
+        self.str_type_default = StringVar(self)
+        self.str_type_default.set(ROOM_TIME_AVAIL)
+        self.str_type_default.trace("w", self.callback_type)
+        self.option_type = OptionMenu(self, self.str_type_default, ROOM_TIME_AVAIL)
+        self.option_type.pack(side = TOP)
+
+        self.room_container = Frame(self)
+        self.room_container.pack(fill=BOTH, side = TOP)
+        
+        # PAGES
+        self.room_time_avail_page = RoomTimeAvail(self.room_container, constraints_view_obj)
+        self.room_time_avail_page.pack()
+
+        self.room_time_avail_page.lift()
+
+    def callback_type(self, *args):
+        constraint_type_str = self.str_type_default.get()
+
+        if constraint_type_str == ROOM_TIME_AVAIL:
+            self.room_time_avail_page.pack()
+
+            
+class RoomTimeAvail(Frame):
+    def __init__(self, root, constraints_view_obj):
+        Frame.__init__(self, root)
+
+        self.constraints_view_obj = constraints_view_obj
+
+        description_constraint_label = Label(self, text=get_description_constraint(TYPE_ROOM_TIME_AVAIL))
+        description_constraint_label.pack(side = TOP)
+
+        self.listbox_frame = Frame(self)
+        self.listbox_frame.pack(side = TOP)
+        
+        self.scrollbar = Scrollbar(self.listbox_frame, orient=VERTICAL)
+        self.listbox = Listbox(self.listbox_frame, yscrollcommand = self.scrollbar.set,\
+                                selectmode = MULTIPLE, height=5)
+
+        self.scrollbar.config(command=self.listbox.yview)
+
+        self.listbox.pack(side=LEFT, fill=X, expand=1)
+        self.scrollbar.pack(side=RIGHT, fill=Y)
+        
+        self.list_of_rooms = globs.rooms
+
+        for item in self.list_of_rooms:
+            self.listbox.insert(END, item[0:2])
+            
+        self.str_when_default = StringVar(self)
+        self.str_when_default.set("Available")
+        self.option_when = OptionMenu(self, self.str_when_default, "Available", "Not Available")
+        self.option_when.pack(side = TOP)
+    
+        self.start_time_list = globs.start_times
+        self.end_time_list = globs.end_times
+
+        self.start_time_label = Label(self, text = "Start Time:")
+        self.start_time_label.pack(side = TOP)
+        self.gap_start_default = StringVar()
+        self.gap_start_default.set(self.start_time_list[0])
+        self.gap_start_default.trace("w", self.callback_gap_start)
+
+        self.gap_start_option = OptionMenu(self,
+                                           self.gap_start_default,
+                                           *self.start_time_list)
+        self.gap_start_option.pack(side = TOP)
+
+        self.end_time_label = Label(self, text = "End Time:")
+        self.end_time_label.pack(side = TOP)
+        self.gap_end_default = StringVar()
+        self.gap_end_default.set(self.end_time_list[0]) # trace isn't necessary
+
+        self.gap_end_option = OptionMenu(self,
+                                         self.gap_end_default,
+                                         *self.end_time_list)
+        self.gap_end_option.pack(side = TOP)
+        
+
+        self.button_add_course_constraint = Button(self, text="Add Availability",\
+                                            command=self.add_room_avail)
+        self.button_add_course_constraint.pack(side = RIGHT, pady = 25)
+
+
+    def callback_gap_start(self, *args):
+        """ Monitors the Instructor Break start time.  If it changes,
+        this will update the end time list so that you can't have
+        bad end times (before the start time). """
+        gap_start = self.gap_start_default.get()
+        gap_start = self.string_to_time(gap_start)
+
+        end_time_list = globs.end_times
+        gap_end_menu = self.gap_end_option["menu"]
+        gap_end_menu.delete(0, "end")
+
+        for i in range(len(self.end_time_list)):
+            end_slot = self.string_to_time(self.end_time_list[i])
+            if gap_start <= end_slot: 
+                end_time_list = end_time_list[i:]
+                break
+        for time in end_time_list:
+            gap_end_menu.add_command(label = time,
+                                     command = lambda value = time : self.gap_end_default.set(value) )
+        self.gap_end_default.set(end_time_list[0])
+
+
+    def string_to_time(self, time_str):
+        t_hr, t_min = time_str.split(":")
+        return time( int(t_hr), int(t_min) )
+        
+    def add_room_avail(self):
+        selection = self.listbox.curselection()
+        if len(selection) > 0:
+            list_rooms = []
+            for i in selection :
+                list_rooms.append(self.list_of_rooms[int(i)])
+
+            self.listbox.selection_clear(0, END)
+
+            is_avail = self.str_when_default.get() == "Available"
+
+            gap_start = self.gap_start_default.get()
+
+            gap_end = self.gap_end_default.get()
+
+            create_room_avail(is_avail, list_rooms, gap_start,
+                              gap_end, self.constraints_view_obj)
+        else:
+            tkMessageBox.showerror(title="Error", message="Select at least 1 room")
+        return
+
+def create_room_avail(is_avail, rooms, gap_start, gap_end, constraints_view_obj):
+    rooms = [r[0] + "" + r[1] for r in rooms]
+        
+    for each_room in rooms:
+        globs.mainScheduler.add_room_avail(each_room, is_avail, gap_start, gap_end)
+
+    status = "Available" if is_avail else "Not Available"
+    tkMessageBox.showinfo("Room Availabilities Entered", "Rooms:\n" + " ".join(rooms) + "\n" +\
+                          "Have been given the availability status of " + status + "\n" +\
+                          "from " + gap_start + " tell " + gap_end + ".\n")
+            
 
 class TypeTime(Frame):
     def __init__(self, root, constraints_view_obj):
@@ -1011,6 +1170,8 @@ class ConstraintPage(Page):
 
         #self.course_page.pack(side = LEFT)
 
+        self.room_page = RoomConstraint(self.content_container, self.constraints_view)
+        
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
 
@@ -1021,6 +1182,7 @@ class ConstraintPage(Page):
     def add_instructor_constraint(self):
         self.instructor_page.pack(side = LEFT, padx = 50)
         self.course_page.pack_forget()
+        self.room_page.pack_forget()
 
     ## Adding a course constraint 
     #  @param self
@@ -1029,7 +1191,18 @@ class ConstraintPage(Page):
     def add_course_constraint(self):
         self.course_page.pack(side = LEFT, padx = 50)
         self.instructor_page.pack_forget()
+        self.room_page.pack_forget()
 
+    ## Adding a course constraint 
+    #  @param self
+    #  @param add_instructor A course object 
+    #           
+    def add_room_constraint(self):
+        self.room_page.pack(side = LEFT, padx = 50)
+        self.instructor_page.pack_forget()
+        self.course_page.pack_forget()
+        
+        
     ## Creating a widget  
     #  @param self
     #  @param create_widget Adding a widget 
@@ -1041,6 +1214,10 @@ class ConstraintPage(Page):
 
         self.button_instructor = Button(self, text="Add Instructor Constraint", command=self.add_instructor_constraint)
         self.button_instructor.pack(anchor = NW, padx = 50)
+
+        self.button_room = Button(self, text="Add Room Constraint", command=self.add_room_constraint)
+        self.button_room.place(x = 230, y = 41.5 )
+
         
 ## Looking for a priority value
 #  
@@ -1337,6 +1514,7 @@ def create_instr_break(instructor, gap_start, gap_end, priority, added_constrain
     added_constraints.add_constraint_listbox(constraint_name, priority)
     return
 
+
 def get_description_constraint(constraint_type):
 
     description = ""
@@ -1359,5 +1537,7 @@ def get_description_constraint(constraint_type):
         description = "Maximum class per day instructor prefer to teach:\n"
     elif constraint_type == TYPE_TIME_INSTRUCTOR:
         description = "Time instructor prefers to teach:\n"
+    elif constraint_type == TYPE_ROOM_TIME_AVAIL:
+        description = "Please select a room:\n"
 
     return description

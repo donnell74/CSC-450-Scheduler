@@ -723,11 +723,11 @@ def contains(bound_start, bound_end, start, end):
 	
 
 def rooms_avail_for_all_courses(this_week, args):
-    """Args should have the rooms_avail and is mandatory.
+    """Args should have the is mandatory.
     rooms_avail should take {<room.full_name> [('-'|'+', <start>, <end>),...], ... }
     """
     rooms_avail = this_week.info("Schedule").rooms_avail
-    is_mandatory = args[1]
+    is_mandatory = args[0]
 
     holds = []
     reval = {"failed": [], "score": 1}

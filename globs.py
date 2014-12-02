@@ -75,7 +75,10 @@ def init(): # call globals.init() from main
         mainScheduler.add_constraint("course sections at different times", 0,
                                     constraint.course_sections_at_different_times,
                                     [courses], True)
-
+        mainScheduler.add_constraint("courses only scheduled when rooms available", 0,
+                                    constraint.rooms_avail_for_all_courses,
+                                    [True], True)
+									
         labs = []
         for each_course in mainScheduler.courses:
             if each_course.is_lab:
