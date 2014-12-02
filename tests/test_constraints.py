@@ -153,22 +153,26 @@ class TestConstraints(unittest.TestCase):
         good_scheduler.calc_fitness(good_scheduler.weeks[0])
         self.assertEquals(good_scheduler.weeks[0].fitness, 100)
 
-    # def test_instructor_conflict(self):
-        # bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_conflict_fail.xml")
-        # instructors = interface.create_instructors_from_courses("tests/schedules/instructor_conflict_fail.xml")
-        # bad_scheduler.add_constraint("instructor conflict", 100,
-                                     # constraint.instructor_conflict,
-                                     # [instructors])
-        # bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
-        # self.assertEquals(bad_scheduler.weeks[0].fitness, 0)
+    def test_instructor_conflict(self):
+        bad_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_conflict_fail.xml")
+        instructors = []
+        smith_instr = Instructor("Smith")
+        smith_instr.courses = [c for c in bad_scheduler.courses if c.code in ('CSC 130 A', 'CSC 131 A')]
+        instructors.append(smith_instr)
+        instructors.append(Instructor("Saquer"))
+        instructors.append(Instructor("Vollmar"))
+        bad_scheduler.add_constraint("instructor conflict", 100,
+                                     constraint.instructor_conflict,
+                                     [instructors])
+        bad_scheduler.calc_fitness(bad_scheduler.weeks[0])
+        self.assertEquals(bad_scheduler.weeks[0].fitness, 0)
 
-        # good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_conflict_pass.xml")
-        # instructors = interface.create_instructors_from_courses("tests/schedules/instructor_conflict_pass.xml")
-        # good_scheduler.add_constraint("instructor conflict", 100,
-                                      # constraint.instructor_conflict,
-                                      # [instructors])
-        # good_scheduler.calc_fitness(good_scheduler.weeks[0])
-        # self.assertEquals(good_scheduler.weeks[0].fitness, 100)
+        good_scheduler = interface.create_scheduler_from_file_test("tests/schedules/instructor_conflict_pass.xml")
+        good_scheduler.add_constraint("instructor conflict", 100,
+                                      constraint.instructor_conflict,
+                                      [instructors])
+        good_scheduler.calc_fitness(good_scheduler.weeks[0])
+        self.assertEquals(good_scheduler.weeks[0].fitness, 100)
 
 if __name__ == "__main__":
     unittest.main()
