@@ -2,11 +2,11 @@
 <data>
     <schedule name="test">
         <courseList>
-          <item code="CSC 232" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" needs_computers="0" is_lab="0"></item>
-          <item code="CSC 320 A" credit="3" instructor="Liu" prereq="CSC131" capacity="10" needs_computers="0" is_lab="0"></item>
-          <item code="CSC 320 001" credit="1" instructor="Liu" prereq="CSC131" capacity="10" needs_computers="0" is_lab="1"></item>
-          <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232" capacity="10" needs_computers="0" is_lab="0"></item>
-          <item code="CSC 365" credit="3" instructor="Saquer" prereq="" capacity="80" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 232" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" period="B" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 320 A" credit="3" instructor="Liu" prereq="CSC131" capacity="10" period="B" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 320 001" credit="1" instructor="Liu" prereq="CSC131" capacity="10" period="B" needs_computers="0" is_lab="1"></item>
+          <item code="CSC 325" credit="3" instructor="Shade" prereq="CSC232" capacity="10" period="B" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 365" credit="3" instructor="Saquer" prereq="" capacity="80" period="B" needs_computers="0" is_lab="0"></item>
         </courseList>
         <roomList>
           <item building="CHEK" number="213" capacity="20" has_computers="1"></item>

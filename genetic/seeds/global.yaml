@@ -1,0 +1,295 @@
+data:
+  schedule:
+    name: global
+    course_list:
+      -
+        code: CSC 111
+        credit: 3
+        instructor: Scroggins
+        prereq: null
+        capacity: 10
+        needs_computers: 0
+        is_lab: 0
+      # -
+      #   code: CSC 125 001
+      #   period: B
+      #   credit: 1
+      #   instructor: Wang
+      #   prereq: null
+      #   capacity: 40
+      #   needs_computers: 0
+      #   is_lab: 1
+      # -
+      #   code: CSC 125 A
+      #   period: B
+      #   credit: 3
+      #   instructor: Wang
+      #   prereq: null
+      #   capacity: 40
+      #   needs_computers: 1
+      #   is_lab: 0
+      -
+        code: CSC 130 001
+        period: B
+        credit: 3
+        instructor: Smith
+        prereq: null
+        capacity: 38
+        needs_computers: 1
+        is_lab: 0
+      -
+        code: CSC 130 002
+        period: B
+        credit: 3
+        instructor: Smith
+        prereq: null
+        capacity: 38
+        needs_computers: 1
+        is_lab: 0
+      -
+        code: CSC 131 001
+        period: B
+        credit: 1
+        instructor: Saquer
+        prereq: CSC130
+        capacity: 35
+        needs_computers: 1
+        is_lab: 1
+      -
+        code: CSC 131 002
+        period: B
+        credit: 1
+        instructor: Saquer
+        prereq: CSC130
+        capacity: 35
+        needs_computers: 1
+        is_lab: 1
+      -
+        code: CSC 131 A
+        period: B
+        credit: 3
+        instructor: Saquer
+        prereq: CSC130
+        capacity: 70
+        needs_computers: 0
+        is_lab: 0
+      # -
+      #   code: CSC 210
+      #   period: B
+      #   credit: 3
+      #   instructor: Scroggins
+      #   prereq: null
+      #   capacity: 20
+      #   needs_computers: 0
+      #   is_lab: 0
+      -
+        code: CSC 232 001
+        period: B
+        credit: 1
+        instructor: Bell
+        prereq: CSC131 CSC215
+        capacity: 38
+        needs_computers: 0
+        is_lab: 1
+      -
+        code: CSC 232 A
+        period: B
+        credit: 3
+        instructor: Bell
+        prereq: CSC131 CSC215
+        capacity: 38
+        needs_computers: 0
+        is_lab: 0
+      # -
+      #   code: CSC 303
+      #   period: S
+      #   credit: 1
+      #   instructor: Shade
+      #   prereq: CSC301 CSC232
+      #   capacity: 30
+      #   needs_computers: 0
+      #   is_lab: 0
+      -
+        code: CSC 320 001
+        period: B
+        credit: 1
+        instructor: Lui
+        prereq: CSC131
+        capacity: 30
+        needs_computers: 0
+        is_lab: 1
+      -
+        code: CSC 320 A
+        period: B
+        credit: 3
+        instructor: Lui
+        prereq: CSC131
+        capacity: 30
+        needs_computers: 0
+        is_lab: 0
+      -
+        code: CSC 325
+        period: B
+        credit: 3
+        instructor: Shade
+        prereq: CSC232
+        capacity: 40
+        needs_computers: 0
+        is_lab: 0
+      -
+        code: CSC 333
+        period: B
+        credit: 4
+        instructor: Shade
+        prereq: CSC232 CSC320
+        capacity: 30
+        needs_computers: 0
+        is_lab: 0
+      # -
+      #   code: CSC 335
+      #   period: S
+      #   credit: 3
+      #   instructor: Saquer
+      #   prereq: CSC131
+      #   capacity: 70
+      #   needs_computers: 0
+      #   is_lab: 0
+      -
+        code: CSC 365
+        period: F
+        credit: 3
+        instructor: Saquer
+        prereq: CSC131
+        capacity: 80
+        needs_computers: 0
+        is_lab: 0
+      -
+        code: CSC 450
+        period: S
+        credit: 3
+        instructor: Shade
+        prereq: CSC325 CSC333 CSC365
+        capacity: 30
+        needs_computers: 0
+        is_lab: 0
+      -
+        code: CSC 460
+        period: B
+        credit: 3
+        instructor: Wang
+        prereq: CSC320 CSC325
+        capacity: 30
+        needs_computers: 0
+        is_lab: 0
+      # -
+      #   code: CSC 482
+      #   period: B
+      #   credit: 1
+      #   instructor: Vollmar
+      #   prereq: CSC333 CSC460
+      #   capacity: 30
+      #   needs_computers: 0
+      #   is_lab: 0
+      # -
+      #   code: CSC 525
+      #   period: F
+      #   credit: 3
+      #   instructor: Wang
+      #   prereq: CSC232
+      #   capacity: 20
+      #   needs_computers: 0
+      #   is_lab: 0
+      # -
+      #   code: CSC 545
+      #   period: S
+      #   credit: 3
+      #   instructor: Smith
+      #   prereq: CSC232
+      #   capacity: 30
+      #   needs_computers: 1
+      #   is_lab: 0
+      # -
+      #   code: CSC 565
+      #   period: F
+      #   credit: 3
+      #   instructor: Lui
+      #   prereq: CSC232
+      #   capacity: 30
+      #   needs_computers: 0
+      #   is_lab: 0
+      # -
+      #   code: CSC 567
+      #   period: S
+      #   credit: 3
+      #   instructor: Lui
+      #   prereq: CSC232
+      #   capacity: 30
+      #   needs_computers: 0
+      #   is_lab: 0
+    room_list:
+      -
+        building: CHEK
+        number: 105
+        capacity: 70
+        has_computers: 0
+      -
+        building: CHEK
+        number: 202
+        capacity: 40
+        has_computers: 0
+      -
+        building: CHEK
+        number: 204
+        capacity: 40
+        has_computers: 0
+      -
+        building: CHEK
+        number: 205
+        capacity: 40
+        has_computers: 0
+      -
+        building: CHEK
+        number: 209
+        capacity: 40
+        has_computers: 0
+      -
+        building: CHEK
+        number: 210
+        capacity: 35
+        has_computers: 0
+      -
+        building: CHEK
+        number: 212
+        capacity: 45
+        has_computers: 0
+      -
+        building: CHEK
+        number: 213
+        capacity: 20
+        has_computers: 1
+      -
+        building: GLAS
+        number: 345
+        capacity: 70
+        has_computers: 0
+      -
+        building: TEMP
+        number: 0001
+        capacity: 144
+        has_computers: 1
+    time_list_mwf:
+      - "08:00-08:50"
+      - "09:05-09:55"
+      - "10:10-11:00"
+      - "11:15-12:05"
+      - "12:20-13:10"
+      - "13:25-14:15"
+      - "14:30-15:20"
+      - "15:35-16:25"
+    time_list_tr:
+      - "08:00-09:15"
+      - "09:30-10:45"
+      - "11:00-12:15"
+      - "12:30-13:45"
+      - "14:00-15:15"
+      - "15:30-16:45"

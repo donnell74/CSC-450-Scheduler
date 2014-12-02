@@ -30,24 +30,35 @@ class HomePage(Page):
     def __init__(self, root):
         Frame.__init__(self, root)
         self.head_label = Label(self, text="CSC Department Scheduler", font=(font_style, size_h1))
-        self.head_label.pack(pady=10)
+        self.head_label.pack(pady = (20, 10))
 
-        paragraph_text = "User Guide: step-by-step\n\n" +\
-                         "1.) Click RUN to begin generating CSC schedules.\n\n" +\
+        semester_info = "Semester to schedule: {0} {1}".format(globs.semester_to_schedule[0],
+                                                               globs.semester_to_schedule[1])
+        self.semester_label = Label(self, text = semester_info, font = (font_style, size_p))
+        self.semester_label.pack()
+
+        semester_additional_info = "(If this is incorrect, please specify in the override file.)"
+        self.semester_additional_label = Label(self, text = semester_additional_info, font = (font_style, size_l))
+        self.semester_additional_label.pack(pady = (0, 15))
+
+        
+        guide_title_text = "User Guide: step-by-step"
+        paragraph_text = "1.) Click RUN to begin generating CSC schedules.\n\n" +\
                          "a.) OPTIONAL: Click the Constraint button to \ngenerate custom schedules.\n\n" +\
                          "2.) After the scheduling is finished click on the View \nbutton" +\
-                         " to view the schedules. Also they will be\n" +\
-                         " exported to CSV format in the installation directory\n"
-        self.description_label = Label(self, text=paragraph_text, font=(font_style, size_p))
-        self.description_label.pack()
+                         " to view the schedules."
+        self.guide_title_heading = Label(self, text = guide_title_text, font = (font_style, size_p))
+        self.guide_title_heading.pack(pady = (0, 5))
+        self.description_label = Label(self, text = paragraph_text, font = (font_style, size_l))
+        self.description_label.pack(pady = (0, 15))
+
 
         runtime_option_text = "Choose a run speed:"
         self.runtime_label = Label(self, text = runtime_option_text, font = (font_style, size_p))
         self.runtime_label.pack()
         self.runtime_disclaimer = Label(self, text = "The scheduler may finish earlier"\
                                         " if it finds 5 valid schedules.", font = (font_style, 10))
-        self.runtime_disclaimer.pack(pady = 5)
-
+        self.runtime_disclaimer.pack(pady = (0, 5))
 
         runtime_modes = [
             ("Quick (~1 minute)", 1),
@@ -55,7 +66,7 @@ class HomePage(Page):
             ("High (~1 hour)", 60),
             ("Overnight (~8 hours)", 480),
             ("Custom", 0)
-            ]
+        ]
 
         self.runtime_selected_var = IntVar()
         self.runtime_selected_var.set(1)
@@ -65,7 +76,6 @@ class HomePage(Page):
             b = Radiobutton(self, text = mode, variable = self.runtime_selected_var,
                             value = val, font = (font_style, size_l))
             b.pack(anchor = W, padx = 225)
-
 
         self.custom_input = Frame(self, width = 50, height = 20)
         self.input_label = Label(self.custom_input, text = "Insert a time (in minutes):",
@@ -107,14 +117,16 @@ class ViewPage(Page):
     def __init__(self, root):
         Frame.__init__(self, root)
 
-        self.head_label = Label(self, text="View Schedules",
+        head_text = "Schedules for {0} {1}".format(globs.semester_to_schedule[0],
+                                                   globs.semester_to_schedule[1])
+        self.head_label = Label(self, text = head_text,
                                 font = (font_style, size_h2))
-        self.head_label.pack()
+        self.head_label.pack(pady = (10, 0))
 
         self.is_run_clicked = False
         self.cached_constraints = None
         self.cache_flag = True
-        
+
         # holds the room names that are in the drop down selection
         self.drop_down_items = []
         # holds canvas items
@@ -124,7 +136,7 @@ class ViewPage(Page):
         self.toggle_schedules_flag = False
 
         self.canvas_created = False
-        
+
         self.toggle_constraint_acceptance_flag = True
         # holds the rooms
         self.rooms = []
@@ -133,12 +145,12 @@ class ViewPage(Page):
         self.room_selection_option = 0  # default to 0
         # dict to hold selection option + room name/number
         self.selections = {}
-        
+
         self.table_labels = []  # holds the labels for the schedules
 
         # dict to hold constraints and fitness score
         self.constraint_bag = {}
-        
+
         # display schedules
         self.toggle_schedules()
 
@@ -187,7 +199,7 @@ class ViewPage(Page):
 
         # delete previous canvas
         #self.delete(self.canvas_items)
-        
+
         # default is to display graphical schedules first
         if not self.toggle_schedules_flag:
             if self.is_run_clicked:
@@ -208,7 +220,7 @@ class ViewPage(Page):
         """ Switch between the acceptance and rejected constraints """
 
         if self.canvas_created:
-            
+
             # delete old labels to make room for new ones
             self.delete(self.table_labels)
 
@@ -217,7 +229,7 @@ class ViewPage(Page):
 
             # default is to display accepted constraints first
             if not self.toggle_constraint_acceptance_flag:
-                
+
                 if self.is_run_clicked:
                     self.toggle_constraint_acceptance_flag = True
                     #self.create_graphical_constraints()
@@ -285,7 +297,7 @@ class ViewPage(Page):
     def create_compact_constraint(self):
         """ Creates a more compact graphical schedule
             respresentation of the valid schedules """
-        
+
         # background place holder for the schedules
         """self.bg_label = Label(self, width = 37, height= 13,
                               font=(font_style, size_h1),
@@ -298,7 +310,7 @@ class ViewPage(Page):
         self.delete([self.bg_label])
         if self.is_run_clicked:
             self.insert_constraint(self.last_viewed_schedule)
-    
+
     def create_room_selection(self):
         """ Creates a drop down menu for room selection """
 
@@ -308,11 +320,11 @@ class ViewPage(Page):
 
         self.selected_option = StringVar(self)
         self.selected_option.set(self.rooms[self.room_selection_option]) # default value
-        
+
         self.menu_select = apply(OptionMenu,
                             (self, self.selected_option) + tuple(self.rooms))
         self.menu_select.place(x = 115, y = 5)
-        
+
         self.selected_option.trace('w', lambda *args: self.get_selected(self.selected_option))
 
         self.drop_down_items.append(self.menu_select)
@@ -321,7 +333,7 @@ class ViewPage(Page):
     def get_selected(self, selected):
         """ Updates the room when user selects
             an option from the the room drop down menu """
-        
+
         option = selected.get()
         for i in xrange(len(self.selections)):
 
@@ -333,7 +345,7 @@ class ViewPage(Page):
 
     def sort_selections(self):
         """ Sorts self.selections """
-        
+
         # sort selections
         sorted_selections = []
         for key in self.selections:
@@ -346,7 +358,7 @@ class ViewPage(Page):
         for room in sorted_selections:
             self.selections[key] = room
             key += 1
-            
+
     def create_graphical_schedules(self):
         """ Creates a graphical respresentation of the valid schedules """
 
@@ -383,7 +395,7 @@ class ViewPage(Page):
             self.canv.bind_all("<MouseWheel>", self.on_mouse_wheel)
 
             self.canvas_created = True
-        
+
     def on_mouse_wheel(self, event):
         """ Update the canvas vertical scrollbar """
 
@@ -477,7 +489,7 @@ class ViewPage(Page):
         """ Inserts schedule n into the textarea/scrollbox of the View page """
 
         self.toggle_constraint_acceptance_flag = True
-        
+
         self.last_viewed_schedule = n
 
         # delete drop downs
@@ -522,12 +534,12 @@ class ViewPage(Page):
         else:
             # destroy old labels to make room for new ones
             self.delete(self.table_labels)
-            
+
             # hide bg_label text
             #self.bg_label['fg'] = 'white'
 
         self.toggle_constraint_acceptance_flag = not self.toggle_constraint_acceptance_flag
-            
+
 
     def format_graphical_schedule(self, schedule_text):
         """ Formats the graphical schedules """
@@ -593,7 +605,7 @@ class ViewPage(Page):
 
         self.rooms.sort()
         self.sort_selections()
-        
+
         # calculate what time to begin showing courses on the graphical schedule
         for i in xrange(len(schedule_text) - 1):
             s = schedule_text[i].split(' ')
@@ -621,7 +633,7 @@ class ViewPage(Page):
 
         if len(y_times) == 0:
             return
-        
+
         a = y_times[0]
         b = y_times[len(y_times) - 1]
         n = 0
@@ -829,13 +841,13 @@ class ViewPage(Page):
         if self.cached_constraints != globs.mainScheduler.constraints and self.cache_flag == True:
             for constraint in globs.mainScheduler.constraints:
                 self.cached_constraints.append(constraint)
-            
+
             self.cache_flag = False
-        
+
         #----------------------------------------------#
         # sort constraints by universal and user-added #
         #----------------------------------------------#
-        
+
         # lists for two types of constranits (universal and user-added)
         universal_constraints = []
         user_added_constraints = []
@@ -845,7 +857,7 @@ class ViewPage(Page):
                 universal_constraints.append(constraint.name)
             else:
                 user_added_constraints.append(constraint.name)
-                
+
         universal_constraints.sort()
         user_added_constraints.sort()
 
@@ -863,7 +875,7 @@ class ViewPage(Page):
                                                      constraints_dict[key][1]])
         universal_sorted_constraints.sort()
         user_added_sorted_constraints.sort()
-        
+
         #---------------------------------------#
         # display constraint data on the canvas #
         #---------------------------------------#
@@ -873,13 +885,13 @@ class ViewPage(Page):
         self.canv.create_text(125, 35,
                               text = 'Universal Constraints',
                               font = (font_style, size_l))
-        
+
         # legend bullet: user-added constraints
         self.canv.create_rectangle(250, 25, 231, 45, width = 3, fill = 'yellow', outline = '')
         self.canv.create_text(345, 35,
                               text = 'User Added Constraints',
                               font = (font_style, size_l))
-        
+
         y = 75
         self.canv.create_text(20, y, anchor = 'w',
                                   text = 'Constraint Name',
@@ -887,7 +899,7 @@ class ViewPage(Page):
         self.canv.create_text(430, y, anchor = 'w',
                                   text = 'Passes',
                                   font = (font_style, size_h2))
-        
+
         y += 40
 
         universal_constraints_length = len(universal_sorted_constraints)
@@ -897,7 +909,7 @@ class ViewPage(Page):
         if user_added_constraints_length > 20:
             self.canv.config(scrollregion = (0, 0, 600,
                                              1050 + user_added_constraints_length * 24))
-            
+
         count = 0
 
         # background color for universal constraints
@@ -913,7 +925,7 @@ class ViewPage(Page):
                 self.canv.create_text(25, y, anchor = 'w',
                                       text = constraint[0],
                                       font = (font_style, size_l))
-                
+
                 passes = ''
                 numerator = constraint[1]
                 denominator = constraint[2]
@@ -947,19 +959,19 @@ class ViewPage(Page):
                     length = user_added_constraints_length
                     if length == 0:
                         length = 1
-                        
+
                     self.canv.create_rectangle(15, y + 13, 518,
                                                y + 19 + (length * 24),
                                                width = 3, outline = 'yellow')
                     y += 3
-                    
+
                 y += 24
 
         if user_added_constraints_length == 0:
                 self.canv.create_text(25, y, anchor = 'w',
                                       text = "No user-added constraints.",
                                       font = (font_style, size_l))
-                                         
+
     def delete(self, labels):
         """ Delete dynamically created objects from memory """
 
@@ -1003,7 +1015,7 @@ class MiscPage(Page):
         if not self.is_loading:
             self.load_bar['bg'] = 'green'
             self.is_loading = True
-            
+
         # print(self.load_bar['width'])
         # Stop at "almost done" status; will jump to 100% when finished
         if self.load_bar['width'] <= 39:
@@ -1061,7 +1073,7 @@ class MainWindow(Frame):
         # ToolTips does not work well on non-Windows platforms
         if sys.platform.startswith('win'):
             ToolTips(root)
-        
+
         self.run_finished = False
         self.run_clicked = False
 
@@ -1102,10 +1114,10 @@ class MainWindow(Frame):
 
         self.view_page = ViewPage(self.content_container)
         self.view_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        
+
         self.misc_page = MiscPage(self.content_container)
         self.misc_page.place(in_=self.content_container, x=0, y=0, relwidth=1, relheight=1)
-        
+
         # INITIALIZE WITH HOME PAGE
         self.home_page.lift()
 
@@ -1161,7 +1173,7 @@ class MainWindow(Frame):
         self.view_page.is_run_clicked = True
         self.view_page.cached_constraints = []
         self.view_page.cache_flag = True
-        
+
         self.view_page.is_constraints_set = True
         if globs.mainScheduler.weeks[0].valid:
             self.view_page.insert_schedule(0)  # show the first schedule in the view page
@@ -1211,7 +1223,7 @@ class MainWindow(Frame):
             self.run_clicked = True
             self.view_page.is_run_clicked = False
             self.run_finished = False
-            
+
             instructors = globs.instructors
             # RUN SCHEDULER METHOD
             # Add hard/obvious constraints before running

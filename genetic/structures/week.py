@@ -14,17 +14,17 @@ class MalformedWeekError(Exception):
 
 
 ## Documentation for a class.
-#  
-#  
+#
+#
 #  A particular week of courses, consisting of 5 day objects
 class Week:
 
     """A particular week of courses, consisting of 5 day objects"""
 
-    ## Initialize week objects with room objects 
+    ## Initialize week objects with room objects
     #  @param self
     #  @param info A week object with list of room objects
-    #  
+    #
     def __init__(self, rooms, this_scheduler, test = False):
         """Initialize week object with list of room objects"""
         if test:
@@ -72,7 +72,7 @@ class Week:
                 each_section = structures.Section(each_course, each_slots)
                 self.sections.append(each_section)
         except:
-            print("ERROR: Update Sections") 
+            print("ERROR: Update Sections")
             print(each_course)
 
     ## Finds sections for a given course
@@ -107,7 +107,7 @@ class Week:
         """Returns list of time slot objects for given course object in week
         IN: course object
         OUT: list of time slot objects"""
-        
+
         time_slots = []
         for each_day in self.days:
             for each_room in each_day.rooms:
@@ -129,8 +129,8 @@ class Week:
 
     ## Finds objects for a given week
     #  @param self
-    #  @param info A get object 
-    #  @return day A get object that returns the day 
+    #  @param info A get object
+    #  @return day A get object that returns the day
     def __getitem__(self, k):
         if k not in "mtwrf":
             raise ValueError
@@ -177,7 +177,7 @@ class Week:
                         empty_slots.append(each_slot)
         return empty_slots
 
-    ## Confirms with a true if a list of courses is empty or false otherwise 
+    ## Confirms with a true if a list of courses is empty or false otherwise
     #  @param self
     #  @param is_empty A  object
     #  @return true or false It returns a bool if empty or not
@@ -266,7 +266,7 @@ class Week:
     ## Provides lists of courses for weeks in the structure
     #  @param self
     #  @param print_concise A print_concise object
-    #  @return List_of_courses A list of courses for week in the structure slot objects 
+    #  @return List_of_courses A list of courses for week in the structure slot objects
     def print_concise(self):
         """Returns a concise list of courses for week in the structure:
             course_code day_code room_number start_time-end_time"""
@@ -290,7 +290,7 @@ class Week:
             for instructor in instructors:
                 concise_schedule_str += instructor.name + "\n"
                 for key in instructor.courses:
-                    # course / days / building / room number / start time / - / end time 
+                    # course / days / building / room number / start time / - / end time
                     concise_schedule_str += str(key) + ' ' + courses_dyct[key.code][0] + ' ' + \
                         str(courses_dyct[key.code][1]) + ' ' + str(courses_dyct[key.code][2]) + ' ' + \
                         str(courses_dyct[key.code][3])[:-3] + '-' + str(courses_dyct[key.code][4])[:-3] + '\n'

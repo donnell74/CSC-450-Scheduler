@@ -2,20 +2,21 @@
 <data>
   <schedule name='test'>
     <courseList>
-      <item code='CSC 111' credit='3' instructor='Scroggins' prereq='' capacity='10' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 130 001' credit='3' instructor='Smith' prereq='' capacity='15' needs_computers='1' is_lab='0'></item>
-      <item code='CSC 130 002' credit='3' instructor='Smith' prereq='' capacity='15' needs_computers='1' is_lab='0'></item>
-      <item code='CSC 131 001' credit='1' instructor='Saquer' prereq='CSC130' capacity='15' needs_computers='0' is_lab='1'></item>
-      <item code='CSC 131 A' credit='3' instructor='Saquer' prereq='CSC130' capacity='15' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 232 A' credit='3' instructor='Vollmar' prereq='CSC131' capacity='10' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 232 001' credit='1' instructor='Vollmar' prereq='CSC131' capacity='10' needs_computers='0' is_lab='1'></item>
-      <item code='CSC 320 A' credit='3' instructor='Liu' prereq='CSC131' capacity='10' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 320 001' credit='1' instructor='Liu' prereq='CSC131' capacity='10' needs_computers='0' is_lab='1'></item>
-      <item code='CSC 325' credit='3' instructor='Shade' prereq='CSC232' capacity='10' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 333' credit='4' instructor='Shade' prereq='CSC232 CSC320' capacity='15' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 365' credit='3' instructor='Saquer' prereq='' capacity='80' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 450' credit='3' instructor='Shade' prereq='CSC325 CSC365' capacity='10' needs_computers='0' is_lab='0'></item>
-      <item code='CSC 460' credit='3' instructor='Wang' prereq='CSC320 CSC325' capacity='10' needs_computers='1' is_lab='0'></item>
+      <item code='CSC 111' period='B' credit='3' instructor='Scroggins' prereq='' capacity='10' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 130 001' period='B' credit='3' instructor='Smith' prereq='' capacity='15' needs_computers='1' is_lab='0'></item>
+      <item code='CSC 130 002' period='B' credit='3' instructor='Smith' prereq='' capacity='15' needs_computers='1' is_lab='0'></item>
+      <item code='CSC 131 001' period='B' credit='1' instructor='Saquer' prereq='CSC130' capacity='15' needs_computers='0' is_lab='1'></item>
+      <item code='CSC 131 A' period='B' credit='3' instructor='Saquer' prereq='CSC130' capacity='15' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 232 A' period='B' credit='3' instructor='Vollmar' prereq='CSC131' capacity='10' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 232 001' period='B' credit='1' instructor='Vollmar' prereq='CSC131' capacity='10' needs_computers='0' is_lab='1'></item>
+      <item code='CSC 320 A' period='B' credit='3' instructor='Liu' prereq='CSC131' capacity='10' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 320 001' period='B' credit='1' instructor='Liu' prereq='CSC131' capacity='10' needs_computers='0' is_lab='1'></item>
+      <item code='CSC 325' period='B' credit='3' instructor='Shade' prereq='CSC232' capacity='10' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 333' period='B' credit='4' instructor='Shade' prereq='CSC232 CSC320' capacity='15' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 365' period='F' credit='3' instructor='Saquer' prereq='' capacity='80' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 450' period='S' credit='3' instructor='Shade' prereq='CSC325 CSC365' capacity='10' needs_computers='0' is_lab='0'></item>
+      <item code='CSC 460' period='B' credit='3' instructor='Wang' prereq='CSC320 CSC325' capacity='10' needs_computers='1' is_lab='0'></item>
+      <item code='CSC 666' period='S' credit='3' instructor='Saquer' prereq='CSC460' capacity='20' needs_computers='1' is_lab='1'></item>
     </courseList>
     <roomList>
       <item building='CHEK' number='213' capacity='20' has_computers='1'></item>
@@ -27,6 +28,7 @@
       <item building='CHEK' number='204' capacity='40' has_computers='0'></item>
       <item building='GLAS' number='345' capacity='70' has_computers='0'></item>
       <item building='TEMP' number='1' capacity='144' has_computers='1'></item>
+      <item building='TEMP' number='2' capacity='40' has_computers='1'></item>
     </roomList>
     <timeListMWF>
       <item>08:00-08:50</item>

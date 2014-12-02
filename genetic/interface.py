@@ -6,33 +6,136 @@ import xml.etree.ElementTree as ET
 from scheduler import *
 from time import strftime, gmtime
 from weakref import ref
-from datetime import time as time_obj
+from datetime import date, time as time_obj
 import constraint
 
 from Tkinter import Tk
 from tkMessageBox import showinfo
 
-## Function that Creates an xml input file (Input.xml) from yaml 
-#  @param path_to_yaml The path_to_yaml parameter
+def course_has_all_attributes(course):
+    """
+    Determine if a course object (built from yaml override, not a true Course object)
+    has all requisite properties (code, period, credit, instructor,
+                                  capacity, needs_computers, is_lab)
+    IN: course object from yaml override
+    OUT: True if course has all attributes else False
+    """
+    required_attributes = ["code", "period", "credit", "instructor", "capacity", "needs_computers", "is_lab"]
+    for attribute in required_attributes:
+        if attribute not in course:
+            return False
+    return True
+
+def room_has_all_attributes(room):
+    """
+    Determine if a room object (built from yaml override, not a true Room object)
+    has all requisite properties (building, number, capacity, has_computers)
+    IN: room object from yaml override
+    OUT: True if room has all attributes else False
+    """
+    required_attributes = ["building", "number", "capacity", "has_computers"]
+    for attribute in required_attributes:
+        if attribute not in room:
+            return False
+    return True
+
+def get_semester_to_schedule(path_to_yaml):
+    """
+    Given the path to the override file, return the specific semester to be planned.
+    If no valid override input is found, use today's date to guess at the semester
+    and year. For example, if it is currently Fall or Winter, the guess will
+    be for the Spring of the same year. If it is currently Spring or Summer,
+    the guess will be for the Fall of next year.
+    IN: path to yaml override file.
+    OUT: a tuple representing the semester and year to be planned
+        e.g.: ('Fall', 2015)
+    """
+
+    try:
+        yaml_file = open(path_to_yaml, 'r')
+        yaml_dict = yaml.load(yaml_file)
+        yaml_file.close()
+
+        semester_object = yaml_dict['data']['semester'].split(' ')
+        fall_or_spring = semester_object[0].lower()
+        if fall_or_spring in ['fall', 'fa', 'f']:
+            fall_or_spring = "Fall"
+        elif fall_or_spring in ['spring', 'sp', 's']:
+            fall_or_spring = "Spring"
+        else:
+            raise IOError("Error: Invalid semester input.")
+
+        # we know at least fall / spring
+        if fall_or_spring == "Fall":
+            year_upcoming = date.today().year
+        else:
+            year_upcoming = date.today().year + 1
+
+        if len(semester_object) == 1: # no year is specified
+            semester_year = year_upcoming
+        elif int(semester_object[1]) < year_upcoming: # don't schedule past years
+            semester_year = year_upcoming
+        else:
+            semester_year = int(semester_object[1])
+
+        return (fall_or_spring, semester_year)
+
+    except (IOError, TypeError): # override file not found or invalid information entered;
+                                 # guess the semester to schedule
+        # "day of year" ranges for the northern hemisphere
+        spring_or_summer = range(80, 264)
+        # fall_or_winter = everything else
+
+        # get today's 'day number'. (Jan 1st -> 1)
+        day_num = date.today().timetuple().tm_yday
+
+        """
+        If it is spring or summer, we guess that the semester to plan
+        is the upcoming fall. Otherwise, we guess it is the upcoming spring.
+        """
+        if day_num in spring_or_summer:
+            # we guess that we're planning for fall of the same year
+            fall_or_spring = "Fall"
+            semester_year = date.today().year
+        else:
+            # we guess that we're planning for spring of next year
+            fall_or_spring = "Spring"
+            semester_year = date.today().year + 1
+
+        print "No override found. Guessing at the semester to be planned:",
+        print fall_or_spring, semester_year
+        return (fall_or_spring, semester_year)
+
+    except ValueError:
+        print "Invalid input. Please use the format 'Fall 2015'"
+        return
+
+    except Exception as e:
+        print e
+        return
+
+## Function that Creates an xml input file (Input.xml) from yaml
+#  @param path_to_global The path to the global input
+#  @param path_to_override The path to the override input
 #  @return none
-def create_xml_from_yaml(path_to_yaml):
+def create_xml_input_from_yaml(path_to_global, path_to_override):
     """
     Creates an xml input file (Input.xml) from yaml.
     IN: path to yaml input
     OUT: None (does not return anything; creates Input.xml in genetic/seeds/)
     """
-    def course_object_to_xml_string(code, credit, instructor, prereq,
+    def course_object_to_xml_string(code, period, credit, instructor, prereq,
                                     capacity, needs_computers, is_lab):
         # since "prereq='{}'".format('') -> "prereq=''''", we need an ugly conditional
         if prereq:
-            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='{3}' "
-                                       "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
-            return unformatted_xml_string.format(code, credit, instructor,
+            unformatted_xml_string =  ("<item code='{0}' period='{1}' credit='{2}' instructor='{3}' prereq='{4}' "
+                                       "capacity='{5}' needs_computers='{6}' is_lab='{7}'></item>")
+            return unformatted_xml_string.format(code, period, credit, instructor,
                                                  prereq, capacity, needs_computers, is_lab)
         else: # prereq == None
-            unformatted_xml_string =  ("<item code='{0}' credit='{1}' instructor='{2}' prereq='' "
-                                       "capacity='{3}' needs_computers='{4}' is_lab='{5}'></item>")
-            return unformatted_xml_string.format(code, credit, instructor,
+            unformatted_xml_string =  ("<item code='{0}' period='{1}' credit='{2}' instructor='{3}' prereq='' "
+                                       "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
+            return unformatted_xml_string.format(code, period, credit, instructor,
                                                  capacity, needs_computers, is_lab)
 
     def room_object_to_xml_string(building, number, capacity, has_computers):
@@ -60,21 +163,29 @@ def create_xml_from_yaml(path_to_yaml):
 
     def xml_header():
         return "<?xml version='1.0'?>"
-    
+
     def valid_credit_hour_input():
         ''' Validates that course credit hours are 1, 3, or 4.
             And that a lab is only 1 credit hour.
             Returns False if credit input is invalid.'''
-        
+
         error_title = ''
         error_message = ''
         is_valid_input = True
+        invalid_course_credits = False
+        invalid_lab_credits = False
 
         # check for invalid credit hours
         for course in course_list:
             if not course['credit'] in [1, 3, 4] and course['is_lab'] == 0:
+                if not invalid_course_credits:
+                    invalid_course_credits = True
+                else:
+                    continue
+
                 error_title = 'Error: course credit hours'
-                error_message = 'The course credit hour "' + str(course['credit']) + \
+                error_message = 'Error for course {0}\n.'.format(course['code']) + \
+                                'The course credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable credit hour.' + \
                                 '\nCredit hours must ' + \
                                 'be 1, 3, or 4.\n' + \
@@ -82,10 +193,16 @@ def create_xml_from_yaml(path_to_yaml):
                                 'genetic\seeds\input.yaml'
                 is_valid_input = False
                 show_error_message(error_title, error_message)
-                    
+
             if course['is_lab'] == 1 and course['credit'] != 1:
+                if not invalid_lab_credits:
+                    invalid_lab_credits = True
+                else:
+                    continue
+
                 error_title = 'Error: lab credit hours'
-                error_message = 'The lab credit hour "' + str(course['credit']) + \
+                error_message = 'Error for course {0}.\n'.format(course['code']) + \
+                                'The lab credit hour "' + str(course['credit']) + \
                                 '" is \nnot an acceptable lab credit.' + \
                                 '\nLab credit must be 1 hour.\n' + \
                                 '\nPlease change this in:\n' + \
@@ -94,22 +211,37 @@ def create_xml_from_yaml(path_to_yaml):
                 show_error_message(error_title, error_message)
 
         return is_valid_input
-        
+
     def show_error_message(error_title, error_message):
         ''' Displays an error message '''
-        
+
         root = Tk()
         root.withdraw() # hide tkinter window
 
         # display tkMessageBox
         showinfo(error_title, error_message)
 
-    try:
-        yaml_file = open(path_to_yaml, 'r')
-        yaml_dict = yaml.load(yaml_file)
-        yaml_file.close()
+    def this_course_in_course_list(course_code, course_list):
+        for course in course_list:
+            if course_code == course['code']:
+                return True
+        return False
 
-        yaml_data_object = yaml_dict['data']['schedule']
+    def update_attribute_in_course_list(course_code, attr, new_attr, course_list):
+        try:
+            for course in course_list:
+                if course_code == course['code']:
+                    course[attr] = str(new_attr)
+        except:
+            print "There was a problem with updating '" + str(attr) + "' for " + str(course_code)
+        return course_list
+
+    try:
+        global_file = open(path_to_global, 'r')
+        global_dict = yaml.load(global_file)
+        global_file.close()
+
+        yaml_data_object = global_dict['data']['schedule']
         schedule_name = yaml_data_object['name']
         course_list = yaml_data_object['course_list']
         time_list_tr = yaml_data_object['time_list_tr']
@@ -118,7 +250,78 @@ def create_xml_from_yaml(path_to_yaml):
 
         if not valid_credit_hour_input():
             exit() # exit the scheduler
-            
+
+        override_file = open(path_to_override, 'r')
+        override_dict = yaml.load(override_file)
+        override_file.close()
+
+        course_overrides = override_dict['data']['course_list']
+        room_overrides = override_dict['data']['room_list']
+
+        # if there are overrides, update the global vars before outputting
+        if course_overrides:
+            for this_course in course_overrides:
+                # at least the course code must be specified
+                if 'code' in this_course:
+                    this_code = this_course['code']
+                    if this_course_in_course_list(this_code, course_list):
+                        # course already exists; modify information
+
+                        if 'period' in this_course:
+                            new_period = this_course['period']
+                            course_list = update_attribute_in_course_list(this_code, "period",
+                                                                          new_period, course_list)
+
+                        if 'instructor' in this_course:
+                            new_instructor = this_course['instructor']
+                            course_list = update_attribute_in_course_list(this_code, "instructor",
+                                                                          new_instructor, course_list)
+
+                        if 'prereq' in this_course:
+                            new_prereq = this_course['prereq']
+                            course_list = update_attribute_in_course_list(this_code, "prereq",
+                                                                          new_prereq, course_list)
+
+                        if 'capacity' in this_course:
+                            new_capacity = this_course['capacity']
+                            course_list = update_attribute_in_course_list(this_code, "capacity",
+                                                                          new_capacity, course_list)
+
+                        if 'needs_computers' in this_course:
+                            new_needs_computers = this_course['needs_computers']
+                            course_list = update_attribute_in_course_list(this_code, "needs_computers",
+                                                                          new_needs_computers, course_list)
+
+                        if 'is_lab' in this_course:
+                            new_is_lab = this_course['is_lab']
+                            course_list = update_attribute_in_course_list(this_code, "is_lab",
+                                                                          new_is_lab, course_list)
+
+                    # course does not already exist; check for required information
+                    elif course_has_all_attributes(this_course):
+                        new_course = {'code':               this_course['code'],
+                                      'period':             this_course['period'],
+                                      'credit':             this_course['credit'],
+                                      'instructor':         this_course['instructor'],
+                                      'prereq':             this_course['prereq'],
+                                      'capacity':           this_course['capacity'],
+                                      'needs_computers':    this_course['needs_computers'],
+                                      'is_lab':             this_course['is_lab']}
+                        course_list.append(new_course)
+                    else:
+                        print "Incomplete information supplied in the override for " + \
+                            this_course['code'] + ". Ignoring..."
+
+        if room_overrides:
+            for this_room in room_overrides:
+                if room_has_all_attributes(this_room):
+                    new_room = {"building": this_room['building'],
+                                "number": this_room['number'],
+                                "capacity": this_room['capacity'],
+                                "has_computers": this_room['has_computers']}
+                    room_list.append(new_room)
+
+        # now that we have dealt with any existing overrides, output to xml
         xml_file = open('./genetic/seeds/Input.xml', 'w')
         indent_level = 0
 
@@ -138,6 +341,7 @@ def create_xml_from_yaml(path_to_yaml):
             else:
                 course_prereq = course['prereq']
             course_xml_string = course_object_to_xml_string(code = course['code'],
+                                                            period = course['period'],
                                                             credit = course['credit'],
                                                             instructor = course['instructor'],
                                                             prereq = course_prereq,
@@ -225,7 +429,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         priority = priorities.get(priority, 0)
         return priority
 
-    def course_time_constraint(constraint_dict, scheduler):
+    def course_time(constraint_dict, scheduler):
         """ Takes a dictionary of data required for a course
         time constraint:  course_code, before_after, timeslot, priority.
         IN: a dictionary with appropriate data fields
@@ -243,25 +447,126 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 if course_obj == c.code: # found it
                     course_obj = c
                     break
-        
+
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
         else:
             is_mandatory = False
         timeslot_obj = str_to_time(constraint_dict["time"])
-        
+
         # scheduler.courses is course list
         if constraint_dict["before_after"] == "before":
             scheduler.add_constraint(constraint_name,
-                                        priority, 
+                                        priority,
                                         constraint.course_before_time,
                                         [course_obj, timeslot_obj, is_mandatory])
         else: # after constraint
             scheduler.add_constraint(constraint_name,
-                                        priority, 
+                                        priority,
                                         constraint.course_after_time,
                                         [course_obj, timeslot_obj, is_mandatory])
+
+
+    def course_day(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a course
+        day constraint:  code, day_code, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        constraint_name = constraint_dict["code"] + "_" + constraint_dict["day_code"]
+
+        course_obj = constraint_dict["code"]
+        for c in scheduler.courses:
+            if course_obj == c.code: # found it
+                course_obj = c
+                break
+
+        day_code = constraint_dict["day_code"].lower()
+
+        if len(day_code) == 0 or len(day_code) == 5:
+            return  # drop silently, bad constraint
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        
+        scheduler.add_constraint(constraint_name,
+                                    priority, 
+                                    constraint.partial_schedule_day,
+                                    [course_obj, day_code, is_mandatory])
+
+
+    def course_room(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a course
+        room constraint:  code, rooms, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        rooms = constraint_dict["rooms"]
+        constraint_name = constraint_dict["code"] + "_" + rooms[0]
+        if len(rooms) > 1:
+            constraint_name += "..."
+
+        course_obj = constraint_dict["code"]
+        for c in scheduler.courses:
+            if course_obj == c.code: # found it
+                course_obj = c
+                break
+
+        if len(rooms) == 0:
+            return  # drop silently, bad constraint
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+        
+        scheduler.add_constraint(constraint_name,
+                                    priority, 
+                                    constraint.partial_schedule_room,
+                                    [course_obj, rooms, is_mandatory])
+
+
+    def avoid_overlap(constraint_dict, scheduler):
+        """ Takes a dictionary of data required for a manual
+        concurrence (avoid conflict) constraint:  code,
+        start_time, end_time, courses, priority.
+        IN: a dictionary with appropriate data fields
+        OUT: adds course constraint to scheduler.
+        """
+        courses = constraint_dict["courses"]
+        constraint_name = "avoid overlap" + "_" + constraint_dict["code"] + "_" + courses[0]
+        if len(courses) > 1:
+            constraint_name += "..."
+
+        course_objs = []
+        for each_course in courses:
+            for c in scheduler.courses:
+                if each_course == c.code: # found it
+                    course_objs.append(c)
+                    break
+
+        if len(courses) == 0:
+            return  # drop silently, bad constraint
+        
+        priority = get_priority_value(constraint_dict["priority"])
+        if priority == 0:
+            is_mandatory = True
+        else:
+            is_mandatory = False
+
+        start_time = str_to_time(constraint_dict["start_time"])
+        end_time = str_to_time(constraint_dict["end_time"])
+        
+        scheduler.add_constraint(constraint_name,
+                                    priority, 
+                                    constraint.avoid_overlap,
+                                    [course_objs, start_time,
+                                    end_time, is_mandatory])
 
 
     def instructor_time_pref(constraint_dict, scheduler):
@@ -302,7 +607,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN:  a dictionary of appropriate data
         OUT: a max_courses constraint is added to the scheduler
         """
-        
+
         constraint_name = constraint_dict["instr_name"] + \
                             "_max_courses_" + str(constraint_dict["max_courses"])
         priority = get_priority_value(constraint_dict["priority"])
@@ -393,13 +698,23 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     # begin parsing YAML
     input_file = file(path_to_yaml, "r")
     yaml_dict = yaml.load(input_file)
-    
+
     if yaml_dict["data"]["constraint_list"]["course_constraints"] is not None:
         # course constraints exist
         course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
-        for course in course_constraints:
-            constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
-            course_time_constraint(course, scheduler)
+        for type in course_constraints:
+            if course_constraints[type] is not None:
+                # course constraints exist
+                for i in range(len(course_constraints[type])): # create each constraint of each type
+                    this_constraint = course_constraints[type][i]
+                    if type == "time":
+                        course_time(this_constraint, scheduler)
+                    elif type == "day":
+                        course_day(this_constraint, scheduler)
+                    elif type == "room":
+                        course_room(this_constraint, scheduler)
+                    elif type == "avoid_overlap":
+                        avoid_overlap(this_constraint, scheduler)
 
     if yaml_dict["data"]["constraint_list"]["instructor_constraints"] is not None:
         instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
@@ -408,6 +723,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 # instructor constraints exist
                 for i in range(len(instr_constraints[type])): # create every constraint of each type
                     this_constraint = instr_constraints[type][i]
+                    # only add constraint if this instructor exists
                     if type == "time_pref":
                         instructor_time_pref(this_constraint, scheduler)
                     elif type == "max_courses":
@@ -420,7 +736,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                         instructor_break(this_constraint, scheduler)
 
 
-## Function that reads an xml file and schedules all courses found in it 
+## Function that reads an xml file and schedules all courses found in it
 #  @param path_to_xml The path_to_xml parameter
 #  @param slot_divide The slot_divide parameter
 #  @return return_schedule
@@ -430,7 +746,7 @@ def create_scheduler_from_file_test(path_to_xml, slot_divide = 2):
     OUT: scheduler object with one week based on the xml input"""
     tree = ET.parse(path_to_xml)
     root = tree.getroot()
-    
+
     instructors = create_instructors_from_courses(path_to_xml)
     instructors_dict = dict(zip([inst.name for inst in instructors],
                            [inst for inst in instructors]))
@@ -485,8 +801,22 @@ def create_course_list_from_file_test(path_to_xml):
         print(inst)
         return None
 
+def course_should_be_scheduled(period):
+    """
+    Determines if a course should be scheduled based on its periodicity.
+    For example, if the semester being scheduled is Fall and a course is
+    only taught in the Spring, it should be ignored.
+    IN: periodicity of course being considered ["F", "B", "S", "D"]
+    OUT: True if course should be scheduled else False
+    """
+    yaml_override_path = "genetic/seeds/override.yaml"
+    this_semester = get_semester_to_schedule(yaml_override_path)[0]
+    return (period in ["B"]) or \
+            (this_semester == "Fall" and period == "F") or \
+            (this_semester == "Spring" and period == "S")
 
-## Function that reads an xml file and creates a list of course objects  
+
+## Function that reads an xml file and creates a list of course objects
 #  @param path_to_xml The path_to_xml parameter
 #  @param instructors_dict The instructors_dict parameter
 #  @return List of course objects; courses are assigned to instructors
@@ -502,21 +832,25 @@ def create_course_list_from_file(path_to_xml, instructors_dict):
         courses = []
         for c in root.find("schedule").find("courseList").getchildren():
             instructor = instructors_dict[c.attrib["instructor"]]
-            course = Course(code = c.attrib["code"],
-                            credit = int(c.attrib["credit"]),
-                            instructor = instructor,
-                            capacity = int(c.attrib["capacity"]),
-                            needs_computers = bool(int(c.attrib["needs_computers"])),
-                            is_lab = bool(int(c.attrib["is_lab"])))
-            instructor.add_course(course)
-            courses.append(course)
+            # only schedule courses with valid periodicity
+            if c.attrib["period"] in ["F", "S", "B", "D"]:
+                # only schedule courses with periodicity occuring in this semester
+                if course_should_be_scheduled(c.attrib["period"]):
+                    course = Course(code = c.attrib["code"],
+                                    credit = int(c.attrib["credit"]),
+                                    instructor = instructor,
+                                    capacity = int(c.attrib["capacity"]),
+                                    needs_computers = bool(int(c.attrib["needs_computers"])),
+                                    is_lab = bool(int(c.attrib["is_lab"])))
+                    instructor.add_course(course)
+                    courses.append(course)
         return courses
     except Exception as inst:
         print(inst)
         return None
 
 
-## Function that reads an xml file and creates a list of rooms objects  
+## Function that reads an xml file and creates a list of rooms objects
 #  @param path_to_xml The path_to_xml parameter
 #  @return List of rooms as strings
 def create_room_list_from_file(path_to_xml):
@@ -538,7 +872,7 @@ def create_room_list_from_file(path_to_xml):
         return None
 
 
-## Function that reads an xml file and creates a list of time slots  
+## Function that reads an xml file and creates a list of time slots
 #  @param path_to_xml The path_to_xml parameter
 #  @return Tuple of 2 lists of time slots as strings (mwf and tr)
 def create_time_slot_list_from_file(path_to_xml):
@@ -556,7 +890,7 @@ def create_time_slot_list_from_file(path_to_xml):
         return None
 
 
-## Function that reads an xml file and creates a dictionary of extras  
+## Function that reads an xml file and creates a dictionary of extras
 #  @param path_to_xml The path_to_xml parameter
 #  @return Dictionary of extras
 def create_extras_list_from_file(path_to_xml):
@@ -579,7 +913,7 @@ def create_extras_list_from_file(path_to_xml):
         return None
 
 
-## Function that reads an xml file and creates a list of unique instructor objects  
+## Function that reads an xml file and creates a list of unique instructor objects
 #  @param path_to_xml The path_to_xml parameter
 #  @return List of instructor objects
 def create_instructors_from_courses(path_to_xml):
@@ -675,7 +1009,7 @@ instructor="%s">
 
 
 
-## Function that Exports top 5 valid schedules to csv f 
+## Function that Exports top 5 valid schedules to csv f
 #  @param weeks The weeks parameter
 #  @param export_dir The export_dir parameter
 #  @return Up to 5 csv files for top 5 valid schedules

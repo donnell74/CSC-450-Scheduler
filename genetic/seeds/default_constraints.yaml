@@ -2,6 +2,7 @@ data:
   constraint_list:
     name: defaults
     course_constraints:
+      time:
       -
         code: CSC 111
         before_after: before
@@ -12,6 +13,31 @@ data:
         before_after: after
         time: "11:15"
         priority: Medium
+      day:
+      -
+        code: CSC 333
+        day_code: MTWF
+        priority: Mandatory
+      room:
+      -
+        code: CSC 111
+        rooms:
+        -
+          CHEK 213
+        -
+          CHEK 205
+        priority: High
+      avoid_overlap:
+      -
+        code: MTH 280
+        start_time: "08:00"
+        end_time: "11:00"
+        courses:
+        -
+          CSC 450
+        -
+          CSC 460
+        priority: High
     instructor_constraints:
         time_pref:
           -
