@@ -720,12 +720,7 @@ def create_room_avail(is_avail, days, rooms, gap_start, gap_end, constraints_vie
         constraint_name = each_room + "_"
         constraint_name += "Avail" if is_avail else "NotAvail"
         constraint_name += "_" + gap_start + "_" + gap_end + "_" + days
-        constraints_view_obj.add_constraint_listbox(constraint_name, priority)
-
-    tkMessageBox.showinfo("Room Availabilities Entered", "Rooms:\n" + " ".join(rooms) + "\n" +\
-                          "Have been given the availability status of " + status + "\n" +\
-                          "from " + gap_start + " tell " + gap_end +\
-                          "on the days of " + days + ".\n")
+        constraints_view_obj.add_constraint_listbox(constraint_name, 0)
             
 
 class TypeTime(Frame):
