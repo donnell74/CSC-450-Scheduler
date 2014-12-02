@@ -595,6 +595,9 @@ class RoomTimeAvail(Frame):
         description_constraint_label = Label(self, text=get_description_constraint(TYPE_ROOM_TIME_AVAIL))
         description_constraint_label.pack(side = TOP)
 
+        pick_room_label = Label(self, text="Pick a room:")
+        pick_room_label.pack(side = TOP)
+        
         self.listbox_frame = Frame(self)
         self.listbox_frame.pack(side = TOP)
         
@@ -1555,6 +1558,6 @@ def get_description_constraint(constraint_type):
     elif constraint_type == TYPE_TIME_INSTRUCTOR:
         description = "Time instructor prefers to teach:\n"
     elif constraint_type == TYPE_ROOM_TIME_AVAIL:
-        description = "Please select a room:\n"
+        description = "NOTE: Rooms start as available \n24 hours a day, adding \na when a room is available \nwill restrict it to \njust that time.\n"
 
     return description
