@@ -713,7 +713,64 @@ def instructor_max_courses(this_week, args):
 
     return reval
 
+	
+def contains(bound_start, bound_end, start, end):
+    if start >= bound_start and \
+       end <= bound_end:
+        return True
+    else:
+        return False
+	
 
+def rooms_avail_for_all_courses(this_week, args):
+    """Args should have the rooms_avail and is mandatory.
+    rooms_avail should take {<room.full_name> [('-'|'+', <start>, <end>),...], ... }
+    """
+    rooms_avail = this_week.info("Schedule").rooms_avail
+    is_mandatory = args[1]
+
+    holds = []
+    reval = {"failed": [], "score": 1}
+
+    for each_time_slot in this_week.list_time_slots():
+        if each_time_slot.course != None:
+            if not rooms_avail.has_key(each_time_slot.room.full_name):
+                holds.append(1)
+                continue
+			
+            this_room_avail = rooms_avail[each_time_slot.room.full_name]
+            positive_containing_found = False
+            negative_containing_found = False
+            total_positive = len([s for s in this_room_avail if s[0] == '+'])
+            for each_statement in this_room_avail:
+                start = map(int, each_statement[1].split(':'))
+                end = map(int, each_statement[2].split(':'))
+			    # each_statement[0] is '-'|'+', [1] is start, [2] is end
+                if each_statement[0] == '+' and not positive_containing_found:
+                    if contains(time(start[0], start[1]), time(end[0], end[1]),
+                                each_time_slot.start_time, each_time_slot.end_time):							
+                        positive_containing_found = True
+                        holds.append(1)
+				
+                if each_statement[0] == '-':
+                    if contains(time(start[0], start[1]), time(end[0], end[1]),
+                                each_time_slot.start_time, each_time_slot.end_time):
+                        if is_mandatory:
+                            this_week.valid = False
+
+                        reval["score"] = 0
+                        negative_containing_found = True
+                        holds.append(0)
+
+            if negative_containing_found:
+                reval["failed"].append(each_time_slot.course)
+	
+    if not is_mandatory: # if no fails by here, it passed
+        reval["score"] = get_partial_credit(holds)
+    
+    return reval
+
+	
 ## Function that counts the number of true values in a list and returns the partial credit 
 #  @param results_list The results_list parameter
 #  @return partial_weight.

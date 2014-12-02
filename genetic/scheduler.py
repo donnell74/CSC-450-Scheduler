@@ -125,6 +125,7 @@ class Scheduler:
         self.constraints = []
         self.num_hard_constraints = 0  # updated in globs, used for the mandatory, hardcoded constraints
         self.max_fitness = 0
+        self.rooms_avail = {}
 
         # default message to be displayed on the loading screen
         self.gui_loading_info = ""
