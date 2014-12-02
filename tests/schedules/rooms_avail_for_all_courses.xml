@@ -35,7 +35,7 @@
     </course>
     <course 
         code="CSC 131 001"
-        credit="4"
+        credit="1"
         startTime="08:00"
         endTime="09:15"
         days="TR"
@@ -44,7 +44,7 @@
     </course>
     <course 
         code="CSC 131 A"
-        credit="4"
+        credit="3"
         startTime="10:00"
         endTime="11:00"
         days="MWF"
@@ -53,7 +53,7 @@
     </course>
     <course
         code="CSC 232 001"
-        credit="5"
+        credit="1"
         startTime="9:30"
         endTime="10:45"
         days="TR"
@@ -62,7 +62,7 @@
     </course>
     <course
         code="CSC 232 A"
-        credit="5"
+        credit="3"
         startTime="13:00"
         endTime="14:00"
         days="MWF"

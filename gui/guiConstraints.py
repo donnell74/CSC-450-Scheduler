@@ -600,7 +600,7 @@ class RoomTimeAvail(Frame):
         
         self.scrollbar = Scrollbar(self.listbox_frame, orient=VERTICAL)
         self.listbox = Listbox(self.listbox_frame, yscrollcommand = self.scrollbar.set,\
-                                selectmode = MULTIPLE, height=5)
+                                selectmode = MULTIPLE, height=3)
 
         self.scrollbar.config(command=self.listbox.yview)
 
@@ -640,11 +640,21 @@ class RoomTimeAvail(Frame):
                                          self.gap_end_default,
                                          *self.end_time_list)
         self.gap_end_option.pack(side = TOP)
-        
 
+        self.end_time_label = Label(self, text = "On Days:")
+        self.end_time_label.pack(side = TOP)        
+        self.checkboxes_days = Frame(self)
+        self.days = ["M", "T", "W", "R", "F"]
+        self.boxes = [IntVar() for i in range(5)]
+        for i in range(len(self.days)):
+            self.value = self.boxes[i]
+            box = Checkbutton(self.checkboxes_days, text = self.days[i], variable = self.value)
+            box.pack(side= LEFT, anchor= W, expand=False)
+
+        self.checkboxes_days.pack()
         self.button_add_course_constraint = Button(self, text="Add Availability",\
                                             command=self.add_room_avail)
-        self.button_add_course_constraint.pack(side = RIGHT, pady = 25)
+        self.button_add_course_constraint.pack(side = LEFT, anchor = SW, expand=YES, fill="both")
 
 
     def callback_gap_start(self, *args):
@@ -683,27 +693,35 @@ class RoomTimeAvail(Frame):
             self.listbox.selection_clear(0, END)
 
             is_avail = self.str_when_default.get() == "Available"
+            
+            checkboxes = self.boxes
+            day_code = []
+            for i in range(len(checkboxes)):  # check each box to see if it's ticked
+                if checkboxes[i].get() == 1:  #checked, so push the day to day_code
+                    day_code.append(self.days[i])
 
+            day_code = ''.join(day_code)
+            
             gap_start = self.gap_start_default.get()
-
             gap_end = self.gap_end_default.get()
 
-            create_room_avail(is_avail, list_rooms, gap_start,
+            create_room_avail(is_avail, day_code, list_rooms, gap_start,
                               gap_end, self.constraints_view_obj)
         else:
             tkMessageBox.showerror(title="Error", message="Select at least 1 room")
         return
 
-def create_room_avail(is_avail, rooms, gap_start, gap_end, constraints_view_obj):
+def create_room_avail(is_avail, days, rooms, gap_start, gap_end, constraints_view_obj):
     rooms = [r[0] + "" + r[1] for r in rooms]
         
     for each_room in rooms:
-        globs.mainScheduler.add_room_avail(each_room, is_avail, gap_start, gap_end)
+        globs.mainScheduler.add_room_avail(each_room, is_avail, days, gap_start, gap_end)
 
     status = "Available" if is_avail else "Not Available"
     tkMessageBox.showinfo("Room Availabilities Entered", "Rooms:\n" + " ".join(rooms) + "\n" +\
                           "Have been given the availability status of " + status + "\n" +\
-                          "from " + gap_start + " tell " + gap_end + ".\n")
+                          "from " + gap_start + " tell " + gap_end +\
+                          "on the days of " + days + ".\n")
             
 
 class TypeTime(Frame):

@@ -236,20 +236,20 @@ class TestConstraints(unittest.TestCase):
         self.assertEqual(this_scheduler.weeks[0].fitness, 30)
 		
 		# Non mandatory passing
-        this_scheduler.rooms_avail = { "CHEK209": [ ('+', "08:00", "14:00") ] }
+        this_scheduler.rooms_avail = { "CHEK209": [ ('+', "mwf", "08:00", "14:00") ] }
         this_scheduler.calc_fitness(this_scheduler.weeks[0])
         self.assertEqual(this_scheduler.weeks[0].fitness, 30.0)
 		
 		# Non mandatory one course failing
-        this_scheduler.rooms_avail["CHEK209"].append( ('-', "11:00", "12:00") )
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "mwf", "11:00", "12:00") )
         this_scheduler.calc_fitness(this_scheduler.weeks[0])
-        self.assertEqual(this_scheduler.weeks[0].fitness, 24.0)		
+        self.assertEqual(this_scheduler.weeks[0].fitness, 24.0) # .85
 
         # Non mandatory three courses failing and overlapping negatives
-        this_scheduler.rooms_avail["CHEK209"].append( ('-', "10:00", "11:30") )
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "mwf", "10:00", "11:30") )
         this_scheduler.calc_fitness(this_scheduler.weeks[0])
-        self.assertEqual(this_scheduler.weeks[0].fitness, 21.0)		
-		
+        self.assertEqual(this_scheduler.weeks[0].fitness, 24.0) # math is right here .77	
+        		
 		# Clear everything
         this_scheduler.clear_constraints()
         this_scheduler.rooms_avail = {}
@@ -264,20 +264,81 @@ class TestConstraints(unittest.TestCase):
         self.assertTrue(this_scheduler.weeks[0].valid)
 		
 		# Mandatory passing
-        this_scheduler.rooms_avail = { "CHEK209": [ ('+', "08:00", "14:00") ] }
+        this_scheduler.rooms_avail = { "CHEK209": [ ('+', "mwf", "08:00", "14:00") ] }
         this_scheduler.calc_fitness(this_scheduler.weeks[0])
         self.assertTrue(this_scheduler.weeks[0].valid)
 
 		# Mandatory one course failing
-        this_scheduler.rooms_avail["CHEK209"].append( ('-', "11:00", "12:00") )
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "mwf", "11:00", "12:00") )
         this_scheduler.calc_fitness(this_scheduler.weeks[0])
         self.assertFalse(this_scheduler.weeks[0].valid)
         this_scheduler.weeks[0].valid = True
         
         # Mandatory three courses failing and overlapping negatives
-        this_scheduler.rooms_avail["CHEK209"].append( ('-', "10:00", "11:30") )
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "mwf", "10:00", "11:30") )
         this_scheduler.calc_fitness(this_scheduler.weeks[0])
         self.assertFalse(this_scheduler.weeks[0].valid)
 		
+        # Same tests as above but for tr
+
+   		# Clear everything
+        this_scheduler.clear_constraints()
+        this_scheduler.rooms_avail = {}
+        this_scheduler.weeks[0].valid = True
+        
+        # non mandatory empty check
+        this_scheduler.add_constraint("rooms_avail_for_all_courses_non_mand", 30,
+                                     constraint.rooms_avail_for_all_courses,
+                                     [False])
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+
+        # This schedule should pass since no room_avail given means everything is completely open
+        self.assertEqual(this_scheduler.weeks[0].fitness, 30)
+		
+		# Non mandatory passing
+        this_scheduler.rooms_avail = { "CHEK209": [ ('+', "tr", "08:00", "14:00") ] }
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+        self.assertEqual(this_scheduler.weeks[0].fitness, 30.0)
+		
+		# Non mandatory one course failing
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "tr", "08:00", "09:15") )
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+        self.assertEqual(this_scheduler.weeks[0].fitness, 27.0)		
+
+        # Non mandatory three courses failing and overlapping negatives
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "tr", "09:30", "10:45") )
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+        self.assertEqual(this_scheduler.weeks[0].fitness, 27.0)		
+        		
+		# Clear everything
+        this_scheduler.clear_constraints()
+        this_scheduler.rooms_avail = {}
+        
+		# non mandatory empty check
+        this_scheduler.add_constraint("rooms_avail_for_all_courses_non_mand", 30,
+                                     constraint.rooms_avail_for_all_courses,
+                                     [True])
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+
+        # This schedule should pass since no room_avail given means everything is completely open
+        self.assertTrue(this_scheduler.weeks[0].valid)
+		
+		# Mandatory passing
+        this_scheduler.rooms_avail = { "CHEK209": [ ('+', "tr", "08:00", "14:00") ] }
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+        self.assertTrue(this_scheduler.weeks[0].valid)
+
+		# Mandatory one course failing
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "tr", "08:00", "09:15") )
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+        self.assertFalse(this_scheduler.weeks[0].valid)
+        this_scheduler.weeks[0].valid = True
+        
+        # Mandatory three courses failing and overlapping negatives
+        this_scheduler.rooms_avail["CHEK209"].append( ('-', "tr", "09:30", "10:45") )
+        this_scheduler.calc_fitness(this_scheduler.weeks[0])
+        self.assertFalse(this_scheduler.weeks[0].valid)
+		
+        
 if __name__ == "__main__":
     unittest.main()

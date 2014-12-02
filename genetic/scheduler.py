@@ -225,12 +225,12 @@ class Scheduler:
     # @param is_avail A boolean saying if it is or is not availabile
     # @param start A string representing time in format hh:mm
     # @param end A string representing time in format hh:mm
-    def add_room_avail(self, room, is_avail, start, end):
+    def add_room_avail(self, room, is_avail, days, start, end):
         if not self.rooms_avail.has_key(room):
             self.rooms_avail[room] = []
             
         is_avail_char = '+' if is_avail else '-'
-        self.rooms_avail[room].append((is_avail_char, start, end))
+        self.rooms_avail[room].append((is_avail_char, days.lower(), start, end))
         print("self.rooms_avail updated to: ")
         print(self.rooms_avail)
         
