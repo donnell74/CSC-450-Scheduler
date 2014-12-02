@@ -17,7 +17,7 @@ DAY_COURSE = "Day"
 ROOM_COURSE = "Room"
 TIME = "Time"
 MANUAL_CONCURRENCY = "Avoid Overlap"
-ROOM_TIME_AVAIL = "Available"
+ROOM_TIME_AVAIL = "Availability"
 
 TYPE_DAY_COURSE = 0
 TYPE_TIME_COURSE = 1
