@@ -231,10 +231,9 @@ def instructor_conflict(this_week, args):
     instructors = args[0]
     for each_instructor in instructors:
         times = []
-        count = 0
         for each_instructors_course in each_instructor.courses:
             times.append(
-                this_week.find_course(each_instructors_course)[0])
+               this_week.find_course(each_instructors_course)[0])
         while len(times) > 0:
             each_time = times.pop(0)
             for each_other_time in times:
