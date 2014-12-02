@@ -8,7 +8,6 @@ from time import strftime, gmtime
 from weakref import ref
 from datetime import date, time as time_obj
 import constraint
-import globs
 
 from Tkinter import Tk
 from tkMessageBox import showinfo
@@ -604,9 +603,8 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         course_constraints = yaml_dict["data"]["constraint_list"]["course_constraints"]
         for course in course_constraints:
             # only add constraint if this course exists
-            if course["code"] in globs.course_titles:
-                constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
-                course_time_constraint(course, scheduler)
+            constraint_name = course["code"] + "_" + course["before_after"] + "_" + course["time"]
+            course_time_constraint(course, scheduler)
 
     if yaml_dict["data"]["constraint_list"]["instructor_constraints"] is not None:
         instr_constraints = yaml_dict["data"]["constraint_list"]["instructor_constraints"]
@@ -616,17 +614,16 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 for i in range(len(instr_constraints[type])): # create every constraint of each type
                     this_constraint = instr_constraints[type][i]
                     # only add constraint if this instructor exists
-                    if this_constraint['instr_name'] in globs.instructors_list:
-                        if type == "time_pref":
-                            instructor_time_pref(this_constraint, scheduler)
-                        elif type == "max_courses":
-                            max_courses(this_constraint, scheduler)
-                        elif type == "day_pref":
-                            day_pref(this_constraint, scheduler)
-                        elif type == "computer_pref":
-                            computer_pref(this_constraint, scheduler)
-                        elif type == "instructor_break":
-                            instructor_break(this_constraint, scheduler)
+                    if type == "time_pref":
+                        instructor_time_pref(this_constraint, scheduler)
+                    elif type == "max_courses":
+                        max_courses(this_constraint, scheduler)
+                    elif type == "day_pref":
+                        day_pref(this_constraint, scheduler)
+                    elif type == "computer_pref":
+                        computer_pref(this_constraint, scheduler)
+                    elif type == "instructor_break":
+                        instructor_break(this_constraint, scheduler)
 
 
 ## Function that reads an xml file and schedules all courses found in it
@@ -702,7 +699,8 @@ def course_should_be_scheduled(period):
     IN: periodicity of course being considered ["F", "B", "S", "D"]
     OUT: True if course should be scheduled else False
     """
-    this_semester = globs.semester_to_schedule[0]
+    yaml_override_path = "genetic/seeds/override.yaml"
+    this_semester = get_semester_to_schedule(yaml_override_path)[0]
     return (period in ["B"]) or \
             (this_semester == "Fall" and period == "F") or \
             (this_semester == "Spring" and period == "S")
