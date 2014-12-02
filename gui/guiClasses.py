@@ -315,15 +315,15 @@ class ViewPage(Page):
         """ Creates a drop down menu for room selection """
 
         self.room_label = Label(self, text = 'Room: ',
-                            font = (font_style, size_p))
-        self.room_label.place(x = 50, y = 10)
+                            font = (font_style, 10))
+        self.room_label.place(x = 47, y = 18)
 
         self.selected_option = StringVar(self)
         self.selected_option.set(self.rooms[self.room_selection_option]) # default value
 
         self.menu_select = apply(OptionMenu,
                             (self, self.selected_option) + tuple(self.rooms))
-        self.menu_select.place(x = 115, y = 5)
+        self.menu_select.place(x = 94, y = 10)
 
         self.selected_option.trace('w', lambda *args: self.get_selected(self.selected_option))
 
