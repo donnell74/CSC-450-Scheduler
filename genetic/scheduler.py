@@ -125,6 +125,7 @@ class Scheduler:
         self.constraints = []
         self.num_hard_constraints = 0  # updated in globs, used for the mandatory, hardcoded constraints
         self.max_fitness = 0
+        self.rooms_avail = {}
 
         # default message to be displayed on the loading screen
         self.gui_loading_info = ""
@@ -187,6 +188,9 @@ class Scheduler:
     def delete_list_constraints(self, constraint_name_list):
         """Removes list constraints from schedule"""
         for constraint_name in constraint_name_list:
+            if "Avail" in constraint_name or\
+               "NotAvail" in constraint_name:
+               self.delete_room_avail(constraint_name)
             for constraint_obj in self.constraints:
                 if constraint_name == constraint_obj.name:
                     self.max_fitness -= constraint_obj.weight
@@ -204,6 +208,8 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
+            if not this_week.valid:
+                break
             this_week.constraints[each_constraint.name] = [each_fitness["score"],
                     each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
@@ -218,6 +224,38 @@ class Scheduler:
 
         #print(this_week.constraints)
 
+    ## Safely adds room availability to scheduler
+    # @param self
+    # @param room A full name of a room (building + number, no spaces)
+    # @param is_avail A boolean saying if it is or is not availabile
+    # @param start A string representing time in format hh:mm
+    # @param end A string representing time in format hh:mm
+    def add_room_avail(self, room, is_avail, days, start, end):
+        if not self.rooms_avail.has_key(room):
+            self.rooms_avail[room] = []
+            
+        is_avail_char = '+' if is_avail else '-'
+        self.rooms_avail[room].append((is_avail_char, days.lower(), start, end))
+        print("self.rooms_avail updated to: ")
+        print(self.rooms_avail)
+        
+     
+    def delete_room_avail(self, constraint_name):
+        tokens = constraint_name.split('_')
+        tokens[1] = '+' if tokens[1] == "Avail" else '-'
+        room = tokens[0]
+        tokens = (tokens[1], tokens[4].lower(), tokens[2], tokens[3])
+
+        
+        if self.rooms_avail.has_key(room):
+            this_room_avail = self.rooms_avail[room]
+            for counter in range(len(this_room_avail)):
+                if this_room_avail[counter] == tokens:
+                    self.rooms_avail[room].pop(counter)
+                    break
+                    
+        if not self.rooms_avail[room]:
+            del self.rooms_avail[room]
 
     ## Mutates a schedule by changing one course based off a random constraint
     #  @param self
@@ -504,9 +542,7 @@ class Scheduler:
         #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
         num_segments_displayed = self.loading_screen.load_bar['width']
         number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
-        print(number_of_segments_to_add)
         while number_of_segments_to_add > 1:
-            print("Updating the loading bar")
             self.loading_screen.update_loading_bar()
             number_of_segments_to_add -= 1
         return
@@ -570,18 +606,35 @@ class Scheduler:
             # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
 
             self.weeks = filter(lambda x: x.complete, self.weeks)
-            #Case that no schedules are complete
-            if len(self.weeks) == 0:
-                self.generate_starting_population(1000, False, time_limit, 
-                                                  start_time)
-                total_iterations += 1
-                counter += 1
-                continue
-                #todo: error out if never have a complete week
 
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
+
+            #Case that no schedules are complete or valid
+            if len(self.weeks) == 0 or (len(filter(lambda x: x.valid, self.weeks)) == 0 and
+                                        total_iterations < 9):
+                # for case two only...reset before generate another 1000
+                if len(self.weeks) >= 1000:
+                    for i in range(len(self.weeks)):
+                        del self.weeks[0]
+                    gc.collect()
+
+                self.generate_starting_population(1000, False, time_limit, 
+                                                  start_time)
+                total_iterations += 1
+                counter += 1
+                time_elapsed = now() - start_time
+                self.loading_bar_update(one_increment, time_elapsed, time_limit)
+                print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
+                if time_elapsed > time_limit:
+                    # need to assess the new weeks
+                    for each_week in self.weeks:
+                        each_week.update_sections(self.courses)
+                        self.calc_fitness(each_week)
+                    print('Time limit reached; final output found')
+                    break
+                continue
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
@@ -600,6 +653,7 @@ class Scheduler:
                 top_5_avg = reduce(lambda x, y: x+y, [w.fitness for w in self.weeks[0:5]]) / 5
                 print("Minimum fitness of the top schedules of the generation:", top_5_min)
                 print("Average fitness of the top schedules of the generation:", top_5_avg)
+                print("Max fitness for any schedule:", self.max_fitness)
                 if top_5_min == top_5_avg and top_5_min != self.max_fitness:
                     print("Invoking guided mutatation")
                     
@@ -934,22 +988,40 @@ class Scheduler:
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
             possibilities = self.assess_time_slot_row_for_open_slots(possibilities)
-            # each day open for that time and room
-            if possibilities['type'] == 2:
-                chosen = random.choice(possibilities['time_slots'])
-                self.assign_and_remove(
-                        course, chosen, list_of_slots, this_week)
-                done = True
+            if course.is_lab: # tr
+                # each day open for that time and room
+                if possibilities['type'] == 2:
+                    chosen = random.choice(possibilities['time_slots'])
+                    self.assign_and_remove(
+                            course, chosen, list_of_slots, this_week)
+                    done = True
 
-            # case that cannot schedule for this time and room
-            else:
-                # remove this timeslot and the other unoccupied in its
-                # week from temp pool
-                for to_remove in possibilities['time_slots']:
-                    i = self.find_index(to_remove, current_pool)
-                    del(current_pool[i])
-                # get a new random time slot
-                random_slot = choice(current_pool)
+                # case that cannot schedule for this time and room
+                else:
+                    # remove this timeslot and the other unoccupied in its
+                    # week from temp pool
+                    for to_remove in possibilities['time_slots']:
+                        i = self.find_index(to_remove, current_pool)
+                        del(current_pool[i])
+                    # get a new random time slot
+                    random_slot = choice(current_pool)
+            else: # mwf
+                # each day open for that time and room
+                if possibilities['type'] == 1:
+                    chosen = random.choice(possibilities['time_slots'])
+                    self.assign_and_remove(
+                            course, chosen, list_of_slots, this_week)
+                    done = True
+
+                # case that cannot schedule for this time and room
+                else:
+                    # remove this timeslot and the other unoccupied in its
+                    # week from temp pool
+                    for to_remove in possibilities['time_slots']:
+                        i = self.find_index(to_remove, current_pool)
+                        del(current_pool[i])
+                    # get a new random time slot
+                    random_slot = choice(current_pool)
         #status
         return not done
 
@@ -1045,4 +1117,5 @@ class Scheduler:
 
         if len(self.weeks) == 0:
             print("Could not schedule")
+        print("Generated %d schedules" % num_to_generate)
         return None

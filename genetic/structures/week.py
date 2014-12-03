@@ -14,7 +14,7 @@ class MalformedWeekError(Exception):
 
 
 ## Documentation for a class.
-#
+#  
 #
 #  A particular week of courses, consisting of 5 day objects
 class Week:

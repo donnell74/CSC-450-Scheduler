@@ -494,25 +494,28 @@ def avoid_overlap(this_week, args):
     list_of_courses = args[0]
     gap_start = args[1]
     gap_end = args[2]
-    is_mandatory = args[3]
+    day_code = args[3]
+    is_mandatory = args[4]
 
     holds = []
     reval = {"score": 1, "failed": []}
 
     for each_course in list_of_courses: 
-        each_slot_row = this_week.find_course(each_course)[0]
-        # before or after gap
-        if each_slot_row.end_time < gap_start or each_slot_row.start_time > gap_end:
-            holds.append(1)
-        else:  # in gap, bad
-            if is_mandatory:
-                this_week.valid = False
+        each_slot_row = this_week.find_course(each_course)
+        for each_slot in each_slot_row:
+            if each_slot.day in day_code:
+                # before or after gap
+                if each_slot.end_time <= gap_start or each_slot.start_time >= gap_end:
+                    holds.append(1)
+                else:  # in gap, bad
+                    if is_mandatory:
+                        this_week.valid = False
 
-            reval["score"] = 0
-            reval["failed"].append(each_course)
-            holds.append(0)
+                    reval["score"] = 0
+                    reval["failed"].append(each_course)
+                    holds.append(0)
 
-    if is_mandatory: # if no fails by here, it passed
+    if is_mandatory:
         reval["score"] = get_partial_credit(holds)
     
     return reval
@@ -713,7 +716,69 @@ def instructor_max_courses(this_week, args):
 
     return reval
 
+	
+def contains(bound_start, bound_end, start, end):
+    if start >= bound_start and \
+       end <= bound_end:
+        return True
+    else:
+        return False
+	
 
+def rooms_avail_for_all_courses(this_week, args):
+    """Args should have the is mandatory.
+    rooms_avail should take {<room.full_name> [('-'|'+', <days>, <start>, <end>),...], ... }
+    """
+    rooms_avail = this_week.info("Schedule").rooms_avail
+    is_mandatory = args[0]
+
+    holds = []
+    reval = {"failed": [], "score": 1}
+
+    for each_time_slot in this_week.list_time_slots():
+        if each_time_slot.course != None:
+            if not rooms_avail.has_key(each_time_slot.room.full_name):
+                holds.append(1)
+                continue
+			
+            this_room_avail = rooms_avail[each_time_slot.room.full_name]
+            positive_containing_found = False
+            negative_containing_found = False
+            total_positive = len([s for s in this_room_avail if s[0] == '+'])
+            for each_statement in this_room_avail:
+                if each_time_slot.day not in each_statement[1]:
+                    holds.append(1)
+                    continue
+                    
+                start = map(int, each_statement[2].split(':'))
+                end = map(int, each_statement[3].split(':'))
+			    # each_statement[0] is '-'|'+', [1] is days, [2] is start, [3] is end
+                if each_statement[0] == '+' and not positive_containing_found:
+                    if contains(time(start[0], start[1]), time(end[0], end[1]),
+                                each_time_slot.start_time, each_time_slot.end_time):							
+                        positive_containing_found = True
+                        holds.append(1)
+				
+                if each_statement[0] == '-':
+                    if contains(time(start[0], start[1]), time(end[0], end[1]),
+                                each_time_slot.start_time, each_time_slot.end_time):
+                        if is_mandatory:
+                            this_week.valid = False
+
+                        reval["score"] = 0
+                        negative_containing_found = True
+                        holds.append(0)
+
+            if negative_containing_found:
+                if each_time_slot.course not in reval["failed"]:
+                    reval["failed"].append(each_time_slot.course)
+	
+    if not is_mandatory: # if no fails by here, it passed
+        reval["score"] = get_partial_credit(holds)
+
+    return reval
+
+	
 ## Function that counts the number of true values in a list and returns the partial credit 
 #  @param results_list The results_list parameter
 #  @return partial_weight.
@@ -731,6 +796,7 @@ def get_partial_credit(results_list):
     #avoid dividing by zero; shouldn't happen if constraint is set up right
     if len(results_list) == 0:
         return 0
+     
     count = float(count)/len(results_list)
     partial_weight = round(count, 1)
 
