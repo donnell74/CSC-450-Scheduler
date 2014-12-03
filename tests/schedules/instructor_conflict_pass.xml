@@ -4,7 +4,7 @@
         <courseList>
           <item code="CSC 130 A" credit="3" instructor="Smith" prereq="" capacity="15" period="B" needs_computers="1" is_lab="0"></item>
           <item code="CSC 131 001" credit="1" instructor="Saquer" prereq="CSC130" capacity="15" period="B" needs_computers="0" is_lab="1"></item>
-          <item code="CSC 131 A" credit="3" instructor="Saquer" prereq="CSC130" capacity="15" period="B" needs_computers="0" is_lab="0"></item>
+          <item code="CSC 131 A" credit="3" instructor="Smith" prereq="CSC130" capacity="15" period="B" needs_computers="0" is_lab="0"></item>
           <item code="CSC 232 A" credit="3" instructor="Vollmar" prereq="CSC131" capacity="10" period="B" needs_computers="0" is_lab="0"></item>
           <item code="CSC 232 001" credit="1" instructor="Vollmar" prereq="CSC131" capacity="10" period="B" needs_computers="0" is_lab="1"></item>
         </courseList>
@@ -43,11 +43,11 @@
     <course 
         code="CSC 131 A"
         credit="4"
-        startTime="13:00"
-        endTime="14:00"
+        startTime="10:00"
+        endTime="11:00"
         days="MWF"
         room="CHEK 209"
-        instructor="Saquer">
+        instructor="Smith">
     </course>
     <course
         code="CSC 232 001"
@@ -61,8 +61,8 @@
     <course
         code="CSC 232 A"
         credit="5"
-        startTime="10:00"
-        endTime="11:00"
+        startTime="13:00"
+        endTime="14:00"
         days="MWF"
         room="CHEK 209"
         instructor="Volmar">

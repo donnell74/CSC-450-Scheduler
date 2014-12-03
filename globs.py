@@ -2,31 +2,40 @@ from genetic import interface, scheduler, constraint
 import os
 
 def init(): # call globals.init() from main
-    global courses, course_titles, rooms, time_slots, instructors, mainScheduler, start_times, end_times
+    global courses, course_titles, rooms, time_slots, instructors, \
+           instructors_list, instructors_dict, mainScheduler, \
+           start_times, end_times, semester_to_schedule
 
     yaml_input_path = "genetic/seeds/Input.yaml"
+    # yaml_input_path = "genetic/seeds/global.yaml"
+    yaml_override_path = "genetic/seeds/override.yaml"
+    yaml_constraint_path = "genetic/seeds/default_constraints.yaml"
+
+    # figure out which semester we're scheduling; guess if not specified in override
+    semester_to_schedule = interface.get_semester_to_schedule(yaml_override_path)
 
     # Create XML input from YAMl (Input.yaml)
-    if os.path.isfile(yaml_input_path) == False:
-        print("No valid input found. Please put put an input seed named 'Input.yaml' or " +
-                  "'Input.xml' in ./genetic/seeds/ and try again")
-        return
+    if not os.path.isfile(yaml_input_path):
+        raise IOError("No valid input found. Please put put an input seed named 'Input.yaml' or " +
+                      "'Input.xml' in ./genetic/seeds/ and try again")
     else:
-        interface.create_xml_from_yaml(yaml_input_path) #create xml from yaml
+        # take into account override and output correct xml
+        interface.create_xml_input_from_yaml(yaml_input_path, yaml_override_path)
 
     # Now that we have valid XML input, create requisite objects from file
     xml_input_path = "genetic/seeds/Input.xml"
     instructors = interface.create_instructors_from_courses(xml_input_path)
     instructors_dict = dict(zip([inst.name for inst in instructors], [inst for inst in instructors]))
+    instructors_list = set(instructors_dict.keys())
     courses = interface.create_course_list_from_file(xml_input_path, instructors_dict)
     rooms = interface.create_room_list_from_file(xml_input_path)
     time_slots_mwf, time_slots_tr = interface.create_time_slot_list_from_file(xml_input_path)
+
     course_titles = [course.code for course in courses]
 
     # stuff that should be moved to a file
     time_slot_divide = 2 #todo: remove this from xml
-    #DO NOT DO THIS AGAIN
-    #GREG IS SORRY
+
     try:
         mainScheduler
     except:
@@ -37,38 +46,60 @@ def init(): # call globals.init() from main
         #prereqs computation and display
         prereqs = interface.get_prereqs(xml_input_path, courses)
         prereqs = interface.get_extended_prereqs(prereqs, courses)
-        '''for prereq in prereqs:
-            print " ".join([c.absolute_course for c in prereq.courses]) + ":" + \
-                  " ".join([c.absolute_course for c in prereq.prereqs])'''
+        for prereq in prereqs:
+            '''print " ".join([c.code for c in prereq.courses]) + ":" + \
+                  " ".join([c.code for c in prereq.prereqs]) + "\n*****\n"'''
+            prereq.determine_not_prereq(courses)
+            print " ".join([c.code for c in prereq.courses]) + ":" + \
+                  " ".join([c.code for c in prereq.not_prereqs]) + "\n*****\n"
 
-        # Add all mandatory constraints here
+        # Add all mandatory/hard constraints here
         mainScheduler.add_constraint("instructor conflict", 0,
                                     constraint.instructor_conflict,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("sequential_time_different_building_conflict", 0,
                                     constraint.sequential_time_different_building_conflict,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("subsequent courses", 0,
                                     constraint.num_subsequent_courses,
-                                    [instructors])
+                                    [instructors], True)
         mainScheduler.add_constraint("capacity checking", 0,
                                     constraint.ensure_course_room_capacity,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("no overlapping courses", 0,
                                     constraint.no_overlapping_courses,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("computer requirement", 0,
                                     constraint.ensure_computer_requirement,
-                                    [])
+                                    [], True)
         mainScheduler.add_constraint("course sections at different times", 0,
                                     constraint.course_sections_at_different_times,
-                                    [courses])
-
+                                    [courses], True)
+        mainScheduler.add_constraint("courses only scheduled when rooms available", 0,
+                                    constraint.rooms_avail_for_all_courses,
+                                    [True], True)
+									
+        labs = []
         for each_course in mainScheduler.courses:
             if each_course.is_lab:
-                mainScheduler.add_constraint("lab on tr: " + each_course.code, 0,
-                                             constraint.lab_on_tr, [each_course])
+                labs.append(each_course)
 
+        mainScheduler.add_constraint("labs on tr", 0,
+                                     constraint.lab_on_tr,
+                                     [labs], True)
+
+        mainScheduler.add_constraint(
+            "avoid overlap between CSC courses", 100,
+            constraint.avoid_overlap_within_csc,
+            [prereqs, False],
+            True)
+
+        mainScheduler.num_hard_constraints = len(mainScheduler.constraints)
+
+        # Create list of default constraints from YAML (default_constraints.yaml)
+        if os.path.isfile(yaml_constraint_path):
+            # found default constraint file
+            interface.create_constraints_from_yaml(yaml_constraint_path, mainScheduler, instructors)
 
     # used for gui strings
     # must be in military time

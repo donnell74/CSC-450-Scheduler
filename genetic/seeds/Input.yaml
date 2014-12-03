@@ -4,6 +4,7 @@ data:
     course_list:
       -
         code: CSC 111
+        period: B
         credit: 3
         instructor: Scroggins
         prereq: null
@@ -12,6 +13,7 @@ data:
         is_lab: 0
       -
         code: CSC 130 001
+        period: B
         credit: 3
         instructor: Smith
         prereq: null
@@ -20,6 +22,7 @@ data:
         is_lab: 0
       -
         code: CSC 130 002
+        period: B
         credit: 3
         instructor: Smith
         prereq: null
@@ -28,6 +31,7 @@ data:
         is_lab: 0
       -
         code: CSC 131 001
+        period: B
         credit: 1
         instructor: Saquer
         prereq: CSC130
@@ -36,6 +40,7 @@ data:
         is_lab: 1
       -
         code: CSC 131 A
+        period: B
         credit: 3
         instructor: Saquer
         prereq: CSC130
@@ -44,6 +49,7 @@ data:
         is_lab: 0
       -
         code: CSC 232 A
+        period: B
         credit: 3
         instructor: Vollmar
         prereq: CSC131
@@ -52,6 +58,7 @@ data:
         is_lab: 0
       -
         code: CSC 232 001
+        period: B
         credit: 1
         instructor: Vollmar
         prereq: CSC131
@@ -60,6 +67,7 @@ data:
         is_lab: 1
       -
         code: CSC 320 A
+        period: B
         credit: 3
         instructor: Liu
         prereq: CSC131
@@ -68,6 +76,7 @@ data:
         is_lab: 0
       -
         code: CSC 320 001
+        period: B
         credit: 1
         instructor: Liu
         prereq: CSC131
@@ -76,6 +85,7 @@ data:
         is_lab: 1
       -
         code: CSC 325
+        period: B
         credit: 3
         instructor: Shade
         prereq: CSC232
@@ -84,6 +94,7 @@ data:
         is_lab: 0
       -
         code: CSC 333
+        period: B
         credit: 4
         instructor: Shade
         prereq: CSC232 CSC320
@@ -92,6 +103,7 @@ data:
         is_lab: 0
       -
         code: CSC 365
+        period: F
         credit: 3
         instructor: Saquer
         prereq: null
@@ -100,6 +112,7 @@ data:
         is_lab: 0
       -
         code: CSC 450
+        period: S
         credit: 3
         instructor: Shade
         prereq: CSC325 CSC365
@@ -108,11 +121,21 @@ data:
         is_lab: 0
       -
         code: CSC 460
+        period: B
         credit: 3
         instructor: Wang
         prereq: CSC320 CSC325
         capacity: 10
         needs_computers: 1
+        is_lab: 0
+      -
+        code: CSC 482
+        period: B
+        credit: 1
+        instructor: Vollmar
+        prereq: CSC333 CSC460
+        capacity: 30
+        needs_computers: 0
         is_lab: 0
     room_list:
       -

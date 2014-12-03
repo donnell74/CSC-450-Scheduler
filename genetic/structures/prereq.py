@@ -8,6 +8,8 @@ class Prereq:
         self.absolute_prereqs = []
         #list of course objects as prereqs
         self.prereqs = []
+        #list of course objects not prereqs
+        self.not_prereqs = []
         #course objects for absolute course
         self.courses = self.determine_courses(list_of_all_courses)
  
@@ -26,6 +28,12 @@ class Prereq:
             if course.absolute_course == self.absolute_course:
                 out.append(course)
         return out
+
+    def determine_not_prereq(self, courses):
+        """Determine courses that are not prereqs and not this course"""
+        for each_course in courses:
+            if each_course not in self.prereqs and each_course not in self.courses:
+                self.not_prereqs.append(each_course)
 
     def __str__(self):
         return self.absolute_course + " requires " + "".join([str(p) + ", " for p in self.absolute_prereqs])

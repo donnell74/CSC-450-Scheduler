@@ -15,14 +15,13 @@ class ToolTips(object):
         self.buttons = ['Home',
                         'Constraint',
                         'View',
-                        'Misc',
                         'RUN',
+                        'Misc',
                         'Schedule 1',
                         'Schedule 2',
                         'Schedule 3',
                         'Schedule 4',
                         'Schedule 5',
-                        'View Constraints',
                         'Add Course Constraint',
                         'Add Instructor Constraint',
                         'Add Constraint']
@@ -31,8 +30,8 @@ class ToolTips(object):
         self.tips = {self.buttons[0] : 'Return home.',
                      self.buttons[1] : 'Make a custom schedule.',
                      self.buttons[2] : 'View the schedules.',
-                     self.buttons[3] : 'Misc',
-                     self.buttons[4] : 'Generate schedules.'}
+                     self.buttons[3] : 'Generate schedules.',
+                     self.buttons[4] : 'Misc'}
 
         # x position of a tool tip
         self.tip_x_pos = {self.buttons[0] : 150,
@@ -78,25 +77,34 @@ class ToolTips(object):
                 if not (self.btn_name == 'RUN') and \
                    not (button in self.buttons_clicked):
                        button['bg'] = 'SystemButtonFace'
-                    
-                # cancel queued call to self.__animate
-                self.root.after_cancel(self._animation)
-                self.tip.destroy()  # destroy tool tip label
+                
+                self.__stop_animation()
         except:
             pass
 
+    def __stop_animation(self):
+        """ Stops an animation. """
+        # cancel queued call to self.__animate
+        self.root.after_cancel(self._animation)
+        self.tip.destroy()  # destroy tool tip label
+        
     def __on_click(self, event):
         """ Changes button color back to normal and deletes tool tip """
         try:
+            # stop animation when a button is clicked
+            self.__stop_animation()
+            
             button = event.widget
             self.btn_name = button['text']
-            if self.btn_name.split(' ')[0] == 'Schedule' or self.btn_name == 'View Constraints':
+            
+            if self.btn_name.split(' ')[0] == 'Schedule':
                 if len(self.buttons_clicked) > 0:
                     self.buttons_clicked[0]['bg'] = 'SystemButtonFace'
                     del self.buttons_clicked[:]
                 
                 button['bg'] = 'green'
                 self.buttons_clicked.append(button)
+
             if self.btn_name == 'RUN':
                 self.buttons_clicked[0]['bg'] = 'SystemButtonFace'
         except:

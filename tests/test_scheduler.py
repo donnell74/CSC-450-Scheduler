@@ -3,6 +3,7 @@ import unittest
 import random
 from genetic import *
 import genetic.interface
+from datetime import time
 
 filename = "tests/schedules/morning_class_test.xml"
 sample_scheduler = interface.create_scheduler_from_file_test(filename)
@@ -22,23 +23,27 @@ class TestScheduler(unittest.TestCase):
     def test_clear_constraints(self):
         self.assertEquals(len(sample_scheduler.constraints), 0)
         self.assertEquals(sample_scheduler.max_fitness, 0)
-        sample_scheduler.add_constraint("morning_classes", 30, 
-                constraint.morning_class, [sample_scheduler.courses[0]]) 
+        sample_scheduler.add_constraint("course before 20", 30, 
+                constraint.course_before_time, [sample_scheduler.courses[0], time(20, 0), False]) 
         sample_scheduler.clear_constraints()
         self.assertEquals(len(sample_scheduler.constraints), 0)
         self.assertEquals(sample_scheduler.max_fitness, 0)
 
     def test_add_contsraint(self):
-        sample_scheduler.add_constraint("morning_classes", 30, 
-                constraint.morning_class, [sample_scheduler.courses[0]]) 
-        sample_scheduler.add_constraint("morning_classes_2", 30, 
-                constraint.morning_class, [sample_scheduler.courses[1]]) 
+        sample_scheduler.add_constraint("course before 20", 30, 
+                constraint.course_before_time, [sample_scheduler.courses[0], time(20, 0), False]) 
+        sample_scheduler.add_constraint("course before 20 2", 30, 
+                constraint.course_before_time, [sample_scheduler.courses[1], time(20, 0), False]) 
         self.assertEquals(len(sample_scheduler.constraints), 2)
         self.assertEquals(sample_scheduler.max_fitness, 60)
 
     def test_calc_fitness(self):
+        labs = []
+        for each_course in sample_scheduler.courses:
+            if each_course.is_lab:
+                labs.append(each_course)
         sample_scheduler.add_constraint("lab_on_tr", 30, 
-                constraint.lab_on_tr, [sample_scheduler.courses[1]])
+                constraint.lab_on_tr, [labs])
         sample_scheduler.calc_fitness(sample_scheduler.weeks[0])
         self.assertEquals(sample_scheduler.weeks[0].fitness, 30)
 

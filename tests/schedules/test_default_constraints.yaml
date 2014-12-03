@@ -1,0 +1,27 @@
+data:
+  constraint_list:
+    name: defaults
+    course_constraints:
+        time:
+          -
+            code: CSC 111
+            before_after: before
+            time: "08:50"
+            priority: Low
+    instructor_constraints:
+        time_pref:
+          -
+            instr_name: Shade
+            before_after: after
+            time: "13:25"
+            priority: High
+        day_pref:
+          -
+            instr_name: Liu
+            day_code: TR
+            priority: Low
+        max_courses:
+          -
+            instr_name: Saquer
+            max_courses: 2
+            priority: Low

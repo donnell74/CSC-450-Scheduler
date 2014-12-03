@@ -4,3 +4,4 @@
 schedule_*.csv
 /html/*
 /latex/*
+/genetic/seeds/input.xml

@@ -10,6 +10,7 @@
         </courseList>
         <roomList>
           <item building="CHEK" number="209" capacity="30" has_computers="1"></item>
+          <item building="TEMP" number="0001" capacity="40" has_computers="0"></item>
         </roomList>
         <timeListMWF>
           <item>10:00-11:00</item>
@@ -43,10 +44,10 @@
     <course 
         code="CSC 131 A"
         credit="4"
-        startTime="13:00"
-        endTime="14:00"
-        days="MWF"
-        room="CHEK 209"
+        startTime="09:30"
+        endTime="10:45"
+        days="TR"
+        room="TEMP 0001"
         instructor="Saquer">
     </course>
     <course
@@ -61,8 +62,8 @@
     <course
         code="CSC 232 A"
         credit="5"
-        startTime="10:00"
-        endTime="11:00"
+        startTime="13:00"
+        endTime="14:00"
         days="MWF"
         room="CHEK 209"
         instructor="Volmar">

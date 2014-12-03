@@ -1,0 +1,111 @@
+data:
+  constraint_list:
+    name: defaults
+    course_constraints:
+      time:
+      -
+        code: CSC 111
+        before_after: before
+        time: "12:20"
+        priority: Low
+      -
+        code: CSC 450
+        before_after: after
+        time: "11:15"
+        priority: Medium
+      day:
+      -
+        code: CSC 333
+        day_code: MTWF
+        priority: Mandatory
+      room:
+      -
+        code: CSC 111
+        rooms:
+        -
+          CHEK 213
+        -
+          CHEK 205
+        priority: High
+      avoid_overlap:
+      -
+        code: MTH 280
+        start_time: "08:00"
+        end_time: "11:00"
+        days: MWF
+        courses:
+        -
+          CSC 450
+        -
+          CSC 460
+        priority: High
+    instructor_constraints:
+        time_pref:
+          -
+            instr_name: Shade
+            before_after: after
+            time: "09:30"
+            priority: Medium
+          -
+            instr_name: Shade
+            before_after: before
+            time: "15:30"
+            priority: Medium
+        day_pref:
+          -
+            instr_name: Shade
+            day_code: MTWF
+            priority: Low
+        computer_pref:
+          -
+            instr_name: Shade
+            prefers_computers: False
+            priority: Mandatory
+        max_courses:
+          -
+            instr_name: Liu
+            max_courses: 2
+            priority: Low
+        instructor_break:
+          -
+            instr_name: Scroggins
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+
+          -
+            instr_name: Smith 
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+
+          -
+            instr_name: Saquer
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+
+          -
+            instr_name: Vollmar
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+
+          -
+            instr_name: Liu
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+
+          -
+            instr_name: Shade
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+
+          -
+            instr_name: Wang
+            break_start: "11:00"
+            break_end: "12:15"
+            priority: High
+

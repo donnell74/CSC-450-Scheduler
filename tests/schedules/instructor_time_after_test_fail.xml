@@ -19,6 +19,7 @@
         <timeListTR>
             <item>08:00-09:15</item>
             <item>09:30-10:45</item>
+			<item>11:00-12:15</item>
         </timeListTR>
         <timeSlotDivide>2</timeSlotDivide>
     </schedule>

@@ -14,6 +14,7 @@ class Room:
         
         self.building = building
         self.number = number
+        self.full_name = building + number
         # not sure if capacity is int or str when passed. Ensure it stores as int
         self.capacity = int(capacity)
         self.has_computers = bool(int(has_computers))
