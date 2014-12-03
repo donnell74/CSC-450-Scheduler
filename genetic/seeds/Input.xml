@@ -16,7 +16,7 @@
       <item code='CSC 365' period='F' credit='3' instructor='Saquer' prereq='' capacity='80' needs_computers='0' is_lab='0'></item>
       <item code='CSC 450' period='S' credit='3' instructor='Shade' prereq='CSC325 CSC365' capacity='10' needs_computers='0' is_lab='0'></item>
       <item code='CSC 460' period='B' credit='3' instructor='Wang' prereq='CSC320 CSC325' capacity='10' needs_computers='1' is_lab='0'></item>
-      <item code='CSC 666' period='S' credit='3' instructor='Saquer' prereq='CSC460' capacity='20' needs_computers='1' is_lab='1'></item>
+      <item code='CSC 777' period='F' credit='3' instructor='Saquer' prereq='CSC460' capacity='20' needs_computers='1' is_lab='0'></item>
     </courseList>
     <roomList>
       <item building='CHEK' number='213' capacity='20' has_computers='1'></item>

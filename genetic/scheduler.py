@@ -208,6 +208,8 @@ class Scheduler:
         total_to_be_valid = 0
         for each_constraint in self.constraints:
             each_fitness = each_constraint.get_fitness(this_week)
+            if not this_week.valid:
+                break
             this_week.constraints[each_constraint.name] = [each_fitness["score"],
                     each_constraint.weight if each_constraint.weight != 0 else 1]
             if each_constraint.weight == 0:
@@ -540,9 +542,7 @@ class Scheduler:
         #Currently, 40 is hard programmed into the GUI, so it is hard programmed here as well
         num_segments_displayed = self.loading_screen.load_bar['width']
         number_of_segments_to_add = (((current_elapsed_seconds * 1.0)/max_runtime) * 40.0) - num_segments_displayed
-        print(number_of_segments_to_add)
         while number_of_segments_to_add > 1:
-            print("Updating the loading bar")
             self.loading_screen.update_loading_bar()
             number_of_segments_to_add -= 1
         return
@@ -606,18 +606,35 @@ class Scheduler:
             # self.gui_loading_info1 = 'Generation counter: ' + str(counter +1)
 
             self.weeks = filter(lambda x: x.complete, self.weeks)
-            #Case that no schedules are complete
-            if len(self.weeks) == 0:
-                self.generate_starting_population(1000, False, time_limit, 
-                                                  start_time)
-                total_iterations += 1
-                counter += 1
-                continue
-                #todo: error out if never have a complete week
 
             for each_week in self.weeks:
                 each_week.update_sections(self.courses)
                 self.calc_fitness(each_week)
+
+            #Case that no schedules are complete or valid
+            if len(self.weeks) == 0 or (len(filter(lambda x: x.valid, self.weeks)) == 0 and
+                                        total_iterations < 9):
+                # for case two only...reset before generate another 1000
+                if len(self.weeks) >= 1000:
+                    for i in range(len(self.weeks)):
+                        del self.weeks[0]
+                    gc.collect()
+
+                self.generate_starting_population(1000, False, time_limit, 
+                                                  start_time)
+                total_iterations += 1
+                counter += 1
+                time_elapsed = now() - start_time
+                self.loading_bar_update(one_increment, time_elapsed, time_limit)
+                print("Time left for evolution loop: %d seconds" % (time_limit - time_elapsed))
+                if time_elapsed > time_limit:
+                    # need to assess the new weeks
+                    for each_week in self.weeks:
+                        each_week.update_sections(self.courses)
+                        self.calc_fitness(each_week)
+                    print('Time limit reached; final output found')
+                    break
+                continue
 
             valid_weeks = week_slice_helper()
             print("Calculated fitness")
@@ -636,6 +653,7 @@ class Scheduler:
                 top_5_avg = reduce(lambda x, y: x+y, [w.fitness for w in self.weeks[0:5]]) / 5
                 print("Minimum fitness of the top schedules of the generation:", top_5_min)
                 print("Average fitness of the top schedules of the generation:", top_5_avg)
+                print("Max fitness for any schedule:", self.max_fitness)
                 if top_5_min == top_5_avg and top_5_min != self.max_fitness:
                     print("Invoking guided mutatation")
                     
@@ -1081,4 +1099,5 @@ class Scheduler:
 
         if len(self.weeks) == 0:
             print("Could not schedule")
+        print("Generated %d schedules" % num_to_generate)
         return None

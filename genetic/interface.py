@@ -448,6 +448,13 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                     course_obj = c
                     break
 
+        # fail silently if invalid course
+        try:
+            if course_obj not in scheduler.courses:
+                return
+        except:
+            return
+
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
@@ -481,6 +488,13 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
             if course_obj == c.code: # found it
                 course_obj = c
                 break
+
+        # fail silently if invalid course
+        try:
+            if course_obj not in scheduler.courses:
+                return
+        except:
+            return
 
         day_code = constraint_dict["day_code"].lower()
 
@@ -516,6 +530,13 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 course_obj = c
                 break
 
+        # fail silently if invalid course
+        try:
+            if course_obj not in scheduler.courses:
+                return
+        except:
+            return
+
         if len(rooms) == 0:
             return  # drop silently, bad constraint
         
@@ -549,6 +570,14 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 if each_course == c.code: # found it
                     course_objs.append(c)
                     break
+
+        # fail silently if invalid course
+        try:
+            for each_course_obj in course_objs:
+                if each_course_obj not in scheduler.courses:
+                    return
+        except:
+            return
 
         if len(courses) == 0:
             return  # drop silently, bad constraint

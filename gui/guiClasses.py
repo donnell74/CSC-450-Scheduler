@@ -234,14 +234,14 @@ class ViewPage(Page):
                     self.toggle_constraint_acceptance_flag = True
                     #self.create_graphical_constraints()
                     #self.insert_schedule(self.last_viewed_schedule)
-                    self.canv.delete("all")
+                    self.canv.delete(ALL)
                     self.create_compact_schedules()
             else:
                 if self.is_run_clicked:
                     self.toggle_constraint_acceptance_flag = True
 
                 # delete previous canvas
-                self.canv.delete("all")
+                self.canv.delete(ALL)
 
                 self.create_compact_constraint()
 
@@ -504,7 +504,7 @@ class ViewPage(Page):
             self.create_graphical_schedules()
 
             # delete previous canvas items
-            self.canv.delete("all")
+            self.canv.delete(ALL)
 
             if self.is_run_clicked:
                 self.format_graphical_schedule(globs.mainScheduler.weeks[n].print_concise())
@@ -516,7 +516,7 @@ class ViewPage(Page):
             #self.bg_label['fg'] = 'white'
 
             # delete previous canvas items
-            self.canv.delete("all")
+            self.canv.delete(ALL)
 
             self.format_compact_schedule(globs.mainScheduler.weeks[n].print_concise())
 
@@ -1021,7 +1021,8 @@ class MiscPage(Page):
         if self.load_bar['width'] <= 39:
             self.load_bar['width'] += 1
         else:
-            print("bar is overflowing! this shouldn't be happening!")
+            # print("bar is overflowing! this shouldn't be happening!")
+            pass
         # part 1 of the genetic algorithm
 
         # if self.past == "":
@@ -1240,6 +1241,6 @@ class MainWindow(Frame):
 
     def ask_to_keep_running(self):
         if tkMessageBox.askyesno("Continue?", "It is possible you have conflicting " + \
-                                 "constraints, do you want to pause the algorithm to check your constraints?"):
+                                 "constraints, do you want to stop schedule generation to check your constraints?"):
             return True
         return False

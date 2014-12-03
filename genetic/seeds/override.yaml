@@ -10,17 +10,17 @@
 # it should be included here.
 
 data:
-  semester: Spring 2015
+  semester: Fall 2015
   course_list:
     -
-      code: CSC 666
-      period: S
+      code: CSC 777
+      period: F
       credit: 3
       instructor: Saquer
       prereq: CSC460
       capacity: 20
       needs_computers: 1
-      is_lab: 1
+      is_lab: 0
   room_list:
     -
       building: TEMP
