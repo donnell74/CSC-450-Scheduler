@@ -988,22 +988,40 @@ class Scheduler:
         while len(current_pool) > 0 and not done:
             possibilities = this_week.find_matching_time_slot_row(random_slot)
             possibilities = self.assess_time_slot_row_for_open_slots(possibilities)
-            # each day open for that time and room
-            if possibilities['type'] == 2:
-                chosen = random.choice(possibilities['time_slots'])
-                self.assign_and_remove(
-                        course, chosen, list_of_slots, this_week)
-                done = True
+            if course.is_lab: # tr
+                # each day open for that time and room
+                if possibilities['type'] == 2:
+                    chosen = random.choice(possibilities['time_slots'])
+                    self.assign_and_remove(
+                            course, chosen, list_of_slots, this_week)
+                    done = True
 
-            # case that cannot schedule for this time and room
-            else:
-                # remove this timeslot and the other unoccupied in its
-                # week from temp pool
-                for to_remove in possibilities['time_slots']:
-                    i = self.find_index(to_remove, current_pool)
-                    del(current_pool[i])
-                # get a new random time slot
-                random_slot = choice(current_pool)
+                # case that cannot schedule for this time and room
+                else:
+                    # remove this timeslot and the other unoccupied in its
+                    # week from temp pool
+                    for to_remove in possibilities['time_slots']:
+                        i = self.find_index(to_remove, current_pool)
+                        del(current_pool[i])
+                    # get a new random time slot
+                    random_slot = choice(current_pool)
+            else: # mwf
+                # each day open for that time and room
+                if possibilities['type'] == 1:
+                    chosen = random.choice(possibilities['time_slots'])
+                    self.assign_and_remove(
+                            course, chosen, list_of_slots, this_week)
+                    done = True
+
+                # case that cannot schedule for this time and room
+                else:
+                    # remove this timeslot and the other unoccupied in its
+                    # week from temp pool
+                    for to_remove in possibilities['time_slots']:
+                        i = self.find_index(to_remove, current_pool)
+                        del(current_pool[i])
+                    # get a new random time slot
+                    random_slot = choice(current_pool)
         #status
         return not done
 
