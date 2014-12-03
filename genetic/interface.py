@@ -130,18 +130,18 @@ def create_xml_input_from_yaml(path_to_global, path_to_override):
         if prereq:
             unformatted_xml_string =  ("<item code='{0}' period='{1}' credit='{2}' instructor='{3}' prereq='{4}' "
                                        "capacity='{5}' needs_computers='{6}' is_lab='{7}'></item>")
-            return unformatted_xml_string.format(code, period, credit, instructor,
-                                                 prereq, capacity, needs_computers, is_lab)
+            return unformatted_xml_string.format(code.upper(), period.upper(), credit, enforce_capital_first_letter(instructor),
+                                                 prereq.upper(), capacity, needs_computers, is_lab)
         else: # prereq == None
             unformatted_xml_string =  ("<item code='{0}' period='{1}' credit='{2}' instructor='{3}' prereq='' "
                                        "capacity='{4}' needs_computers='{5}' is_lab='{6}'></item>")
-            return unformatted_xml_string.format(code, period, credit, instructor,
+            return unformatted_xml_string.format(code.upper(), period.upper(), credit, enforce_capital_first_letter(instructor),
                                                  capacity, needs_computers, is_lab)
 
     def room_object_to_xml_string(building, number, capacity, has_computers):
         unformatted_xml_string = ("<item building='{0}' number='{1}' capacity='{2}' "
                                   "has_computers='{3}'></item>")
-        return unformatted_xml_string.format(building, number, capacity, has_computers)
+        return unformatted_xml_string.format(building.upper(), number, capacity, has_computers)
 
     def print_number_spaces(num):
         return " " * num
@@ -299,11 +299,11 @@ def create_xml_input_from_yaml(path_to_global, path_to_override):
 
                     # course does not already exist; check for required information
                     elif course_has_all_attributes(this_course):
-                        new_course = {'code':               this_course['code'],
-                                      'period':             this_course['period'],
+                        new_course = {'code':               this_course['code'].upper(),
+                                      'period':             this_course['period'].upper(),
                                       'credit':             this_course['credit'],
-                                      'instructor':         this_course['instructor'],
-                                      'prereq':             this_course['prereq'],
+                                      'instructor':         enforce_capital_first_letter(this_course['instructor']),
+                                      'prereq':             this_course['prereq'].upper(),
                                       'capacity':           this_course['capacity'],
                                       'needs_computers':    this_course['needs_computers'],
                                       'is_lab':             this_course['is_lab']}
@@ -315,7 +315,7 @@ def create_xml_input_from_yaml(path_to_global, path_to_override):
         if room_overrides:
             for this_room in room_overrides:
                 if room_has_all_attributes(this_room):
-                    new_room = {"building": this_room['building'],
+                    new_room = {"building": this_room['building'].upper(),
                                 "number": this_room['number'],
                                 "capacity": this_room['capacity'],
                                 "has_computers": this_room['has_computers']}
@@ -398,6 +398,16 @@ def create_xml_input_from_yaml(path_to_global, path_to_override):
         return None
 
 
+def enforce_capital_first_letter(str):
+    """ ensures that a string takes the form "Abcd" instead of "abcd" or "ABCD" """
+    first_letter = str[:1]
+    rest_of_str = str[1:]
+    first_letter = first_letter.upper()
+    rest_of_str = rest_of_str.lower()
+    fixed_str = first_letter + rest_of_str
+    return fixed_str
+
+
 def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     """ Takes an input YAML file (default_constraints.yaml) and generates appropriate
     constraints, then adds them to the scheduler.
@@ -410,7 +420,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     def pull_instructor_obj(instructor_name):
         """ finds the instructor object for the given name """
         for instr in instructor_objs:
-            if instructor_name == instr.name:
+            if instructor_name.upper() == instr.name.upper():
                 return instr
 
     def str_to_time(time_str):
@@ -421,6 +431,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
     def get_priority_value(priority):
         """ Turns the string value of priority into the
         appropriate weight (int) value. """
+        priority = enforce_capital_first_letter(priority)
         priorities = {"Low": 10,
                       "Medium": 25,
                       "High": 50
@@ -429,17 +440,19 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         priority = priorities.get(priority, 0)
         return priority
 
+
     def course_time(constraint_dict, scheduler):
         """ Takes a dictionary of data required for a course
         time constraint:  course_code, before_after, timeslot, priority.
         IN: a dictionary with appropriate data fields
         OUT: adds course constraint to scheduler.
         """
+        constraint_dict["code"] = constraint_dict["code"].upper()
         constraint_name = constraint_dict["code"] + "_" +\
-                            constraint_dict["before_after"] + "_" \
+                            constraint_dict["before_after"].lower() + "_" \
                             + constraint_dict["time"]
 
-        course_obj = constraint_dict["code"]
+        course_obj = constraint_dict["code"].upper()
         if course_obj == "All":
             course_obj = scheduler.courses
         else: # find the course object
@@ -463,7 +476,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         timeslot_obj = str_to_time(constraint_dict["time"])
 
         # scheduler.courses is course list
-        if constraint_dict["before_after"] == "before":
+        if constraint_dict["before_after"].upper() == "BEFORE":
             scheduler.add_constraint(constraint_name,
                                         priority,
                                         constraint.course_before_time,
@@ -481,7 +494,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN: a dictionary with appropriate data fields
         OUT: adds course constraint to scheduler.
         """
-        constraint_name = constraint_dict["code"] + "_" + constraint_dict["day_code"]
+        constraint_name = constraint_dict["code"] + "_" + constraint_dict["day_code"].upper()
 
         course_obj = constraint_dict["code"]
         for c in scheduler.courses:
@@ -520,7 +533,10 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         OUT: adds course constraint to scheduler.
         """
         rooms = constraint_dict["rooms"]
-        constraint_name = constraint_dict["code"] + "_" + rooms[0]
+        for r in rooms:
+            r = r.upper()
+        
+        constraint_name = constraint_dict["code"] + "_" + rooms[0].upper()
         if len(rooms) > 1:
             constraint_name += "..."
 
@@ -560,14 +576,17 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         OUT: adds course constraint to scheduler.
         """
         courses = constraint_dict["courses"]
-        constraint_name = "avoid overlap" + "_" + constraint_dict["code"] + "_" + courses[0]
+        for i in range(len(courses)):
+            courses[i] = courses[i].upper()
+        
+        constraint_name = "avoid overlap" + "_" + constraint_dict["code"].upper() + "_" + courses[0]
         if len(courses) > 1:
             constraint_name += "..."
 
         course_objs = []
         for each_course in courses:
             for c in scheduler.courses:
-                if each_course == c.code: # found it
+                if each_course.upper() == c.code.upper(): # found it
                     course_objs.append(c)
                     break
 
@@ -608,7 +627,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         """
         constraint_name = constraint_dict["instr_name"] + \
                             "_prefers_" + \
-                            constraint_dict["before_after"] + \
+                            constraint_dict["before_after"].lower() + \
                             "_" + constraint_dict["time"]
 
         priority = get_priority_value(constraint_dict["priority"])
@@ -620,7 +639,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
         timeslot_obj = str_to_time(constraint_dict["time"])
 
-        if constraint_dict["before_after"] == "before":
+        if constraint_dict["before_after"].lower() == "before":
             scheduler.add_constraint(constraint_name,
                                         priority,
                                         constraint.instructor_time_pref_before,
@@ -638,7 +657,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN:  a dictionary of appropriate data
         OUT: a max_courses constraint is added to the scheduler
         """
-
+        constraint_dict["instr_name"] = enforce_capital_first_letter(constraint_dict["instr_name"])
         constraint_name = constraint_dict["instr_name"] + \
                             "_max_courses_" + str(constraint_dict["max_courses"])
         priority = get_priority_value(constraint_dict["priority"])
@@ -661,16 +680,17 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN: a dictionary of appropriate data
         OUT: a computer_pref constraint added to the scheduler
         """
+        constraint_dict["instr_name"] = enforce_capital_first_letter(constraint_dict["instr_name"])
         constraint_name = constraint_dict["instr_name"] + \
                             "_prefers_computers_" + \
-                            str(constraint_dict["prefers_computers"])
+                            enforce_capital_first_letter(str(constraint_dict["prefers_computers"]))
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
         else:
             is_mandatory = False
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
-        prefers_computers = constraint_dict["prefers_computers"]
+        prefers_computers = bool(enforce_capital_first_letter(str(constraint_dict["prefers_computers"])))
 
         scheduler.add_constraint(constraint_name,
                                     priority,
@@ -684,8 +704,9 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN: a dictionary of appropriate data
         OUT: a day_pref constraint added to the scheduler
         """
+        constraint_dict["instr_name"] = enforce_capital_first_letter(constraint_dict["instr_name"])
         constraint_name = constraint_dict["instr_name"] + \
-                            "_prefers_" + constraint_dict["day_code"]
+                            "_prefers_" + constraint_dict["day_code"].upper()
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
             is_mandatory = True
@@ -709,6 +730,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         IN: a dictionary of appropriate data
         OUT: an instructor_break constraint added to the scheduler
         """
+        constraint_dict["instr_name"] = enforce_capital_first_letter(constraint_dict["instr_name"])
         constraint_name = constraint_dict["instr_name"] + \
                             "_break_" + constraint_dict["break_start"] + \
                             "_" + constraint_dict["break_end"]
@@ -754,7 +776,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                 # instructor constraints exist
                 for i in range(len(instr_constraints[type])): # create every constraint of each type
                     this_constraint = instr_constraints[type][i]
-                    # only add constraint if this instructor exists
+                    instr_constraints[type][i]["instr_name"] = enforce_capital_first_letter(instr_constraints[type][i]["instr_name"])
                     if type == "time_pref":
                         instructor_time_pref(this_constraint, scheduler)
                     elif type == "max_courses":
