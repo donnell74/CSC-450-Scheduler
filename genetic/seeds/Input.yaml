@@ -128,6 +128,15 @@ data:
         capacity: 10
         needs_computers: 1
         is_lab: 0
+      -
+        code: CSC 482
+        period: B
+        credit: 1
+        instructor: Vollmar
+        prereq: CSC333 CSC460
+        capacity: 30
+        needs_computers: 0
+        is_lab: 0
     room_list:
       -
         building: CHEK
