@@ -1050,6 +1050,7 @@ class TypeDayCourse(Frame):
         self.str_course_default = StringVar(self)
         self.list_of_courses = globs.courses
         self.str_course_default.set(self.list_of_courses[0])
+        self.str_course_default.trace("w", self.callback_course_change)
         self.option_course = OptionMenu(self, self.str_course_default, *self.list_of_courses)
         self.option_course.pack(side = TOP)
 
@@ -1102,6 +1103,23 @@ class TypeDayCourse(Frame):
         elif course_obj.credit == 1 and course_obj.is_lab:
             list_days_str = ["T", "R"]
             return list_days_str
+
+    def callback_course_change(self, *args):
+        course_str = self.str_course_default.get()
+        
+        for course_obj in globs.courses:
+            if isinstance(course_obj, Course):
+                if course_obj.code == course_str:
+                    list_days_str = self.match_days_by_course(course_obj)
+                    break
+
+        menu_days = self.option_day["menu"]
+        
+        menu_days.delete(0, "end")
+        for day_str in list_days_str:
+            menu_days.add_command(label=day_str,\
+                              command=lambda value=day_str : self.str_day_default.set(value))
+        self.str_day_default.set(list_days_str[0])
 
 
 class TypeRoomCourse(Frame):
