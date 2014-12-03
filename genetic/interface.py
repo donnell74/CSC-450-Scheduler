@@ -618,6 +618,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
             is_mandatory = False
 
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        if instr_obj is None: return # instructor does not exist; do not add constraint
         timeslot_obj = str_to_time(constraint_dict["time"])
 
         if constraint_dict["before_after"] == "before":
@@ -649,6 +650,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
 
         max_courses = constraint_dict["max_courses"]
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        if instr_obj is None: return # instructor does not exist; do not add constraint
         scheduler.add_constraint(constraint_name,
                                     priority,
                                     constraint.instructor_max_courses,
@@ -670,6 +672,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         else:
             is_mandatory = False
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        if instr_obj is None: return # instructor does not exist; do not add constraint
         prefers_computers = constraint_dict["prefers_computers"]
 
         scheduler.add_constraint(constraint_name,
@@ -692,6 +695,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         else:
             is_mandatory = False
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        if instr_obj is None: return # instructor does not exist; do not add constraint
         day_code = constraint_dict["day_code"].lower()
 
         if len(day_code) == 0 or len(day_code) == 5:
@@ -718,6 +722,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
         else:
             is_mandatory = False
         instr_obj = pull_instructor_obj(constraint_dict["instr_name"])
+        if instr_obj is None: return # instructor does not exist; do not add constraint
         gap_start = str_to_time(constraint_dict["break_start"])
         gap_end = str_to_time(constraint_dict["break_end"])
 
