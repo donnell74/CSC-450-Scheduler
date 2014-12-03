@@ -494,25 +494,28 @@ def avoid_overlap(this_week, args):
     list_of_courses = args[0]
     gap_start = args[1]
     gap_end = args[2]
-    is_mandatory = args[3]
+    day_code = args[3]
+    is_mandatory = args[4]
 
     holds = []
     reval = {"score": 1, "failed": []}
 
     for each_course in list_of_courses: 
-        each_slot_row = this_week.find_course(each_course)[0]
-        # before or after gap
-        if each_slot_row.end_time < gap_start or each_slot_row.start_time > gap_end:
-            holds.append(1)
-        else:  # in gap, bad
-            if is_mandatory:
-                this_week.valid = False
+        each_slot_row = this_week.find_course(each_course)
+        for each_slot in each_slot_row:
+            if each_slot.day in day_code:
+                # before or after gap
+                if each_slot.end_time <= gap_start or each_slot.start_time >= gap_end:
+                    holds.append(1)
+                else:  # in gap, bad
+                    if is_mandatory:
+                        this_week.valid = False
 
-            reval["score"] = 0
-            reval["failed"].append(each_course)
-            holds.append(0)
+                    reval["score"] = 0
+                    reval["failed"].append(each_course)
+                    holds.append(0)
 
-    if is_mandatory: # if no fails by here, it passed
+    if is_mandatory:
         reval["score"] = get_partial_credit(holds)
     
     return reval

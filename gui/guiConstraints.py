@@ -811,8 +811,8 @@ class TypeManualConcurrency(Frame):
 
         self.constraints_view_obj = constraints_view_obj
         
-        description_constraint_label = Label(self, text=get_description_constraint(TYPE_MANUAL_CONCURRENCY), wraplength = 200)
-        description_constraint_label.pack(side = TOP)
+        # description_constraint_label = Label(self, text=get_description_constraint(TYPE_MANUAL_CONCURRENCY), wraplength = 200)
+        # description_constraint_label.pack(side = TOP)
 
         self.outside_course_label = Label(self, text="Code of course outside department:", wraplength = 200)
         self.outside_course_label.pack(side = TOP)
@@ -870,7 +870,19 @@ class TypeManualConcurrency(Frame):
 
         for item in self.list_of_courses:
             self.listbox.insert(END, item)
-        
+
+        # days
+        self.checkboxes_days = Frame(self)
+        self.days = ["M", "T", "W", "R", "F"]
+        self.boxes = [IntVar() for i in range(5)]
+        for i in range(len(self.days)):
+            self.value = self.boxes[i]
+            box = Checkbutton(self.checkboxes_days, text = self.days[i], variable = self.value)
+            box.pack(side= LEFT, anchor= W, expand=False)
+
+        self.checkboxes_days.pack()
+
+        #priority
         priority_options = ["Low", "Medium", "High", "Mandatory"]
         self.priority_label = Label(self, text = "Priority: ")
         self.priority_label.pack()
@@ -900,11 +912,20 @@ class TypeManualConcurrency(Frame):
 
             outside_course_name = self.outside_course_name.get()
 
+            checkboxes = self.boxes
+            day_code = []
+            for i in range(len(checkboxes)):  # check each box to see if it's ticked
+                if checkboxes[i].get() == 1:  #checked, so push the day to day_code
+                    day_code.append(self.days[i])
+
+            day_code = ''.join(day_code)
+            day_code = day_code.lower()
+
             gap_start = self.string_to_time(self.time_start_default.get())
             gap_end = self.string_to_time(self.end_default.get())
             
             create_manual_concurrency_constraint(list_courses_obj, priority,
-                self.constraints_view_obj, outside_course_name, gap_start, gap_end)
+                self.constraints_view_obj, outside_course_name, gap_start, gap_end, day_code)
         else:
             tkMessageBox.showerror(title="Error", message="Select at least 1 course")
 
@@ -933,7 +954,7 @@ class TypeManualConcurrency(Frame):
 
 
 def create_manual_concurrency_constraint(list_courses_obj, priority, constraints_view_obj,
-                                         outside_course_name, gap_start, gap_end):
+                                         outside_course_name, gap_start, gap_end, day_code):
     is_mandatory = False
     if priority == 0:
         is_mandatory = True
@@ -952,6 +973,7 @@ def create_manual_concurrency_constraint(list_courses_obj, priority, constraints
                                        [    list_courses_obj,
                                             gap_start,
                                             gap_end,
+                                            day_code,
                                             is_mandatory]
                                        )
 

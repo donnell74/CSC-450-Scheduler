@@ -581,6 +581,8 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
 
         if len(courses) == 0:
             return  # drop silently, bad constraint
+
+        day_code = constraint_dict["days"].lower()
         
         priority = get_priority_value(constraint_dict["priority"])
         if priority == 0:
@@ -595,7 +597,7 @@ def create_constraints_from_yaml(path_to_yaml, scheduler, instructor_objs):
                                     priority, 
                                     constraint.avoid_overlap,
                                     [course_objs, start_time,
-                                    end_time, is_mandatory])
+                                    end_time, day_code, is_mandatory])
 
 
     def instructor_time_pref(constraint_dict, scheduler):
